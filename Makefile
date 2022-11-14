@@ -2,6 +2,8 @@ include config/.env
 
 usage:
 	@echo "make run"
+	@echo "make test"
+	@echo "make test-cover"
 	@echo "---------- Linter ----------"
 	@echo "make lint"
 	@echo "make install-lint"
@@ -12,6 +14,13 @@ usage:
 
 run:
 	cd cmd/app && go run main.go
+
+test:
+	go test ./...
+
+test-cover:
+	go test ./... -coverprofile=build/coverage.out
+	go tool cover -html=build/coverage.out
 
 lint:
 	golangci-lint run --timeout=3m
