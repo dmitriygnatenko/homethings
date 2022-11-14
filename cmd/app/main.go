@@ -1,13 +1,25 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"log"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/fiber"
+	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
+	_ "github.com/go-sql-driver/mysql"
+)
 
 func main() {
-	app := fiber.New()
+	serviceProvider, err := sp.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
-	})
+	fiberApp, err := fiber.Init(serviceProvider)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	app.Listen(":3000")
+	if err = fiberApp.Listen(":" + serviceProvider.GetEnvService().GetAppPort()); err != nil {
+		log.Fatal(err)
+	}
 }
