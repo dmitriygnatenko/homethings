@@ -1,0 +1,34 @@
+# More info on config here: https://golangci-lint.run/usage/configuration/#config-file
+run:
+  skip-dirs:
+    - build
+    - frontend
+    - scripts
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  revive:
+    min-confidence: 0
+  goconst:
+    min-len:         2
+    min-occurrences: 2
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - ineffassign
+    - typecheck
+    - errcheck
+    - goconst
+    - goimports
+    - gosec
+    - revive
+    - gocritic
+    - prealloc
