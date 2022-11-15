@@ -8,16 +8,14 @@ import (
 )
 
 type ServiceProvider struct {
-	env                  interfaces.IEnv
-	articleRepository    interfaces.IArticleRepository
-	tagRepository        interfaces.ITagRepository
-	articleTagRepository interfaces.IArticleTagRepository
+	env           interfaces.IEnv
+	tagRepository interfaces.ITagRepository
 }
 
 func Init() (interfaces.IServiceProvider, error) {
 	sp := &ServiceProvider{}
 
-	// Init env service
+	// Init services
 	env, err := envService.Init()
 	if err != nil {
 		return nil, err
@@ -30,9 +28,7 @@ func Init() (interfaces.IServiceProvider, error) {
 	}
 
 	// Init repositories
-	sp.articleRepository = repositories.InitArticleRepository(db)
 	sp.tagRepository = repositories.InitTagRepository(db)
-	sp.articleTagRepository = repositories.InitArticleTagRepository(db)
 
 	return sp, nil
 }
@@ -41,16 +37,8 @@ func (sp *ServiceProvider) GetEnvService() interfaces.IEnv {
 	return sp.env
 }
 
-func (sp *ServiceProvider) GetArticleRepository() interfaces.IArticleRepository {
-	return sp.articleRepository
-}
-
 func (sp *ServiceProvider) GetTagRepository() interfaces.ITagRepository {
 	return sp.tagRepository
-}
-
-func (sp *ServiceProvider) GetArticleTagRepository() interfaces.IArticleTagRepository {
-	return sp.articleTagRepository
 }
 
 func InitMock(deps ...interface{}) interfaces.IServiceProvider {
@@ -60,10 +48,6 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 		switch s := d.(type) {
 		case interfaces.IEnv:
 			sp.env = s
-		case interfaces.IArticleRepository:
-			sp.articleRepository = s
-		case interfaces.IArticleTagRepository:
-			sp.articleTagRepository = s
 		case interfaces.ITagRepository:
 			sp.tagRepository = s
 		}

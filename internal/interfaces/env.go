@@ -7,4 +7,8 @@ type IEnv interface {
 	GetDBName() string
 	GetDBUser() string
 	GetDBPassword() string
+	GetCORSAllowOrigins() string
+	GetCORSAllowMethods() string
+	GetAuthUser() string
+	GetAuthPassword() string
 }

@@ -20,6 +20,12 @@ const (
 	dbNameEnv     = "DB_NAME"
 	dbUserEnv     = "DB_USER"
 	dbPasswordEnv = "DB_PASSWORD"
+
+	corsAllowOriginsEnv = "CORS_ALLOW_ORIGING="
+	corsAllowMethodsEnv = "CORS_ALLOW_METHODS"
+
+	authUser     = "AUTH_USER"
+	authPassword = "AUTH_PASSWORD"
 )
 
 type env struct {
@@ -30,6 +36,12 @@ type env struct {
 	dbName     string
 	dbUser     string
 	dbPassword string
+
+	corsAllowOrigins string
+	corsAllowMethods string
+
+	authUser     string
+	authPassword string
 }
 
 func Init() (interfaces.IEnv, error) {
@@ -85,6 +97,16 @@ func set(res *env, key string, value string) {
 		res.dbUser = value
 	case dbPasswordEnv:
 		res.dbPassword = value
+
+	case corsAllowOriginsEnv:
+		res.corsAllowOrigins = value
+	case corsAllowMethodsEnv:
+		res.corsAllowMethods = value
+
+	case authUser:
+		res.authUser = value
+	case authPassword:
+		res.authPassword = value
 	}
 }
 
@@ -110,4 +132,20 @@ func (e *env) GetDBUser() string {
 
 func (e *env) GetDBPassword() string {
 	return e.dbPassword
+}
+
+func (e *env) GetCORSAllowOrigins() string {
+	return e.corsAllowOrigins
+}
+
+func (e *env) GetCORSAllowMethods() string {
+	return e.corsAllowMethods
+}
+
+func (e *env) GetAuthUser() string {
+	return e.authUser
+}
+
+func (e *env) GetAuthPassword() string {
+	return e.authPassword
 }

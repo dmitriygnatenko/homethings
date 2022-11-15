@@ -29,7 +29,7 @@ lint:
 	golangci-lint run --timeout=3m
 
 run-swag:
-	swag init -o "./internal/docs"  -d "cmd/app,internal/api/v1"
+	swag init --pd -o "./internal/docs"  -d "cmd/app,internal/api/v1"
 
 migration-status:
 	goose -dir migrations mysql ${GOOSE_DB_STRING} status

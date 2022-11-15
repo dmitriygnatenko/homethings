@@ -1,9 +1,10 @@
 -- +goose Up
 CREATE TABLE place_image
 (
-    `id`       INT PRIMARY KEY AUTO_INCREMENT,
-    `place_id` INT          NOT NULL,
-    `image`    VARCHAR(255) NOT NULL,
+    `id`         INT PRIMARY KEY AUTO_INCREMENT,
+    `place_id`   INT          NOT NULL,
+    `image`      VARCHAR(255) NOT NULL,
+    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX (`place_id`),
     FOREIGN KEY (`place_id`) REFERENCES place (`id`) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB

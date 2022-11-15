@@ -1,8 +1,9 @@
 -- +goose Up
 CREATE TABLE thing_tag
 (
-    `thing_id` INT NOT NULL,
-    `tag_id` INT NOT NULL,
+    `thing_id`   INT      NOT NULL,
+    `tag_id`     INT      NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE INDEX (`thing_id`, `tag_id`),
     FOREIGN KEY (`tag_id`) REFERENCES tag (`id`) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (`thing_id`) REFERENCES thing (`id`) ON UPDATE CASCADE ON DELETE RESTRICT

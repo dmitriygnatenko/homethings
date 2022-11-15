@@ -1,0 +1,277 @@
+basePath: /api
+definitions:
+  dto.AddPlaceRequest:
+    properties:
+      id:
+        type: integer
+      parent_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.AddThingRequest:
+    properties:
+      description:
+        type: string
+      place_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.EmptyResponse:
+    type: object
+  dto.PlaceResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      parent_id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.ThingResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      place_id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.UpdatePlaceRequest:
+    properties:
+      parent_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.UpdateThingRequest:
+    properties:
+      description:
+        type: string
+      place_id:
+        type: integer
+      title:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Homethings API
+  version: "1.0"
+paths:
+  /v1/places:
+    post:
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddPlaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlaceResponse'
+      security:
+      - BasicAuth: []
+      summary: Add place
+      tags:
+      - Places
+  /v1/places/{id}:
+    delete:
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+      security:
+      - BasicAuth: []
+      summary: Delete place
+      tags:
+      - Places
+    get:
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlaceResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+      security:
+      - BasicAuth: []
+      summary: Get one place by ID
+      tags:
+      - Places
+    put:
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePlaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlaceResponse'
+      security:
+      - BasicAuth: []
+      summary: Update place
+      tags:
+      - Places
+  /v1/places/{id}/things:
+    get:
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ThingResponse'
+            type: array
+      security:
+      - BasicAuth: []
+      summary: Get things by place ID
+      tags:
+      - Places
+  /v1/things:
+    post:
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddThingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ThingResponse'
+      security:
+      - BasicAuth: []
+      summary: Add thing
+      tags:
+      - Things
+  /v1/things/{id}:
+    delete:
+      parameters:
+      - description: Thing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+      security:
+      - BasicAuth: []
+      summary: Delete thing
+      tags:
+      - Things
+    get:
+      parameters:
+      - description: Thing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ThingResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+      security:
+      - BasicAuth: []
+      summary: Get one thing by ID
+      tags:
+      - Things
+    put:
+      parameters:
+      - description: Thing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateThingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ThingResponse'
+      security:
+      - BasicAuth: []
+      summary: Update thing
+      tags:
+      - Things
+produces:
+- application/json
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
