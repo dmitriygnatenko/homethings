@@ -5,18 +5,18 @@ import "database/sql"
 type Thing struct {
 	ID          int
 	Title       string
-	Description sql.NullString
+	Description string
 	CreatedAt   string
 	UpdatedAt   string
 }
 
 type AddThingRequest struct {
 	Title       string
-	Description sql.NullString
+	Description string
 }
 
 type UpdateThingRequest struct {
-	PlaceID     sql.NullInt64
+	ID          int
 	Title       sql.NullString
 	Description sql.NullString
 }
@@ -24,4 +24,9 @@ type UpdateThingRequest struct {
 type AddPlaceThingRequest struct {
 	PlaceID int
 	ThingID int
+}
+
+type UpdatePlaceThingRequest struct {
+	ThingID int
+	PlaceID int
 }

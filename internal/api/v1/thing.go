@@ -7,9 +7,12 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+)
+
+const (
+	defaultTxLevel = sql.LevelReadCommitted
 )
 
 // @Router 		/v1/things/{id} [get]
@@ -21,23 +24,46 @@ import (
 // @security 	BasicAuth
 // @Produce     json
 func GetThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(fctx *fiber.Ctx) error {
+		ctx := fctx.Context()
+		id, err := fctx.ParamsInt("id")
+		if err != nil {
+			return err
+		}
 
-		return ctx.JSON(dto.ThingResponse{})
+		res, err := sp.GetThingRepository().Get(ctx, id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return helpers.NotFoundJsonResponse(dto.EmptyResponse{})
+			}
+			return err
+		}
+
+		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))
 	}
 }
 
 // @Router 		/v1/places/{id}/things [get]
 // @Param       id path int true "Place ID"
-// @Success     200 {array} dto.ThingResponse
+// @Success     200 {object} dto.ThingsResponse
 // @Summary     Get things by place ID
 // @Tags  		Places
 // @security 	BasicAuth
 // @Produce     json
 func GetPlaceThingsHandler(sp interfaces.IServiceProvider) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(fctx *fiber.Ctx) error {
+		ctx := fctx.Context()
+		id, err := fctx.ParamsInt("id")
+		if err != nil {
+			return err
+		}
 
-		return ctx.JSON(dto.ThingResponse{})
+		res, err := sp.GetThingRepository().GetByPlaceID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		return fctx.JSON(mappers.ConvertToThingsResponseDTO(res))
 	}
 }
 
@@ -50,32 +76,29 @@ func GetPlaceThingsHandler(sp interfaces.IServiceProvider) fiber.Handler {
 // @security 	BasicAuth
 // @Produce     json
 func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+	return func(fctx *fiber.Ctx) error {
+		ctx := fctx.Context()
 		req := dto.AddThingRequest{}
-		if err := ctx.BodyParser(&req); err != nil {
+		if err := fctx.BodyParser(&req); err != nil {
 			return err
 		}
 
 		var validate = validator.New()
 		if err := validate.Struct(req); err != nil {
-			return helpers.FormatError(err)
+			return helpers.BadRequestJsonResponse(helpers.FormatValidateErrors(err))
 		}
 
-		tx, err := sp.GetThingRepository().BeginTx(ctx.Context(), sql.LevelReadCommitted)
+		tx, err := sp.GetThingRepository().BeginTx(ctx, defaultTxLevel)
 		if err != nil {
 			return err
 		}
 
-		id, err := sp.GetThingRepository().Add(ctx.Context(), mappers.ConvertToAddThingRequestModel(req), tx)
+		id, err := sp.GetThingRepository().Add(ctx, mappers.ConvertToAddThingRequestModel(req), tx)
 		if err != nil {
 			return err
 		}
 
-		err = sp.GetPlaceThingRepository().Add(ctx.Context(), models.AddPlaceThingRequest{
-			PlaceID: req.PlaceID,
-			ThingID: id,
-		}, tx)
-
+		err = sp.GetPlaceThingRepository().Add(ctx, mappers.ConvertToAddPlaceThingRequestModel(id, req.PlaceID), tx)
 		if err != nil {
 			return err
 		}
@@ -84,12 +107,12 @@ func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return err
 		}
 
-		res, err := sp.GetThingRepository().Get(ctx.Context(), id)
+		res, err := sp.GetThingRepository().Get(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		return ctx.JSON(mappers.ConvertToThingResponseDTO(*res))
+		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))
 	}
 }
 
@@ -102,20 +125,47 @@ func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 // @security 	BasicAuth
 // @Produce     json
 func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		id, err := ctx.ParamsInt("id")
+	return func(fctx *fiber.Ctx) error {
+		ctx := fctx.Context()
+		id, err := fctx.ParamsInt("id")
 		if err != nil {
 			return err
 		}
 
-		req := dto.UpdatePlaceRequest{}
-		if err = ctx.BodyParser(&req); err != nil {
+		req := dto.UpdateThingRequest{}
+		if err = fctx.BodyParser(&req); err != nil {
 			return err
 		}
 
-		_ = id
+		tx, err := sp.GetThingRepository().BeginTx(ctx, defaultTxLevel)
+		if err != nil {
+			return err
+		}
 
-		return ctx.JSON(dto.ThingResponse{})
+		if req.Title != nil || req.Description != nil {
+			err = sp.GetThingRepository().Update(ctx, mappers.ConvertToUpdateThingRequestModel(id, req), tx)
+			if err != nil {
+				return err
+			}
+		}
+
+		if req.PlaceID != nil {
+			err = sp.GetPlaceThingRepository().UpdatePlace(ctx, mappers.ConvertToUpdatePlaceThingRequestModel(id, *req.PlaceID), tx)
+			if err != nil {
+				return err
+			}
+		}
+
+		if err = tx.Commit(); err != nil {
+			return err
+		}
+
+		res, err := sp.GetThingRepository().Get(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))
 	}
 }
 
@@ -127,14 +177,40 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 // @security 	BasicAuth
 // @Produce     json
 func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		id, err := ctx.ParamsInt("id")
+	return func(fctx *fiber.Ctx) error {
+		ctx := fctx.Context()
+		id, err := fctx.ParamsInt("id")
 		if err != nil {
 			return err
 		}
 
-		_ = id
+		_, err = sp.GetThingRepository().Get(ctx, id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return helpers.BadRequestJsonResponse(dto.EmptyResponse{})
+			}
+			return err
+		}
 
-		return ctx.JSON(dto.EmptyResponse{})
+		tx, err := sp.GetThingRepository().BeginTx(ctx, defaultTxLevel)
+		if err != nil {
+			return err
+		}
+
+		err = sp.GetPlaceThingRepository().DeleteThing(ctx, id, tx)
+		if err != nil {
+			return err
+		}
+
+		err = sp.GetThingRepository().Delete(ctx, id, tx)
+		if err != nil {
+			return err
+		}
+
+		if err = tx.Commit(); err != nil {
+			return err
+		}
+
+		return fctx.JSON(dto.EmptyResponse{})
 	}
 }

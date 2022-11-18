@@ -31,17 +31,23 @@ type IThingRepositoryMock struct {
 	beforeBeginTxCounter uint64
 	BeginTxMock          mIThingRepositoryMockBeginTx
 
-	funcDelete          func(ctx context.Context, id int, tx *sql.Tx) (err error)
-	inspectFuncDelete   func(ctx context.Context, id int, tx *sql.Tx)
+	funcDelete          func(ctx context.Context, thingID int, tx *sql.Tx) (err error)
+	inspectFuncDelete   func(ctx context.Context, thingID int, tx *sql.Tx)
 	afterDeleteCounter  uint64
 	beforeDeleteCounter uint64
 	DeleteMock          mIThingRepositoryMockDelete
 
-	funcGet          func(ctx context.Context, id int) (tp1 *models.Thing, err error)
-	inspectFuncGet   func(ctx context.Context, id int)
+	funcGet          func(ctx context.Context, thingID int) (tp1 *models.Thing, err error)
+	inspectFuncGet   func(ctx context.Context, thingID int)
 	afterGetCounter  uint64
 	beforeGetCounter uint64
 	GetMock          mIThingRepositoryMockGet
+
+	funcGetByPlaceID          func(ctx context.Context, placeID int) (ta1 []models.Thing, err error)
+	inspectFuncGetByPlaceID   func(ctx context.Context, placeID int)
+	afterGetByPlaceIDCounter  uint64
+	beforeGetByPlaceIDCounter uint64
+	GetByPlaceIDMock          mIThingRepositoryMockGetByPlaceID
 
 	funcUpdate          func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) (err error)
 	inspectFuncUpdate   func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx)
@@ -68,6 +74,9 @@ func NewIThingRepositoryMock(t minimock.Tester) *IThingRepositoryMock {
 
 	m.GetMock = mIThingRepositoryMockGet{mock: m}
 	m.GetMock.callArgs = []*IThingRepositoryMockGetParams{}
+
+	m.GetByPlaceIDMock = mIThingRepositoryMockGetByPlaceID{mock: m}
+	m.GetByPlaceIDMock.callArgs = []*IThingRepositoryMockGetByPlaceIDParams{}
 
 	m.UpdateMock = mIThingRepositoryMockUpdate{mock: m}
 	m.UpdateMock.callArgs = []*IThingRepositoryMockUpdateParams{}
@@ -529,9 +538,9 @@ type IThingRepositoryMockDeleteExpectation struct {
 
 // IThingRepositoryMockDeleteParams contains parameters of the IThingRepository.Delete
 type IThingRepositoryMockDeleteParams struct {
-	ctx context.Context
-	id  int
-	tx  *sql.Tx
+	ctx     context.Context
+	thingID int
+	tx      *sql.Tx
 }
 
 // IThingRepositoryMockDeleteResults contains results of the IThingRepository.Delete
@@ -540,7 +549,7 @@ type IThingRepositoryMockDeleteResults struct {
 }
 
 // Expect sets up expected params for IThingRepository.Delete
-func (mmDelete *mIThingRepositoryMockDelete) Expect(ctx context.Context, id int, tx *sql.Tx) *mIThingRepositoryMockDelete {
+func (mmDelete *mIThingRepositoryMockDelete) Expect(ctx context.Context, thingID int, tx *sql.Tx) *mIThingRepositoryMockDelete {
 	if mmDelete.mock.funcDelete != nil {
 		mmDelete.mock.t.Fatalf("IThingRepositoryMock.Delete mock is already set by Set")
 	}
@@ -549,7 +558,7 @@ func (mmDelete *mIThingRepositoryMockDelete) Expect(ctx context.Context, id int,
 		mmDelete.defaultExpectation = &IThingRepositoryMockDeleteExpectation{}
 	}
 
-	mmDelete.defaultExpectation.params = &IThingRepositoryMockDeleteParams{ctx, id, tx}
+	mmDelete.defaultExpectation.params = &IThingRepositoryMockDeleteParams{ctx, thingID, tx}
 	for _, e := range mmDelete.expectations {
 		if minimock.Equal(e.params, mmDelete.defaultExpectation.params) {
 			mmDelete.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmDelete.defaultExpectation.params)
@@ -560,7 +569,7 @@ func (mmDelete *mIThingRepositoryMockDelete) Expect(ctx context.Context, id int,
 }
 
 // Inspect accepts an inspector function that has same arguments as the IThingRepository.Delete
-func (mmDelete *mIThingRepositoryMockDelete) Inspect(f func(ctx context.Context, id int, tx *sql.Tx)) *mIThingRepositoryMockDelete {
+func (mmDelete *mIThingRepositoryMockDelete) Inspect(f func(ctx context.Context, thingID int, tx *sql.Tx)) *mIThingRepositoryMockDelete {
 	if mmDelete.mock.inspectFuncDelete != nil {
 		mmDelete.mock.t.Fatalf("Inspect function is already set for IThingRepositoryMock.Delete")
 	}
@@ -584,7 +593,7 @@ func (mmDelete *mIThingRepositoryMockDelete) Return(err error) *IThingRepository
 }
 
 // Set uses given function f to mock the IThingRepository.Delete method
-func (mmDelete *mIThingRepositoryMockDelete) Set(f func(ctx context.Context, id int, tx *sql.Tx) (err error)) *IThingRepositoryMock {
+func (mmDelete *mIThingRepositoryMockDelete) Set(f func(ctx context.Context, thingID int, tx *sql.Tx) (err error)) *IThingRepositoryMock {
 	if mmDelete.defaultExpectation != nil {
 		mmDelete.mock.t.Fatalf("Default expectation is already set for the IThingRepository.Delete method")
 	}
@@ -599,14 +608,14 @@ func (mmDelete *mIThingRepositoryMockDelete) Set(f func(ctx context.Context, id 
 
 // When sets expectation for the IThingRepository.Delete which will trigger the result defined by the following
 // Then helper
-func (mmDelete *mIThingRepositoryMockDelete) When(ctx context.Context, id int, tx *sql.Tx) *IThingRepositoryMockDeleteExpectation {
+func (mmDelete *mIThingRepositoryMockDelete) When(ctx context.Context, thingID int, tx *sql.Tx) *IThingRepositoryMockDeleteExpectation {
 	if mmDelete.mock.funcDelete != nil {
 		mmDelete.mock.t.Fatalf("IThingRepositoryMock.Delete mock is already set by Set")
 	}
 
 	expectation := &IThingRepositoryMockDeleteExpectation{
 		mock:   mmDelete.mock,
-		params: &IThingRepositoryMockDeleteParams{ctx, id, tx},
+		params: &IThingRepositoryMockDeleteParams{ctx, thingID, tx},
 	}
 	mmDelete.expectations = append(mmDelete.expectations, expectation)
 	return expectation
@@ -619,15 +628,15 @@ func (e *IThingRepositoryMockDeleteExpectation) Then(err error) *IThingRepositor
 }
 
 // Delete implements interfaces.IThingRepository
-func (mmDelete *IThingRepositoryMock) Delete(ctx context.Context, id int, tx *sql.Tx) (err error) {
+func (mmDelete *IThingRepositoryMock) Delete(ctx context.Context, thingID int, tx *sql.Tx) (err error) {
 	mm_atomic.AddUint64(&mmDelete.beforeDeleteCounter, 1)
 	defer mm_atomic.AddUint64(&mmDelete.afterDeleteCounter, 1)
 
 	if mmDelete.inspectFuncDelete != nil {
-		mmDelete.inspectFuncDelete(ctx, id, tx)
+		mmDelete.inspectFuncDelete(ctx, thingID, tx)
 	}
 
-	mm_params := &IThingRepositoryMockDeleteParams{ctx, id, tx}
+	mm_params := &IThingRepositoryMockDeleteParams{ctx, thingID, tx}
 
 	// Record call args
 	mmDelete.DeleteMock.mutex.Lock()
@@ -644,7 +653,7 @@ func (mmDelete *IThingRepositoryMock) Delete(ctx context.Context, id int, tx *sq
 	if mmDelete.DeleteMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmDelete.DeleteMock.defaultExpectation.Counter, 1)
 		mm_want := mmDelete.DeleteMock.defaultExpectation.params
-		mm_got := IThingRepositoryMockDeleteParams{ctx, id, tx}
+		mm_got := IThingRepositoryMockDeleteParams{ctx, thingID, tx}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmDelete.t.Errorf("IThingRepositoryMock.Delete got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -656,9 +665,9 @@ func (mmDelete *IThingRepositoryMock) Delete(ctx context.Context, id int, tx *sq
 		return (*mm_results).err
 	}
 	if mmDelete.funcDelete != nil {
-		return mmDelete.funcDelete(ctx, id, tx)
+		return mmDelete.funcDelete(ctx, thingID, tx)
 	}
-	mmDelete.t.Fatalf("Unexpected call to IThingRepositoryMock.Delete. %v %v %v", ctx, id, tx)
+	mmDelete.t.Fatalf("Unexpected call to IThingRepositoryMock.Delete. %v %v %v", ctx, thingID, tx)
 	return
 }
 
@@ -746,8 +755,8 @@ type IThingRepositoryMockGetExpectation struct {
 
 // IThingRepositoryMockGetParams contains parameters of the IThingRepository.Get
 type IThingRepositoryMockGetParams struct {
-	ctx context.Context
-	id  int
+	ctx     context.Context
+	thingID int
 }
 
 // IThingRepositoryMockGetResults contains results of the IThingRepository.Get
@@ -757,7 +766,7 @@ type IThingRepositoryMockGetResults struct {
 }
 
 // Expect sets up expected params for IThingRepository.Get
-func (mmGet *mIThingRepositoryMockGet) Expect(ctx context.Context, id int) *mIThingRepositoryMockGet {
+func (mmGet *mIThingRepositoryMockGet) Expect(ctx context.Context, thingID int) *mIThingRepositoryMockGet {
 	if mmGet.mock.funcGet != nil {
 		mmGet.mock.t.Fatalf("IThingRepositoryMock.Get mock is already set by Set")
 	}
@@ -766,7 +775,7 @@ func (mmGet *mIThingRepositoryMockGet) Expect(ctx context.Context, id int) *mITh
 		mmGet.defaultExpectation = &IThingRepositoryMockGetExpectation{}
 	}
 
-	mmGet.defaultExpectation.params = &IThingRepositoryMockGetParams{ctx, id}
+	mmGet.defaultExpectation.params = &IThingRepositoryMockGetParams{ctx, thingID}
 	for _, e := range mmGet.expectations {
 		if minimock.Equal(e.params, mmGet.defaultExpectation.params) {
 			mmGet.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGet.defaultExpectation.params)
@@ -777,7 +786,7 @@ func (mmGet *mIThingRepositoryMockGet) Expect(ctx context.Context, id int) *mITh
 }
 
 // Inspect accepts an inspector function that has same arguments as the IThingRepository.Get
-func (mmGet *mIThingRepositoryMockGet) Inspect(f func(ctx context.Context, id int)) *mIThingRepositoryMockGet {
+func (mmGet *mIThingRepositoryMockGet) Inspect(f func(ctx context.Context, thingID int)) *mIThingRepositoryMockGet {
 	if mmGet.mock.inspectFuncGet != nil {
 		mmGet.mock.t.Fatalf("Inspect function is already set for IThingRepositoryMock.Get")
 	}
@@ -801,7 +810,7 @@ func (mmGet *mIThingRepositoryMockGet) Return(tp1 *models.Thing, err error) *ITh
 }
 
 // Set uses given function f to mock the IThingRepository.Get method
-func (mmGet *mIThingRepositoryMockGet) Set(f func(ctx context.Context, id int) (tp1 *models.Thing, err error)) *IThingRepositoryMock {
+func (mmGet *mIThingRepositoryMockGet) Set(f func(ctx context.Context, thingID int) (tp1 *models.Thing, err error)) *IThingRepositoryMock {
 	if mmGet.defaultExpectation != nil {
 		mmGet.mock.t.Fatalf("Default expectation is already set for the IThingRepository.Get method")
 	}
@@ -816,14 +825,14 @@ func (mmGet *mIThingRepositoryMockGet) Set(f func(ctx context.Context, id int) (
 
 // When sets expectation for the IThingRepository.Get which will trigger the result defined by the following
 // Then helper
-func (mmGet *mIThingRepositoryMockGet) When(ctx context.Context, id int) *IThingRepositoryMockGetExpectation {
+func (mmGet *mIThingRepositoryMockGet) When(ctx context.Context, thingID int) *IThingRepositoryMockGetExpectation {
 	if mmGet.mock.funcGet != nil {
 		mmGet.mock.t.Fatalf("IThingRepositoryMock.Get mock is already set by Set")
 	}
 
 	expectation := &IThingRepositoryMockGetExpectation{
 		mock:   mmGet.mock,
-		params: &IThingRepositoryMockGetParams{ctx, id},
+		params: &IThingRepositoryMockGetParams{ctx, thingID},
 	}
 	mmGet.expectations = append(mmGet.expectations, expectation)
 	return expectation
@@ -836,15 +845,15 @@ func (e *IThingRepositoryMockGetExpectation) Then(tp1 *models.Thing, err error) 
 }
 
 // Get implements interfaces.IThingRepository
-func (mmGet *IThingRepositoryMock) Get(ctx context.Context, id int) (tp1 *models.Thing, err error) {
+func (mmGet *IThingRepositoryMock) Get(ctx context.Context, thingID int) (tp1 *models.Thing, err error) {
 	mm_atomic.AddUint64(&mmGet.beforeGetCounter, 1)
 	defer mm_atomic.AddUint64(&mmGet.afterGetCounter, 1)
 
 	if mmGet.inspectFuncGet != nil {
-		mmGet.inspectFuncGet(ctx, id)
+		mmGet.inspectFuncGet(ctx, thingID)
 	}
 
-	mm_params := &IThingRepositoryMockGetParams{ctx, id}
+	mm_params := &IThingRepositoryMockGetParams{ctx, thingID}
 
 	// Record call args
 	mmGet.GetMock.mutex.Lock()
@@ -861,7 +870,7 @@ func (mmGet *IThingRepositoryMock) Get(ctx context.Context, id int) (tp1 *models
 	if mmGet.GetMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmGet.GetMock.defaultExpectation.Counter, 1)
 		mm_want := mmGet.GetMock.defaultExpectation.params
-		mm_got := IThingRepositoryMockGetParams{ctx, id}
+		mm_got := IThingRepositoryMockGetParams{ctx, thingID}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
 			mmGet.t.Errorf("IThingRepositoryMock.Get got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
@@ -873,9 +882,9 @@ func (mmGet *IThingRepositoryMock) Get(ctx context.Context, id int) (tp1 *models
 		return (*mm_results).tp1, (*mm_results).err
 	}
 	if mmGet.funcGet != nil {
-		return mmGet.funcGet(ctx, id)
+		return mmGet.funcGet(ctx, thingID)
 	}
-	mmGet.t.Fatalf("Unexpected call to IThingRepositoryMock.Get. %v %v", ctx, id)
+	mmGet.t.Fatalf("Unexpected call to IThingRepositoryMock.Get. %v %v", ctx, thingID)
 	return
 }
 
@@ -941,6 +950,223 @@ func (m *IThingRepositoryMock) MinimockGetInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcGet != nil && mm_atomic.LoadUint64(&m.afterGetCounter) < 1 {
 		m.t.Error("Expected call to IThingRepositoryMock.Get")
+	}
+}
+
+type mIThingRepositoryMockGetByPlaceID struct {
+	mock               *IThingRepositoryMock
+	defaultExpectation *IThingRepositoryMockGetByPlaceIDExpectation
+	expectations       []*IThingRepositoryMockGetByPlaceIDExpectation
+
+	callArgs []*IThingRepositoryMockGetByPlaceIDParams
+	mutex    sync.RWMutex
+}
+
+// IThingRepositoryMockGetByPlaceIDExpectation specifies expectation struct of the IThingRepository.GetByPlaceID
+type IThingRepositoryMockGetByPlaceIDExpectation struct {
+	mock    *IThingRepositoryMock
+	params  *IThingRepositoryMockGetByPlaceIDParams
+	results *IThingRepositoryMockGetByPlaceIDResults
+	Counter uint64
+}
+
+// IThingRepositoryMockGetByPlaceIDParams contains parameters of the IThingRepository.GetByPlaceID
+type IThingRepositoryMockGetByPlaceIDParams struct {
+	ctx     context.Context
+	placeID int
+}
+
+// IThingRepositoryMockGetByPlaceIDResults contains results of the IThingRepository.GetByPlaceID
+type IThingRepositoryMockGetByPlaceIDResults struct {
+	ta1 []models.Thing
+	err error
+}
+
+// Expect sets up expected params for IThingRepository.GetByPlaceID
+func (mmGetByPlaceID *mIThingRepositoryMockGetByPlaceID) Expect(ctx context.Context, placeID int) *mIThingRepositoryMockGetByPlaceID {
+	if mmGetByPlaceID.mock.funcGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("IThingRepositoryMock.GetByPlaceID mock is already set by Set")
+	}
+
+	if mmGetByPlaceID.defaultExpectation == nil {
+		mmGetByPlaceID.defaultExpectation = &IThingRepositoryMockGetByPlaceIDExpectation{}
+	}
+
+	mmGetByPlaceID.defaultExpectation.params = &IThingRepositoryMockGetByPlaceIDParams{ctx, placeID}
+	for _, e := range mmGetByPlaceID.expectations {
+		if minimock.Equal(e.params, mmGetByPlaceID.defaultExpectation.params) {
+			mmGetByPlaceID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetByPlaceID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetByPlaceID
+}
+
+// Inspect accepts an inspector function that has same arguments as the IThingRepository.GetByPlaceID
+func (mmGetByPlaceID *mIThingRepositoryMockGetByPlaceID) Inspect(f func(ctx context.Context, placeID int)) *mIThingRepositoryMockGetByPlaceID {
+	if mmGetByPlaceID.mock.inspectFuncGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("Inspect function is already set for IThingRepositoryMock.GetByPlaceID")
+	}
+
+	mmGetByPlaceID.mock.inspectFuncGetByPlaceID = f
+
+	return mmGetByPlaceID
+}
+
+// Return sets up results that will be returned by IThingRepository.GetByPlaceID
+func (mmGetByPlaceID *mIThingRepositoryMockGetByPlaceID) Return(ta1 []models.Thing, err error) *IThingRepositoryMock {
+	if mmGetByPlaceID.mock.funcGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("IThingRepositoryMock.GetByPlaceID mock is already set by Set")
+	}
+
+	if mmGetByPlaceID.defaultExpectation == nil {
+		mmGetByPlaceID.defaultExpectation = &IThingRepositoryMockGetByPlaceIDExpectation{mock: mmGetByPlaceID.mock}
+	}
+	mmGetByPlaceID.defaultExpectation.results = &IThingRepositoryMockGetByPlaceIDResults{ta1, err}
+	return mmGetByPlaceID.mock
+}
+
+// Set uses given function f to mock the IThingRepository.GetByPlaceID method
+func (mmGetByPlaceID *mIThingRepositoryMockGetByPlaceID) Set(f func(ctx context.Context, placeID int) (ta1 []models.Thing, err error)) *IThingRepositoryMock {
+	if mmGetByPlaceID.defaultExpectation != nil {
+		mmGetByPlaceID.mock.t.Fatalf("Default expectation is already set for the IThingRepository.GetByPlaceID method")
+	}
+
+	if len(mmGetByPlaceID.expectations) > 0 {
+		mmGetByPlaceID.mock.t.Fatalf("Some expectations are already set for the IThingRepository.GetByPlaceID method")
+	}
+
+	mmGetByPlaceID.mock.funcGetByPlaceID = f
+	return mmGetByPlaceID.mock
+}
+
+// When sets expectation for the IThingRepository.GetByPlaceID which will trigger the result defined by the following
+// Then helper
+func (mmGetByPlaceID *mIThingRepositoryMockGetByPlaceID) When(ctx context.Context, placeID int) *IThingRepositoryMockGetByPlaceIDExpectation {
+	if mmGetByPlaceID.mock.funcGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("IThingRepositoryMock.GetByPlaceID mock is already set by Set")
+	}
+
+	expectation := &IThingRepositoryMockGetByPlaceIDExpectation{
+		mock:   mmGetByPlaceID.mock,
+		params: &IThingRepositoryMockGetByPlaceIDParams{ctx, placeID},
+	}
+	mmGetByPlaceID.expectations = append(mmGetByPlaceID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IThingRepository.GetByPlaceID return parameters for the expectation previously defined by the When method
+func (e *IThingRepositoryMockGetByPlaceIDExpectation) Then(ta1 []models.Thing, err error) *IThingRepositoryMock {
+	e.results = &IThingRepositoryMockGetByPlaceIDResults{ta1, err}
+	return e.mock
+}
+
+// GetByPlaceID implements interfaces.IThingRepository
+func (mmGetByPlaceID *IThingRepositoryMock) GetByPlaceID(ctx context.Context, placeID int) (ta1 []models.Thing, err error) {
+	mm_atomic.AddUint64(&mmGetByPlaceID.beforeGetByPlaceIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetByPlaceID.afterGetByPlaceIDCounter, 1)
+
+	if mmGetByPlaceID.inspectFuncGetByPlaceID != nil {
+		mmGetByPlaceID.inspectFuncGetByPlaceID(ctx, placeID)
+	}
+
+	mm_params := &IThingRepositoryMockGetByPlaceIDParams{ctx, placeID}
+
+	// Record call args
+	mmGetByPlaceID.GetByPlaceIDMock.mutex.Lock()
+	mmGetByPlaceID.GetByPlaceIDMock.callArgs = append(mmGetByPlaceID.GetByPlaceIDMock.callArgs, mm_params)
+	mmGetByPlaceID.GetByPlaceIDMock.mutex.Unlock()
+
+	for _, e := range mmGetByPlaceID.GetByPlaceIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ta1, e.results.err
+		}
+	}
+
+	if mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation.params
+		mm_got := IThingRepositoryMockGetByPlaceIDParams{ctx, placeID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetByPlaceID.t.Errorf("IThingRepositoryMock.GetByPlaceID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetByPlaceID.t.Fatal("No results are set for the IThingRepositoryMock.GetByPlaceID")
+		}
+		return (*mm_results).ta1, (*mm_results).err
+	}
+	if mmGetByPlaceID.funcGetByPlaceID != nil {
+		return mmGetByPlaceID.funcGetByPlaceID(ctx, placeID)
+	}
+	mmGetByPlaceID.t.Fatalf("Unexpected call to IThingRepositoryMock.GetByPlaceID. %v %v", ctx, placeID)
+	return
+}
+
+// GetByPlaceIDAfterCounter returns a count of finished IThingRepositoryMock.GetByPlaceID invocations
+func (mmGetByPlaceID *IThingRepositoryMock) GetByPlaceIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByPlaceID.afterGetByPlaceIDCounter)
+}
+
+// GetByPlaceIDBeforeCounter returns a count of IThingRepositoryMock.GetByPlaceID invocations
+func (mmGetByPlaceID *IThingRepositoryMock) GetByPlaceIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByPlaceID.beforeGetByPlaceIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to IThingRepositoryMock.GetByPlaceID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetByPlaceID *mIThingRepositoryMockGetByPlaceID) Calls() []*IThingRepositoryMockGetByPlaceIDParams {
+	mmGetByPlaceID.mutex.RLock()
+
+	argCopy := make([]*IThingRepositoryMockGetByPlaceIDParams, len(mmGetByPlaceID.callArgs))
+	copy(argCopy, mmGetByPlaceID.callArgs)
+
+	mmGetByPlaceID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetByPlaceIDDone returns true if the count of the GetByPlaceID invocations corresponds
+// the number of defined expectations
+func (m *IThingRepositoryMock) MinimockGetByPlaceIDDone() bool {
+	for _, e := range m.GetByPlaceIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByPlaceIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByPlaceID != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetByPlaceIDInspect logs each unmet expectation
+func (m *IThingRepositoryMock) MinimockGetByPlaceIDInspect() {
+	for _, e := range m.GetByPlaceIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IThingRepositoryMock.GetByPlaceID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByPlaceIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		if m.GetByPlaceIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IThingRepositoryMock.GetByPlaceID")
+		} else {
+			m.t.Errorf("Expected call to IThingRepositoryMock.GetByPlaceID with params: %#v", *m.GetByPlaceIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByPlaceID != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		m.t.Error("Expected call to IThingRepositoryMock.GetByPlaceID")
 	}
 }
 
@@ -1172,6 +1398,8 @@ func (m *IThingRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetInspect()
 
+		m.MinimockGetByPlaceIDInspect()
+
 		m.MinimockUpdateInspect()
 		m.t.FailNow()
 	}
@@ -1200,5 +1428,6 @@ func (m *IThingRepositoryMock) minimockDone() bool {
 		m.MinimockBeginTxDone() &&
 		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
+		m.MinimockGetByPlaceIDDone() &&
 		m.MinimockUpdateDone()
 }

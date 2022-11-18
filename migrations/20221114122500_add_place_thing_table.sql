@@ -4,6 +4,7 @@ CREATE TABLE place_thing
     `place_id`   INT      NOT NULL,
     `thing_id`   INT      NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE INDEX (`place_id`, `thing_id`),
     FOREIGN KEY (`place_id`) REFERENCES place (`id`) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (`thing_id`) REFERENCES thing (`id`) ON UPDATE CASCADE ON DELETE RESTRICT

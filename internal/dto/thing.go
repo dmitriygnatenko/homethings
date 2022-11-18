@@ -1,9 +1,9 @@
 package dto
 
 type AddThingRequest struct {
-	PlaceID     int     `json:"place_id" validate:"required"`
-	Title       string  `json:"title"  validate:"required"`
-	Description *string `json:"description"`
+	PlaceID     int    `json:"place_id" validate:"required"`
+	Title       string `json:"title"  validate:"required"`
+	Description string `json:"description"`
 }
 
 type UpdateThingRequest struct {
@@ -18,4 +18,8 @@ type ThingResponse struct {
 	Description string `json:"description"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
+}
+
+type ThingsResponse struct {
+	Things []ThingResponse `json:"things"`
 }

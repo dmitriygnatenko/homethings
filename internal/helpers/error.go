@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func FormatError(errors error) error {
+func FormatValidateErrors(errors error) []dto.ErrorResponse {
 	var res []dto.ErrorResponse
 
 	for _, err := range errors.(validator.ValidationErrors) {
@@ -19,10 +19,23 @@ func FormatError(errors error) error {
 		})
 	}
 
-	errMsg, err := json.Marshal(res)
+	return res
+}
+
+func BadRequestJsonResponse(body interface{}) error {
+	errMsg, err := json.Marshal(body)
 	if err != nil {
 		return err
 	}
 
 	return fiber.NewError(fiber.StatusBadRequest, string(errMsg))
+}
+
+func NotFoundJsonResponse(body interface{}) error {
+	errMsg, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	return fiber.NewError(fiber.StatusNotFound, string(errMsg))
 }

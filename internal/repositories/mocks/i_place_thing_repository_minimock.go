@@ -24,6 +24,12 @@ type IPlaceThingRepositoryMock struct {
 	afterAddCounter  uint64
 	beforeAddCounter uint64
 	AddMock          mIPlaceThingRepositoryMockAdd
+
+	funcUpdatePlace          func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) (err error)
+	inspectFuncUpdatePlace   func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx)
+	afterUpdatePlaceCounter  uint64
+	beforeUpdatePlaceCounter uint64
+	UpdatePlaceMock          mIPlaceThingRepositoryMockUpdatePlace
 }
 
 // NewIPlaceThingRepositoryMock returns a mock for interfaces.IPlaceThingRepository
@@ -35,6 +41,9 @@ func NewIPlaceThingRepositoryMock(t minimock.Tester) *IPlaceThingRepositoryMock 
 
 	m.AddMock = mIPlaceThingRepositoryMockAdd{mock: m}
 	m.AddMock.callArgs = []*IPlaceThingRepositoryMockAddParams{}
+
+	m.UpdatePlaceMock = mIPlaceThingRepositoryMockUpdatePlace{mock: m}
+	m.UpdatePlaceMock.callArgs = []*IPlaceThingRepositoryMockUpdatePlaceParams{}
 
 	return m
 }
@@ -256,10 +265,229 @@ func (m *IPlaceThingRepositoryMock) MinimockAddInspect() {
 	}
 }
 
+type mIPlaceThingRepositoryMockUpdatePlace struct {
+	mock               *IPlaceThingRepositoryMock
+	defaultExpectation *IPlaceThingRepositoryMockUpdatePlaceExpectation
+	expectations       []*IPlaceThingRepositoryMockUpdatePlaceExpectation
+
+	callArgs []*IPlaceThingRepositoryMockUpdatePlaceParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceThingRepositoryMockUpdatePlaceExpectation specifies expectation struct of the IPlaceThingRepository.UpdatePlace
+type IPlaceThingRepositoryMockUpdatePlaceExpectation struct {
+	mock    *IPlaceThingRepositoryMock
+	params  *IPlaceThingRepositoryMockUpdatePlaceParams
+	results *IPlaceThingRepositoryMockUpdatePlaceResults
+	Counter uint64
+}
+
+// IPlaceThingRepositoryMockUpdatePlaceParams contains parameters of the IPlaceThingRepository.UpdatePlace
+type IPlaceThingRepositoryMockUpdatePlaceParams struct {
+	ctx context.Context
+	req models.UpdatePlaceThingRequest
+	tx  *sql.Tx
+}
+
+// IPlaceThingRepositoryMockUpdatePlaceResults contains results of the IPlaceThingRepository.UpdatePlace
+type IPlaceThingRepositoryMockUpdatePlaceResults struct {
+	err error
+}
+
+// Expect sets up expected params for IPlaceThingRepository.UpdatePlace
+func (mmUpdatePlace *mIPlaceThingRepositoryMockUpdatePlace) Expect(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) *mIPlaceThingRepositoryMockUpdatePlace {
+	if mmUpdatePlace.mock.funcUpdatePlace != nil {
+		mmUpdatePlace.mock.t.Fatalf("IPlaceThingRepositoryMock.UpdatePlace mock is already set by Set")
+	}
+
+	if mmUpdatePlace.defaultExpectation == nil {
+		mmUpdatePlace.defaultExpectation = &IPlaceThingRepositoryMockUpdatePlaceExpectation{}
+	}
+
+	mmUpdatePlace.defaultExpectation.params = &IPlaceThingRepositoryMockUpdatePlaceParams{ctx, req, tx}
+	for _, e := range mmUpdatePlace.expectations {
+		if minimock.Equal(e.params, mmUpdatePlace.defaultExpectation.params) {
+			mmUpdatePlace.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmUpdatePlace.defaultExpectation.params)
+		}
+	}
+
+	return mmUpdatePlace
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceThingRepository.UpdatePlace
+func (mmUpdatePlace *mIPlaceThingRepositoryMockUpdatePlace) Inspect(f func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx)) *mIPlaceThingRepositoryMockUpdatePlace {
+	if mmUpdatePlace.mock.inspectFuncUpdatePlace != nil {
+		mmUpdatePlace.mock.t.Fatalf("Inspect function is already set for IPlaceThingRepositoryMock.UpdatePlace")
+	}
+
+	mmUpdatePlace.mock.inspectFuncUpdatePlace = f
+
+	return mmUpdatePlace
+}
+
+// Return sets up results that will be returned by IPlaceThingRepository.UpdatePlace
+func (mmUpdatePlace *mIPlaceThingRepositoryMockUpdatePlace) Return(err error) *IPlaceThingRepositoryMock {
+	if mmUpdatePlace.mock.funcUpdatePlace != nil {
+		mmUpdatePlace.mock.t.Fatalf("IPlaceThingRepositoryMock.UpdatePlace mock is already set by Set")
+	}
+
+	if mmUpdatePlace.defaultExpectation == nil {
+		mmUpdatePlace.defaultExpectation = &IPlaceThingRepositoryMockUpdatePlaceExpectation{mock: mmUpdatePlace.mock}
+	}
+	mmUpdatePlace.defaultExpectation.results = &IPlaceThingRepositoryMockUpdatePlaceResults{err}
+	return mmUpdatePlace.mock
+}
+
+// Set uses given function f to mock the IPlaceThingRepository.UpdatePlace method
+func (mmUpdatePlace *mIPlaceThingRepositoryMockUpdatePlace) Set(f func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) (err error)) *IPlaceThingRepositoryMock {
+	if mmUpdatePlace.defaultExpectation != nil {
+		mmUpdatePlace.mock.t.Fatalf("Default expectation is already set for the IPlaceThingRepository.UpdatePlace method")
+	}
+
+	if len(mmUpdatePlace.expectations) > 0 {
+		mmUpdatePlace.mock.t.Fatalf("Some expectations are already set for the IPlaceThingRepository.UpdatePlace method")
+	}
+
+	mmUpdatePlace.mock.funcUpdatePlace = f
+	return mmUpdatePlace.mock
+}
+
+// When sets expectation for the IPlaceThingRepository.UpdatePlace which will trigger the result defined by the following
+// Then helper
+func (mmUpdatePlace *mIPlaceThingRepositoryMockUpdatePlace) When(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) *IPlaceThingRepositoryMockUpdatePlaceExpectation {
+	if mmUpdatePlace.mock.funcUpdatePlace != nil {
+		mmUpdatePlace.mock.t.Fatalf("IPlaceThingRepositoryMock.UpdatePlace mock is already set by Set")
+	}
+
+	expectation := &IPlaceThingRepositoryMockUpdatePlaceExpectation{
+		mock:   mmUpdatePlace.mock,
+		params: &IPlaceThingRepositoryMockUpdatePlaceParams{ctx, req, tx},
+	}
+	mmUpdatePlace.expectations = append(mmUpdatePlace.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceThingRepository.UpdatePlace return parameters for the expectation previously defined by the When method
+func (e *IPlaceThingRepositoryMockUpdatePlaceExpectation) Then(err error) *IPlaceThingRepositoryMock {
+	e.results = &IPlaceThingRepositoryMockUpdatePlaceResults{err}
+	return e.mock
+}
+
+// UpdatePlace implements interfaces.IPlaceThingRepository
+func (mmUpdatePlace *IPlaceThingRepositoryMock) UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) (err error) {
+	mm_atomic.AddUint64(&mmUpdatePlace.beforeUpdatePlaceCounter, 1)
+	defer mm_atomic.AddUint64(&mmUpdatePlace.afterUpdatePlaceCounter, 1)
+
+	if mmUpdatePlace.inspectFuncUpdatePlace != nil {
+		mmUpdatePlace.inspectFuncUpdatePlace(ctx, req, tx)
+	}
+
+	mm_params := &IPlaceThingRepositoryMockUpdatePlaceParams{ctx, req, tx}
+
+	// Record call args
+	mmUpdatePlace.UpdatePlaceMock.mutex.Lock()
+	mmUpdatePlace.UpdatePlaceMock.callArgs = append(mmUpdatePlace.UpdatePlaceMock.callArgs, mm_params)
+	mmUpdatePlace.UpdatePlaceMock.mutex.Unlock()
+
+	for _, e := range mmUpdatePlace.UpdatePlaceMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmUpdatePlace.UpdatePlaceMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmUpdatePlace.UpdatePlaceMock.defaultExpectation.Counter, 1)
+		mm_want := mmUpdatePlace.UpdatePlaceMock.defaultExpectation.params
+		mm_got := IPlaceThingRepositoryMockUpdatePlaceParams{ctx, req, tx}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmUpdatePlace.t.Errorf("IPlaceThingRepositoryMock.UpdatePlace got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmUpdatePlace.UpdatePlaceMock.defaultExpectation.results
+		if mm_results == nil {
+			mmUpdatePlace.t.Fatal("No results are set for the IPlaceThingRepositoryMock.UpdatePlace")
+		}
+		return (*mm_results).err
+	}
+	if mmUpdatePlace.funcUpdatePlace != nil {
+		return mmUpdatePlace.funcUpdatePlace(ctx, req, tx)
+	}
+	mmUpdatePlace.t.Fatalf("Unexpected call to IPlaceThingRepositoryMock.UpdatePlace. %v %v %v", ctx, req, tx)
+	return
+}
+
+// UpdatePlaceAfterCounter returns a count of finished IPlaceThingRepositoryMock.UpdatePlace invocations
+func (mmUpdatePlace *IPlaceThingRepositoryMock) UpdatePlaceAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdatePlace.afterUpdatePlaceCounter)
+}
+
+// UpdatePlaceBeforeCounter returns a count of IPlaceThingRepositoryMock.UpdatePlace invocations
+func (mmUpdatePlace *IPlaceThingRepositoryMock) UpdatePlaceBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmUpdatePlace.beforeUpdatePlaceCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceThingRepositoryMock.UpdatePlace.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmUpdatePlace *mIPlaceThingRepositoryMockUpdatePlace) Calls() []*IPlaceThingRepositoryMockUpdatePlaceParams {
+	mmUpdatePlace.mutex.RLock()
+
+	argCopy := make([]*IPlaceThingRepositoryMockUpdatePlaceParams, len(mmUpdatePlace.callArgs))
+	copy(argCopy, mmUpdatePlace.callArgs)
+
+	mmUpdatePlace.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockUpdatePlaceDone returns true if the count of the UpdatePlace invocations corresponds
+// the number of defined expectations
+func (m *IPlaceThingRepositoryMock) MinimockUpdatePlaceDone() bool {
+	for _, e := range m.UpdatePlaceMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UpdatePlaceMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdatePlaceCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUpdatePlace != nil && mm_atomic.LoadUint64(&m.afterUpdatePlaceCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockUpdatePlaceInspect logs each unmet expectation
+func (m *IPlaceThingRepositoryMock) MinimockUpdatePlaceInspect() {
+	for _, e := range m.UpdatePlaceMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceThingRepositoryMock.UpdatePlace with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.UpdatePlaceMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterUpdatePlaceCounter) < 1 {
+		if m.UpdatePlaceMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceThingRepositoryMock.UpdatePlace")
+		} else {
+			m.t.Errorf("Expected call to IPlaceThingRepositoryMock.UpdatePlace with params: %#v", *m.UpdatePlaceMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcUpdatePlace != nil && mm_atomic.LoadUint64(&m.afterUpdatePlaceCounter) < 1 {
+		m.t.Error("Expected call to IPlaceThingRepositoryMock.UpdatePlace")
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *IPlaceThingRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockAddInspect()
+
+		m.MinimockUpdatePlaceInspect()
 		m.t.FailNow()
 	}
 }
@@ -283,5 +511,6 @@ func (m *IPlaceThingRepositoryMock) MinimockWait(timeout mm_time.Duration) {
 func (m *IPlaceThingRepositoryMock) minimockDone() bool {
 	done := true
 	return done &&
-		m.MinimockAddDone()
+		m.MinimockAddDone() &&
+		m.MinimockUpdatePlaceDone()
 }

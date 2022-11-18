@@ -10,6 +10,7 @@ import (
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	sq "github.com/Masterminds/squirrel"
 )
 
 const (
@@ -25,14 +26,57 @@ func InitPlaceThingRepository(db *sql.DB) interfaces.IPlaceThingRepository {
 }
 
 func (r placeThingRepository) Add(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) error {
-	var err error
+	query, args, err := sq.Insert(placeThingTableName).
+		Columns("place_id", "thing_id").
+		Values(req.PlaceID, req.ThingID).
+		ToSql()
 
-	query := "INSERT INTO " + placeThingTableName + " (place_id, thing_id) VALUES (?, ?)"
+	if err != nil {
+		return err
+	}
 
 	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, req.PlaceID, req.ThingID)
+		_, err = r.db.ExecContext(ctx, query, args...)
 	} else {
-		_, err = tx.ExecContext(ctx, query, req.PlaceID, req.ThingID)
+		_, err = tx.ExecContext(ctx, query, args...)
+	}
+
+	return err
+}
+
+func (r placeThingRepository) UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) error {
+	query, args, err := sq.Update(placeThingTableName).
+		Set("place_id", req.PlaceID).
+		Where(sq.Eq{"thing_id": req.ThingID}).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	if tx == nil {
+		_, err = r.db.ExecContext(ctx, query, args...)
+	} else {
+		_, err = tx.ExecContext(ctx, query, args...)
+	}
+
+	return err
+}
+
+func (r placeThingRepository) DeleteThing(ctx context.Context, id int, tx *sql.Tx) error {
+	query, args, err := sq.Delete(placeThingTableName).
+		Where(sq.Eq{"thing_id": id}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	if tx == nil {
+		_, err = r.db.ExecContext(ctx, query, args...)
+	} else {
+		_, err = tx.ExecContext(ctx, query, args...)
 	}
 
 	return err
