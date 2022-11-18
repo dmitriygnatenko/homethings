@@ -1,4 +1,4 @@
-package mapper
+package mappers
 
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"

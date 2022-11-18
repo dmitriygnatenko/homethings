@@ -1,8 +1,14 @@
 package v1
 
 import (
+	"database/sql"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -38,18 +44,52 @@ func GetPlaceThingsHandler(sp interfaces.IServiceProvider) fiber.Handler {
 // @Router 		/v1/things [post]
 // @Param       data body dto.AddThingRequest true "Request body"
 // @Success     200 {object} dto.ThingResponse
+// @Failure     400 {array} dto.ErrorResponse
 // @Summary     Add thing
 // @Tags  		Things
 // @security 	BasicAuth
 // @Produce     json
 func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		req := dto.UpdatePlaceRequest{}
+		req := dto.AddThingRequest{}
 		if err := ctx.BodyParser(&req); err != nil {
 			return err
 		}
 
-		return ctx.JSON(dto.ThingResponse{})
+		var validate = validator.New()
+		if err := validate.Struct(req); err != nil {
+			return helpers.FormatError(err)
+		}
+
+		tx, err := sp.GetThingRepository().BeginTx(ctx.Context(), sql.LevelReadCommitted)
+		if err != nil {
+			return err
+		}
+
+		id, err := sp.GetThingRepository().Add(ctx.Context(), mappers.ConvertToAddThingRequestModel(req), tx)
+		if err != nil {
+			return err
+		}
+
+		err = sp.GetPlaceThingRepository().Add(ctx.Context(), models.AddPlaceThingRequest{
+			PlaceID: req.PlaceID,
+			ThingID: id,
+		}, tx)
+
+		if err != nil {
+			return err
+		}
+
+		if err = tx.Commit(); err != nil {
+			return err
+		}
+
+		res, err := sp.GetThingRepository().Get(ctx.Context(), id)
+		if err != nil {
+			return err
+		}
+
+		return ctx.JSON(mappers.ConvertToThingResponseDTO(*res))
 	}
 }
 

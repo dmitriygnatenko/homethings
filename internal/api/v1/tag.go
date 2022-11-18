@@ -2,7 +2,7 @@ package v1
 
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mapper"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,6 +13,6 @@ func GetTagsHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return err
 		}
 
-		return ctx.JSON(mapper.ConvertToTagsResponseDTO(res))
+		return ctx.JSON(mappers.ConvertToTagsResponseDTO(res))
 	}
 }

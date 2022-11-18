@@ -17,8 +17,20 @@ definitions:
         type: integer
       title:
         type: string
+    required:
+    - place_id
+    - title
     type: object
   dto.EmptyResponse:
+    type: object
+  dto.ErrorResponse:
+    properties:
+      field:
+        type: string
+      tag:
+        type: string
+      value:
+        type: string
     type: object
   dto.PlaceResponse:
     properties:
@@ -40,8 +52,6 @@ definitions:
       description:
         type: string
       id:
-        type: integer
-      place_id:
         type: integer
       title:
         type: string
@@ -196,6 +206,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.ThingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            items:
+              $ref: '#/definitions/dto.ErrorResponse'
+            type: array
       security:
       - BasicAuth: []
       summary: Add thing

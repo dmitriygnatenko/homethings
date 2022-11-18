@@ -231,6 +231,15 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.ThingResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ErrorResponse"
+                            }
+                        }
                     }
                 }
             }
@@ -363,6 +372,10 @@ const docTemplate = `{
         },
         "dto.AddThingRequest": {
             "type": "object",
+            "required": [
+                "place_id",
+                "title"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -377,6 +390,20 @@ const docTemplate = `{
         },
         "dto.EmptyResponse": {
             "type": "object"
+        },
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
         },
         "dto.PlaceResponse": {
             "type": "object",
@@ -408,9 +435,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "place_id": {
                     "type": "integer"
                 },
                 "title": {
