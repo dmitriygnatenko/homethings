@@ -14,6 +14,7 @@ type IThingRepository interface {
 	Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error
 	Delete(ctx context.Context, thingID int, tx *sql.Tx) error
 	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+	CommitTx(tx *sql.Tx) error
 }
 
 type IPlaceThingRepository interface {

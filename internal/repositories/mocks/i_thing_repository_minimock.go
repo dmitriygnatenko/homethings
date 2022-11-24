@@ -31,6 +31,12 @@ type IThingRepositoryMock struct {
 	beforeBeginTxCounter uint64
 	BeginTxMock          mIThingRepositoryMockBeginTx
 
+	funcCommitTx          func(tx *sql.Tx) (err error)
+	inspectFuncCommitTx   func(tx *sql.Tx)
+	afterCommitTxCounter  uint64
+	beforeCommitTxCounter uint64
+	CommitTxMock          mIThingRepositoryMockCommitTx
+
 	funcDelete          func(ctx context.Context, thingID int, tx *sql.Tx) (err error)
 	inspectFuncDelete   func(ctx context.Context, thingID int, tx *sql.Tx)
 	afterDeleteCounter  uint64
@@ -68,6 +74,9 @@ func NewIThingRepositoryMock(t minimock.Tester) *IThingRepositoryMock {
 
 	m.BeginTxMock = mIThingRepositoryMockBeginTx{mock: m}
 	m.BeginTxMock.callArgs = []*IThingRepositoryMockBeginTxParams{}
+
+	m.CommitTxMock = mIThingRepositoryMockCommitTx{mock: m}
+	m.CommitTxMock.callArgs = []*IThingRepositoryMockCommitTxParams{}
 
 	m.DeleteMock = mIThingRepositoryMockDelete{mock: m}
 	m.DeleteMock.callArgs = []*IThingRepositoryMockDeleteParams{}
@@ -516,6 +525,221 @@ func (m *IThingRepositoryMock) MinimockBeginTxInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcBeginTx != nil && mm_atomic.LoadUint64(&m.afterBeginTxCounter) < 1 {
 		m.t.Error("Expected call to IThingRepositoryMock.BeginTx")
+	}
+}
+
+type mIThingRepositoryMockCommitTx struct {
+	mock               *IThingRepositoryMock
+	defaultExpectation *IThingRepositoryMockCommitTxExpectation
+	expectations       []*IThingRepositoryMockCommitTxExpectation
+
+	callArgs []*IThingRepositoryMockCommitTxParams
+	mutex    sync.RWMutex
+}
+
+// IThingRepositoryMockCommitTxExpectation specifies expectation struct of the IThingRepository.CommitTx
+type IThingRepositoryMockCommitTxExpectation struct {
+	mock    *IThingRepositoryMock
+	params  *IThingRepositoryMockCommitTxParams
+	results *IThingRepositoryMockCommitTxResults
+	Counter uint64
+}
+
+// IThingRepositoryMockCommitTxParams contains parameters of the IThingRepository.CommitTx
+type IThingRepositoryMockCommitTxParams struct {
+	tx *sql.Tx
+}
+
+// IThingRepositoryMockCommitTxResults contains results of the IThingRepository.CommitTx
+type IThingRepositoryMockCommitTxResults struct {
+	err error
+}
+
+// Expect sets up expected params for IThingRepository.CommitTx
+func (mmCommitTx *mIThingRepositoryMockCommitTx) Expect(tx *sql.Tx) *mIThingRepositoryMockCommitTx {
+	if mmCommitTx.mock.funcCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("IThingRepositoryMock.CommitTx mock is already set by Set")
+	}
+
+	if mmCommitTx.defaultExpectation == nil {
+		mmCommitTx.defaultExpectation = &IThingRepositoryMockCommitTxExpectation{}
+	}
+
+	mmCommitTx.defaultExpectation.params = &IThingRepositoryMockCommitTxParams{tx}
+	for _, e := range mmCommitTx.expectations {
+		if minimock.Equal(e.params, mmCommitTx.defaultExpectation.params) {
+			mmCommitTx.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmCommitTx.defaultExpectation.params)
+		}
+	}
+
+	return mmCommitTx
+}
+
+// Inspect accepts an inspector function that has same arguments as the IThingRepository.CommitTx
+func (mmCommitTx *mIThingRepositoryMockCommitTx) Inspect(f func(tx *sql.Tx)) *mIThingRepositoryMockCommitTx {
+	if mmCommitTx.mock.inspectFuncCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("Inspect function is already set for IThingRepositoryMock.CommitTx")
+	}
+
+	mmCommitTx.mock.inspectFuncCommitTx = f
+
+	return mmCommitTx
+}
+
+// Return sets up results that will be returned by IThingRepository.CommitTx
+func (mmCommitTx *mIThingRepositoryMockCommitTx) Return(err error) *IThingRepositoryMock {
+	if mmCommitTx.mock.funcCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("IThingRepositoryMock.CommitTx mock is already set by Set")
+	}
+
+	if mmCommitTx.defaultExpectation == nil {
+		mmCommitTx.defaultExpectation = &IThingRepositoryMockCommitTxExpectation{mock: mmCommitTx.mock}
+	}
+	mmCommitTx.defaultExpectation.results = &IThingRepositoryMockCommitTxResults{err}
+	return mmCommitTx.mock
+}
+
+// Set uses given function f to mock the IThingRepository.CommitTx method
+func (mmCommitTx *mIThingRepositoryMockCommitTx) Set(f func(tx *sql.Tx) (err error)) *IThingRepositoryMock {
+	if mmCommitTx.defaultExpectation != nil {
+		mmCommitTx.mock.t.Fatalf("Default expectation is already set for the IThingRepository.CommitTx method")
+	}
+
+	if len(mmCommitTx.expectations) > 0 {
+		mmCommitTx.mock.t.Fatalf("Some expectations are already set for the IThingRepository.CommitTx method")
+	}
+
+	mmCommitTx.mock.funcCommitTx = f
+	return mmCommitTx.mock
+}
+
+// When sets expectation for the IThingRepository.CommitTx which will trigger the result defined by the following
+// Then helper
+func (mmCommitTx *mIThingRepositoryMockCommitTx) When(tx *sql.Tx) *IThingRepositoryMockCommitTxExpectation {
+	if mmCommitTx.mock.funcCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("IThingRepositoryMock.CommitTx mock is already set by Set")
+	}
+
+	expectation := &IThingRepositoryMockCommitTxExpectation{
+		mock:   mmCommitTx.mock,
+		params: &IThingRepositoryMockCommitTxParams{tx},
+	}
+	mmCommitTx.expectations = append(mmCommitTx.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IThingRepository.CommitTx return parameters for the expectation previously defined by the When method
+func (e *IThingRepositoryMockCommitTxExpectation) Then(err error) *IThingRepositoryMock {
+	e.results = &IThingRepositoryMockCommitTxResults{err}
+	return e.mock
+}
+
+// CommitTx implements interfaces.IThingRepository
+func (mmCommitTx *IThingRepositoryMock) CommitTx(tx *sql.Tx) (err error) {
+	mm_atomic.AddUint64(&mmCommitTx.beforeCommitTxCounter, 1)
+	defer mm_atomic.AddUint64(&mmCommitTx.afterCommitTxCounter, 1)
+
+	if mmCommitTx.inspectFuncCommitTx != nil {
+		mmCommitTx.inspectFuncCommitTx(tx)
+	}
+
+	mm_params := &IThingRepositoryMockCommitTxParams{tx}
+
+	// Record call args
+	mmCommitTx.CommitTxMock.mutex.Lock()
+	mmCommitTx.CommitTxMock.callArgs = append(mmCommitTx.CommitTxMock.callArgs, mm_params)
+	mmCommitTx.CommitTxMock.mutex.Unlock()
+
+	for _, e := range mmCommitTx.CommitTxMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmCommitTx.CommitTxMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmCommitTx.CommitTxMock.defaultExpectation.Counter, 1)
+		mm_want := mmCommitTx.CommitTxMock.defaultExpectation.params
+		mm_got := IThingRepositoryMockCommitTxParams{tx}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmCommitTx.t.Errorf("IThingRepositoryMock.CommitTx got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmCommitTx.CommitTxMock.defaultExpectation.results
+		if mm_results == nil {
+			mmCommitTx.t.Fatal("No results are set for the IThingRepositoryMock.CommitTx")
+		}
+		return (*mm_results).err
+	}
+	if mmCommitTx.funcCommitTx != nil {
+		return mmCommitTx.funcCommitTx(tx)
+	}
+	mmCommitTx.t.Fatalf("Unexpected call to IThingRepositoryMock.CommitTx. %v", tx)
+	return
+}
+
+// CommitTxAfterCounter returns a count of finished IThingRepositoryMock.CommitTx invocations
+func (mmCommitTx *IThingRepositoryMock) CommitTxAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmCommitTx.afterCommitTxCounter)
+}
+
+// CommitTxBeforeCounter returns a count of IThingRepositoryMock.CommitTx invocations
+func (mmCommitTx *IThingRepositoryMock) CommitTxBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmCommitTx.beforeCommitTxCounter)
+}
+
+// Calls returns a list of arguments used in each call to IThingRepositoryMock.CommitTx.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmCommitTx *mIThingRepositoryMockCommitTx) Calls() []*IThingRepositoryMockCommitTxParams {
+	mmCommitTx.mutex.RLock()
+
+	argCopy := make([]*IThingRepositoryMockCommitTxParams, len(mmCommitTx.callArgs))
+	copy(argCopy, mmCommitTx.callArgs)
+
+	mmCommitTx.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockCommitTxDone returns true if the count of the CommitTx invocations corresponds
+// the number of defined expectations
+func (m *IThingRepositoryMock) MinimockCommitTxDone() bool {
+	for _, e := range m.CommitTxMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.CommitTxMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcCommitTx != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockCommitTxInspect logs each unmet expectation
+func (m *IThingRepositoryMock) MinimockCommitTxInspect() {
+	for _, e := range m.CommitTxMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IThingRepositoryMock.CommitTx with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.CommitTxMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		if m.CommitTxMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IThingRepositoryMock.CommitTx")
+		} else {
+			m.t.Errorf("Expected call to IThingRepositoryMock.CommitTx with params: %#v", *m.CommitTxMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcCommitTx != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		m.t.Error("Expected call to IThingRepositoryMock.CommitTx")
 	}
 }
 
@@ -1394,6 +1618,8 @@ func (m *IThingRepositoryMock) MinimockFinish() {
 
 		m.MinimockBeginTxInspect()
 
+		m.MinimockCommitTxInspect()
+
 		m.MinimockDeleteInspect()
 
 		m.MinimockGetInspect()
@@ -1426,6 +1652,7 @@ func (m *IThingRepositoryMock) minimockDone() bool {
 	return done &&
 		m.MinimockAddDone() &&
 		m.MinimockBeginTxDone() &&
+		m.MinimockCommitTxDone() &&
 		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
 		m.MinimockGetByPlaceIDDone() &&

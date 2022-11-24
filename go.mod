@@ -4,11 +4,13 @@ go 1.19
 
 require (
 	github.com/Masterminds/squirrel v1.5.3
+	github.com/brianvoe/gofakeit/v6 v6.19.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofiber/fiber/v2 v2.39.0
 	github.com/gofiber/swagger v0.1.7
 	github.com/gojuno/minimock/v3 v3.0.10
+	github.com/stretchr/testify v1.8.0
 	github.com/swaggo/swag v1.8.7
 )
 

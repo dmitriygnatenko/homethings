@@ -7,6 +7,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
@@ -27,6 +28,14 @@ func InitThingRepository(db *sql.DB) interfaces.IThingRepository {
 
 func (r thingRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
 	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
+}
+
+func (r thingRepository) CommitTx(tx *sql.Tx) error {
+	if tx == nil {
+		return errors.New("empty transaction")
+	}
+
+	return tx.Commit()
 }
 
 func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, error) {

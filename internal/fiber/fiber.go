@@ -2,7 +2,7 @@ package fiber
 
 import (
 	apiV1 "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	_ "git.dmitriygnatenko.ru/dima/homethings/internal/docs"
+	_ "git.dmitriygnatenko.ru/dima/homethings/internal/docs" //nolint
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
