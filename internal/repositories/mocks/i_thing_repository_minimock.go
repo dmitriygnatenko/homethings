@@ -49,6 +49,12 @@ type IThingRepositoryMock struct {
 	beforeGetCounter uint64
 	GetMock          mIThingRepositoryMockGet
 
+	funcGetAllByPlaceID          func(ctx context.Context, placeID int) (ta1 []models.Thing, err error)
+	inspectFuncGetAllByPlaceID   func(ctx context.Context, placeID int)
+	afterGetAllByPlaceIDCounter  uint64
+	beforeGetAllByPlaceIDCounter uint64
+	GetAllByPlaceIDMock          mIThingRepositoryMockGetAllByPlaceID
+
 	funcGetByPlaceID          func(ctx context.Context, placeID int) (ta1 []models.Thing, err error)
 	inspectFuncGetByPlaceID   func(ctx context.Context, placeID int)
 	afterGetByPlaceIDCounter  uint64
@@ -83,6 +89,9 @@ func NewIThingRepositoryMock(t minimock.Tester) *IThingRepositoryMock {
 
 	m.GetMock = mIThingRepositoryMockGet{mock: m}
 	m.GetMock.callArgs = []*IThingRepositoryMockGetParams{}
+
+	m.GetAllByPlaceIDMock = mIThingRepositoryMockGetAllByPlaceID{mock: m}
+	m.GetAllByPlaceIDMock.callArgs = []*IThingRepositoryMockGetAllByPlaceIDParams{}
 
 	m.GetByPlaceIDMock = mIThingRepositoryMockGetByPlaceID{mock: m}
 	m.GetByPlaceIDMock.callArgs = []*IThingRepositoryMockGetByPlaceIDParams{}
@@ -1177,6 +1186,223 @@ func (m *IThingRepositoryMock) MinimockGetInspect() {
 	}
 }
 
+type mIThingRepositoryMockGetAllByPlaceID struct {
+	mock               *IThingRepositoryMock
+	defaultExpectation *IThingRepositoryMockGetAllByPlaceIDExpectation
+	expectations       []*IThingRepositoryMockGetAllByPlaceIDExpectation
+
+	callArgs []*IThingRepositoryMockGetAllByPlaceIDParams
+	mutex    sync.RWMutex
+}
+
+// IThingRepositoryMockGetAllByPlaceIDExpectation specifies expectation struct of the IThingRepository.GetAllByPlaceID
+type IThingRepositoryMockGetAllByPlaceIDExpectation struct {
+	mock    *IThingRepositoryMock
+	params  *IThingRepositoryMockGetAllByPlaceIDParams
+	results *IThingRepositoryMockGetAllByPlaceIDResults
+	Counter uint64
+}
+
+// IThingRepositoryMockGetAllByPlaceIDParams contains parameters of the IThingRepository.GetAllByPlaceID
+type IThingRepositoryMockGetAllByPlaceIDParams struct {
+	ctx     context.Context
+	placeID int
+}
+
+// IThingRepositoryMockGetAllByPlaceIDResults contains results of the IThingRepository.GetAllByPlaceID
+type IThingRepositoryMockGetAllByPlaceIDResults struct {
+	ta1 []models.Thing
+	err error
+}
+
+// Expect sets up expected params for IThingRepository.GetAllByPlaceID
+func (mmGetAllByPlaceID *mIThingRepositoryMockGetAllByPlaceID) Expect(ctx context.Context, placeID int) *mIThingRepositoryMockGetAllByPlaceID {
+	if mmGetAllByPlaceID.mock.funcGetAllByPlaceID != nil {
+		mmGetAllByPlaceID.mock.t.Fatalf("IThingRepositoryMock.GetAllByPlaceID mock is already set by Set")
+	}
+
+	if mmGetAllByPlaceID.defaultExpectation == nil {
+		mmGetAllByPlaceID.defaultExpectation = &IThingRepositoryMockGetAllByPlaceIDExpectation{}
+	}
+
+	mmGetAllByPlaceID.defaultExpectation.params = &IThingRepositoryMockGetAllByPlaceIDParams{ctx, placeID}
+	for _, e := range mmGetAllByPlaceID.expectations {
+		if minimock.Equal(e.params, mmGetAllByPlaceID.defaultExpectation.params) {
+			mmGetAllByPlaceID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetAllByPlaceID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetAllByPlaceID
+}
+
+// Inspect accepts an inspector function that has same arguments as the IThingRepository.GetAllByPlaceID
+func (mmGetAllByPlaceID *mIThingRepositoryMockGetAllByPlaceID) Inspect(f func(ctx context.Context, placeID int)) *mIThingRepositoryMockGetAllByPlaceID {
+	if mmGetAllByPlaceID.mock.inspectFuncGetAllByPlaceID != nil {
+		mmGetAllByPlaceID.mock.t.Fatalf("Inspect function is already set for IThingRepositoryMock.GetAllByPlaceID")
+	}
+
+	mmGetAllByPlaceID.mock.inspectFuncGetAllByPlaceID = f
+
+	return mmGetAllByPlaceID
+}
+
+// Return sets up results that will be returned by IThingRepository.GetAllByPlaceID
+func (mmGetAllByPlaceID *mIThingRepositoryMockGetAllByPlaceID) Return(ta1 []models.Thing, err error) *IThingRepositoryMock {
+	if mmGetAllByPlaceID.mock.funcGetAllByPlaceID != nil {
+		mmGetAllByPlaceID.mock.t.Fatalf("IThingRepositoryMock.GetAllByPlaceID mock is already set by Set")
+	}
+
+	if mmGetAllByPlaceID.defaultExpectation == nil {
+		mmGetAllByPlaceID.defaultExpectation = &IThingRepositoryMockGetAllByPlaceIDExpectation{mock: mmGetAllByPlaceID.mock}
+	}
+	mmGetAllByPlaceID.defaultExpectation.results = &IThingRepositoryMockGetAllByPlaceIDResults{ta1, err}
+	return mmGetAllByPlaceID.mock
+}
+
+// Set uses given function f to mock the IThingRepository.GetAllByPlaceID method
+func (mmGetAllByPlaceID *mIThingRepositoryMockGetAllByPlaceID) Set(f func(ctx context.Context, placeID int) (ta1 []models.Thing, err error)) *IThingRepositoryMock {
+	if mmGetAllByPlaceID.defaultExpectation != nil {
+		mmGetAllByPlaceID.mock.t.Fatalf("Default expectation is already set for the IThingRepository.GetAllByPlaceID method")
+	}
+
+	if len(mmGetAllByPlaceID.expectations) > 0 {
+		mmGetAllByPlaceID.mock.t.Fatalf("Some expectations are already set for the IThingRepository.GetAllByPlaceID method")
+	}
+
+	mmGetAllByPlaceID.mock.funcGetAllByPlaceID = f
+	return mmGetAllByPlaceID.mock
+}
+
+// When sets expectation for the IThingRepository.GetAllByPlaceID which will trigger the result defined by the following
+// Then helper
+func (mmGetAllByPlaceID *mIThingRepositoryMockGetAllByPlaceID) When(ctx context.Context, placeID int) *IThingRepositoryMockGetAllByPlaceIDExpectation {
+	if mmGetAllByPlaceID.mock.funcGetAllByPlaceID != nil {
+		mmGetAllByPlaceID.mock.t.Fatalf("IThingRepositoryMock.GetAllByPlaceID mock is already set by Set")
+	}
+
+	expectation := &IThingRepositoryMockGetAllByPlaceIDExpectation{
+		mock:   mmGetAllByPlaceID.mock,
+		params: &IThingRepositoryMockGetAllByPlaceIDParams{ctx, placeID},
+	}
+	mmGetAllByPlaceID.expectations = append(mmGetAllByPlaceID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IThingRepository.GetAllByPlaceID return parameters for the expectation previously defined by the When method
+func (e *IThingRepositoryMockGetAllByPlaceIDExpectation) Then(ta1 []models.Thing, err error) *IThingRepositoryMock {
+	e.results = &IThingRepositoryMockGetAllByPlaceIDResults{ta1, err}
+	return e.mock
+}
+
+// GetAllByPlaceID implements interfaces.IThingRepository
+func (mmGetAllByPlaceID *IThingRepositoryMock) GetAllByPlaceID(ctx context.Context, placeID int) (ta1 []models.Thing, err error) {
+	mm_atomic.AddUint64(&mmGetAllByPlaceID.beforeGetAllByPlaceIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetAllByPlaceID.afterGetAllByPlaceIDCounter, 1)
+
+	if mmGetAllByPlaceID.inspectFuncGetAllByPlaceID != nil {
+		mmGetAllByPlaceID.inspectFuncGetAllByPlaceID(ctx, placeID)
+	}
+
+	mm_params := &IThingRepositoryMockGetAllByPlaceIDParams{ctx, placeID}
+
+	// Record call args
+	mmGetAllByPlaceID.GetAllByPlaceIDMock.mutex.Lock()
+	mmGetAllByPlaceID.GetAllByPlaceIDMock.callArgs = append(mmGetAllByPlaceID.GetAllByPlaceIDMock.callArgs, mm_params)
+	mmGetAllByPlaceID.GetAllByPlaceIDMock.mutex.Unlock()
+
+	for _, e := range mmGetAllByPlaceID.GetAllByPlaceIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ta1, e.results.err
+		}
+	}
+
+	if mmGetAllByPlaceID.GetAllByPlaceIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetAllByPlaceID.GetAllByPlaceIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetAllByPlaceID.GetAllByPlaceIDMock.defaultExpectation.params
+		mm_got := IThingRepositoryMockGetAllByPlaceIDParams{ctx, placeID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetAllByPlaceID.t.Errorf("IThingRepositoryMock.GetAllByPlaceID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetAllByPlaceID.GetAllByPlaceIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetAllByPlaceID.t.Fatal("No results are set for the IThingRepositoryMock.GetAllByPlaceID")
+		}
+		return (*mm_results).ta1, (*mm_results).err
+	}
+	if mmGetAllByPlaceID.funcGetAllByPlaceID != nil {
+		return mmGetAllByPlaceID.funcGetAllByPlaceID(ctx, placeID)
+	}
+	mmGetAllByPlaceID.t.Fatalf("Unexpected call to IThingRepositoryMock.GetAllByPlaceID. %v %v", ctx, placeID)
+	return
+}
+
+// GetAllByPlaceIDAfterCounter returns a count of finished IThingRepositoryMock.GetAllByPlaceID invocations
+func (mmGetAllByPlaceID *IThingRepositoryMock) GetAllByPlaceIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetAllByPlaceID.afterGetAllByPlaceIDCounter)
+}
+
+// GetAllByPlaceIDBeforeCounter returns a count of IThingRepositoryMock.GetAllByPlaceID invocations
+func (mmGetAllByPlaceID *IThingRepositoryMock) GetAllByPlaceIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetAllByPlaceID.beforeGetAllByPlaceIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to IThingRepositoryMock.GetAllByPlaceID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetAllByPlaceID *mIThingRepositoryMockGetAllByPlaceID) Calls() []*IThingRepositoryMockGetAllByPlaceIDParams {
+	mmGetAllByPlaceID.mutex.RLock()
+
+	argCopy := make([]*IThingRepositoryMockGetAllByPlaceIDParams, len(mmGetAllByPlaceID.callArgs))
+	copy(argCopy, mmGetAllByPlaceID.callArgs)
+
+	mmGetAllByPlaceID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetAllByPlaceIDDone returns true if the count of the GetAllByPlaceID invocations corresponds
+// the number of defined expectations
+func (m *IThingRepositoryMock) MinimockGetAllByPlaceIDDone() bool {
+	for _, e := range m.GetAllByPlaceIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetAllByPlaceIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetAllByPlaceIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetAllByPlaceID != nil && mm_atomic.LoadUint64(&m.afterGetAllByPlaceIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetAllByPlaceIDInspect logs each unmet expectation
+func (m *IThingRepositoryMock) MinimockGetAllByPlaceIDInspect() {
+	for _, e := range m.GetAllByPlaceIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IThingRepositoryMock.GetAllByPlaceID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetAllByPlaceIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetAllByPlaceIDCounter) < 1 {
+		if m.GetAllByPlaceIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IThingRepositoryMock.GetAllByPlaceID")
+		} else {
+			m.t.Errorf("Expected call to IThingRepositoryMock.GetAllByPlaceID with params: %#v", *m.GetAllByPlaceIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetAllByPlaceID != nil && mm_atomic.LoadUint64(&m.afterGetAllByPlaceIDCounter) < 1 {
+		m.t.Error("Expected call to IThingRepositoryMock.GetAllByPlaceID")
+	}
+}
+
 type mIThingRepositoryMockGetByPlaceID struct {
 	mock               *IThingRepositoryMock
 	defaultExpectation *IThingRepositoryMockGetByPlaceIDExpectation
@@ -1624,6 +1850,8 @@ func (m *IThingRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetInspect()
 
+		m.MinimockGetAllByPlaceIDInspect()
+
 		m.MinimockGetByPlaceIDInspect()
 
 		m.MinimockUpdateInspect()
@@ -1655,6 +1883,7 @@ func (m *IThingRepositoryMock) minimockDone() bool {
 		m.MinimockCommitTxDone() &&
 		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
+		m.MinimockGetAllByPlaceIDDone() &&
 		m.MinimockGetByPlaceIDDone() &&
 		m.MinimockUpdateDone()
 }

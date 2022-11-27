@@ -9,6 +9,7 @@ import (
 
 type ServiceProvider struct {
 	env                  interfaces.IEnv
+	placeRepository      interfaces.IPlaceRepository
 	thingRepository      interfaces.IThingRepository
 	placeThingRepository interfaces.IPlaceThingRepository
 	tagRepository        interfaces.ITagRepository
@@ -30,6 +31,7 @@ func Init() (interfaces.IServiceProvider, error) {
 	}
 
 	// Init repositories
+	sp.placeRepository = repositories.InitPlaceRepository(db)
 	sp.thingRepository = repositories.InitThingRepository(db)
 	sp.placeThingRepository = repositories.InitPlaceThingRepository(db)
 	sp.tagRepository = repositories.InitTagRepository(db)
@@ -39,6 +41,10 @@ func Init() (interfaces.IServiceProvider, error) {
 
 func (sp *ServiceProvider) GetEnvService() interfaces.IEnv {
 	return sp.env
+}
+
+func (sp *ServiceProvider) GetPlaceRepository() interfaces.IPlaceRepository {
+	return sp.placeRepository
 }
 
 func (sp *ServiceProvider) GetThingRepository() interfaces.IThingRepository {
@@ -66,6 +72,8 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 			sp.placeThingRepository = s
 		case interfaces.IThingRepository:
 			sp.thingRepository = s
+		case interfaces.IPlaceRepository:
+			sp.placeRepository = s
 		}
 	}
 

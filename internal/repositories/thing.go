@@ -64,9 +64,10 @@ func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]model
 	var res []models.Thing
 
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at").
-		From(thingTableName + " t").
-		Join(placeThingTableName + " p ON p.thing_id = t.id").
+		From(thingTableName+" t").
+		Join(placeThingTableName+" p ON p.thing_id = t.id").
 		Where(sq.Eq{"p.place_id": placeID}).
+		OrderBy("t.created_at", "desc").
 		ToSql()
 
 	if err != nil {
@@ -74,6 +75,54 @@ func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]model
 	}
 
 	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.Thing{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.Title,
+			&resRow.Description,
+			&resRow.CreatedAt,
+			&resRow.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// GetAllByPlaceID return things by place ID and all child places
+func (r thingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error) {
+	var res []models.Thing
+
+	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
+		"SELECT id, parent_id " +
+		"FROM " + placeTableName + " " +
+		"WHERE id = ? " +
+		"UNION ALL " +
+		"SELECT p.id, p.parent_id " +
+		"FROM " + placeTableName + " p " +
+		"INNER JOIN cte ON p.parent_id = cte.id " +
+		")" +
+		"SELECT t.id, t.title, t.description, t.created_at, t.updated_at " +
+		"FROM cte, " + placeThingTableName + " pt, " + thingTableName + " t " +
+		"WHERE pt.place_id = cte.id and t.id = pt.thing_id " +
+		"ORDER BY t.created_at DESC"
+
+	rows, err := r.db.QueryContext(ctx, query, placeID)
 	if err != nil {
 		return nil, err
 	}
@@ -134,17 +183,12 @@ func (r thingRepository) Add(ctx context.Context, req models.AddThingRequest, tx
 }
 
 func (r thingRepository) Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error {
-	builder := sq.Update(thingTableName)
+	query, args, err := sq.Update(thingTableName).
+		Set("title", req.Title).
+		Set("description", req.Description).
+		Where(sq.Eq{"id": req.ID}).
+		ToSql()
 
-	if req.Title.Valid {
-		builder = builder.Set("title", req.Title.String)
-	}
-
-	if req.Description.Valid {
-		builder = builder.Set("description", req.Description.String)
-	}
-
-	query, args, err := builder.Where(sq.Eq{"id": req.ID}).ToSql()
 	if err != nil {
 		return err
 	}

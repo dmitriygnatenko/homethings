@@ -1,8 +1,6 @@
 package mappers
 
 import (
-	"database/sql"
-
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
@@ -15,17 +13,11 @@ func ConvertToAddThingRequestModel(req dto.AddThingRequest) models.AddThingReque
 }
 
 func ConvertToUpdateThingRequestModel(id int, req dto.UpdateThingRequest) models.UpdateThingRequest {
-	res := models.UpdateThingRequest{ID: id}
-
-	if req.Title != nil {
-		res.Title = sql.NullString{String: *req.Title, Valid: true}
+	return models.UpdateThingRequest{
+		ID:          id,
+		Title:       req.Title,
+		Description: req.Description,
 	}
-
-	if req.Description != nil {
-		res.Description = sql.NullString{String: *req.Description, Valid: true}
-	}
-
-	return res
 }
 
 func ConvertToAddPlaceThingRequestModel(thingID int, placeID int) models.AddPlaceThingRequest {

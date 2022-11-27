@@ -12,7 +12,6 @@ import (
 // @version 					1.0
 // @securityDefinitions.basic 	BasicAuth
 // @BasePath 					/api
-// @produce 					json
 func main() {
 	serviceProvider, err := sp.Init()
 	if err != nil {

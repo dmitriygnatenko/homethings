@@ -6,9 +6,6 @@ import "github.com/swaggo/swag"
 
 const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
-    "produces": [
-        "application/json"
-    ],
     "swagger": "2.0",
     "info": {
         "description": "{{escape .Description}}",
@@ -25,6 +22,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -50,6 +50,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.PlaceResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -60,6 +72,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -84,10 +99,22 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.PlaceResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -97,6 +124,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -129,6 +159,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.PlaceResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             },
@@ -138,13 +180,16 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Places"
                 ],
-                "summary": "Delete place",
+                "summary": "Delete place TODO",
                 "parameters": [
                     {
                         "type": "integer",
@@ -171,6 +216,9 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -193,6 +241,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.ThingsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -203,6 +263,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -232,10 +295,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ValidateErrorResponse"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -247,6 +313,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -271,10 +340,22 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.ThingResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -284,6 +365,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -316,6 +400,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.ThingResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             },
@@ -324,6 +420,9 @@ const docTemplate = `{
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -347,6 +446,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -355,10 +466,10 @@ const docTemplate = `{
     "definitions": {
         "dto.AddPlaceRequest": {
             "type": "object",
+            "required": [
+                "title"
+            ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "parent_id": {
                     "type": "integer"
                 },
@@ -387,6 +498,14 @@ const docTemplate = `{
         },
         "dto.EmptyResponse": {
             "type": "object"
+        },
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
         },
         "dto.PlaceResponse": {
             "type": "object",
@@ -441,6 +560,9 @@ const docTemplate = `{
         },
         "dto.UpdatePlaceRequest": {
             "type": "object",
+            "required": [
+                "title"
+            ],
             "properties": {
                 "parent_id": {
                     "type": "integer"
@@ -452,6 +574,10 @@ const docTemplate = `{
         },
         "dto.UpdateThingRequest": {
             "type": "object",
+            "required": [
+                "place_id",
+                "title"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -460,20 +586,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ValidateErrorResponse": {
-            "type": "object",
-            "properties": {
-                "field": {
-                    "type": "string"
-                },
-                "tag": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             }

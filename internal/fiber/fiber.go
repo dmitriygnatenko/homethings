@@ -1,7 +1,6 @@
 package fiber
 
 import (
-	apiV1 "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
 	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
 	_ "git.dmitriygnatenko.ru/dima/homethings/internal/docs" //nolint
@@ -70,13 +69,11 @@ func getCORSConfig(sp interfaces.IServiceProvider) cors.Config {
 }
 
 func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
-	r.Get("/v1/tags", apiV1.GetTagsHandler(sp))
-
-	r.Get("/v1/places/:id<int>", apiV1.GetPlaceHandler(sp))
+	r.Get("/v1/places/:id<int>", placeAPI.GetPlaceHandler(sp))
 	r.Get("/v1/places/:id<int>/things", placeAPI.GetPlaceThingsHandler(sp))
-	r.Post("/v1/places", apiV1.AddPlaceHandler(sp))
-	r.Put("/v1/places/:id<int>", apiV1.UpdatePlaceHandler(sp))
-	r.Delete("/v1/places/:id<int>", apiV1.DeletePlaceHandler(sp))
+	r.Post("/v1/places", placeAPI.AddPlaceHandler(sp))
+	r.Put("/v1/places/:id<int>", placeAPI.UpdatePlaceHandler(sp))
+	r.Delete("/v1/places/:id<int>", placeAPI.DeletePlaceHandler(sp))
 
 	r.Get("/v1/things/:id<int>", thingAPI.GetThingHandler(sp))
 	r.Post("/v1/things", thingAPI.AddThingHandler(sp))

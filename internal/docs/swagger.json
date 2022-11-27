@@ -1,7 +1,4 @@
 {
-    "produces": [
-        "application/json"
-    ],
     "swagger": "2.0",
     "info": {
         "title": "Homethings API",
@@ -16,6 +13,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -41,6 +41,18 @@
                         "schema": {
                             "$ref": "#/definitions/dto.PlaceResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -51,6 +63,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -75,10 +90,22 @@
                             "$ref": "#/definitions/dto.PlaceResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -88,6 +115,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -120,6 +150,18 @@
                         "schema": {
                             "$ref": "#/definitions/dto.PlaceResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             },
@@ -129,13 +171,16 @@
                         "BasicAuth": []
                     }
                 ],
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Places"
                 ],
-                "summary": "Delete place",
+                "summary": "Delete place TODO",
                 "parameters": [
                     {
                         "type": "integer",
@@ -162,6 +207,9 @@
                         "BasicAuth": []
                     }
                 ],
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -184,6 +232,18 @@
                         "schema": {
                             "$ref": "#/definitions/dto.ThingsResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -194,6 +254,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -223,10 +286,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ValidateErrorResponse"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -238,6 +304,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -262,10 +331,22 @@
                             "$ref": "#/definitions/dto.ThingResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -275,6 +356,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -307,6 +391,18 @@
                         "schema": {
                             "$ref": "#/definitions/dto.ThingResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             },
@@ -315,6 +411,9 @@
                     {
                         "BasicAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -338,6 +437,18 @@
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -346,10 +457,10 @@
     "definitions": {
         "dto.AddPlaceRequest": {
             "type": "object",
+            "required": [
+                "title"
+            ],
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "parent_id": {
                     "type": "integer"
                 },
@@ -378,6 +489,14 @@
         },
         "dto.EmptyResponse": {
             "type": "object"
+        },
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
         },
         "dto.PlaceResponse": {
             "type": "object",
@@ -432,6 +551,9 @@
         },
         "dto.UpdatePlaceRequest": {
             "type": "object",
+            "required": [
+                "title"
+            ],
             "properties": {
                 "parent_id": {
                     "type": "integer"
@@ -443,6 +565,10 @@
         },
         "dto.UpdateThingRequest": {
             "type": "object",
+            "required": [
+                "place_id",
+                "title"
+            ],
             "properties": {
                 "description": {
                     "type": "string"
@@ -451,20 +577,6 @@
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.ValidateErrorResponse": {
-            "type": "object",
-            "properties": {
-                "field": {
-                    "type": "string"
-                },
-                "tag": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             }

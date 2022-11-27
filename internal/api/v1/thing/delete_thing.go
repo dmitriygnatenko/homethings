@@ -13,9 +13,12 @@ import (
 // @Router 		/v1/things/{id} [delete]
 // @Param       id path int true "Thing ID"
 // @Success     200 {object} dto.EmptyResponse
+// @Failure     400 {object} dto.ErrorResponse
+// @Failure     500 {object} dto.ErrorResponse
 // @Summary     Delete thing
 // @Tags  		Things
 // @security 	BasicAuth
+// @Accept      json
 // @Produce     json
 func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {

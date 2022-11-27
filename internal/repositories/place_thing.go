@@ -25,6 +25,28 @@ func InitPlaceThingRepository(db *sql.DB) interfaces.IPlaceThingRepository {
 	return placeThingRepository{db: db}
 }
 
+func (r placeThingRepository) GetByThingID(ctx context.Context, thingID int) (*models.PlaceThing, error) {
+	query, args, err := sq.Select("place_id", "thing_id", "created_at", "updated_at").
+		From(placeThingTableName).
+		Where(sq.Eq{"thing_id": thingID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res models.PlaceThing
+
+	err = r.db.QueryRowContext(ctx, query, args...).
+		Scan(&res.PlaceID, &res.ThingID, &res.CreatedAt, &res.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (r placeThingRepository) Add(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) error {
 	query, args, err := sq.Insert(placeThingTableName).
 		Columns("place_id", "thing_id").

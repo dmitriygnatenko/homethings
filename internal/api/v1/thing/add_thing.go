@@ -13,10 +13,12 @@ import (
 // @Router 		/v1/things [post]
 // @Param       data body dto.AddThingRequest true "Request body"
 // @Success     200 {object} dto.ThingResponse
-// @Failure     400 {array} dto.ValidateErrorResponse
+// @Failure     400 {object} dto.ErrorResponse
+// @Failure     500 {object} dto.ErrorResponse
 // @Summary     Add thing
 // @Tags  		Things
 // @security 	BasicAuth
+// @Accept      json
 // @Produce     json
 func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {

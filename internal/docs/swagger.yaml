@@ -2,12 +2,12 @@ basePath: /api
 definitions:
   dto.AddPlaceRequest:
     properties:
-      id:
-        type: integer
       parent_id:
         type: integer
       title:
         type: string
+    required:
+    - title
     type: object
   dto.AddThingRequest:
     properties:
@@ -22,6 +22,11 @@ definitions:
     - title
     type: object
   dto.EmptyResponse:
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
     type: object
   dto.PlaceResponse:
     properties:
@@ -62,6 +67,8 @@ definitions:
         type: integer
       title:
         type: string
+    required:
+    - title
     type: object
   dto.UpdateThingRequest:
     properties:
@@ -71,15 +78,9 @@ definitions:
         type: integer
       title:
         type: string
-    type: object
-  dto.ValidateErrorResponse:
-    properties:
-      field:
-        type: string
-      tag:
-        type: string
-      value:
-        type: string
+    required:
+    - place_id
+    - title
     type: object
 info:
   contact: {}
@@ -88,6 +89,8 @@ info:
 paths:
   /v1/places:
     post:
+      consumes:
+      - application/json
       parameters:
       - description: Request body
         in: body
@@ -102,6 +105,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.PlaceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Add place
@@ -109,6 +120,8 @@ paths:
       - Places
   /v1/places/{id}:
     delete:
+      consumes:
+      - application/json
       parameters:
       - description: Place ID
         in: path
@@ -124,10 +137,12 @@ paths:
             $ref: '#/definitions/dto.EmptyResponse'
       security:
       - BasicAuth: []
-      summary: Delete place
+      summary: Delete place TODO
       tags:
       - Places
     get:
+      consumes:
+      - application/json
       parameters:
       - description: Place ID
         in: path
@@ -141,16 +156,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.PlaceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
             $ref: '#/definitions/dto.EmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Get one place by ID
       tags:
       - Places
     put:
+      consumes:
+      - application/json
       parameters:
       - description: Place ID
         in: path
@@ -170,6 +195,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.PlaceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Update place
@@ -177,6 +210,8 @@ paths:
       - Places
   /v1/places/{id}/things:
     get:
+      consumes:
+      - application/json
       parameters:
       - description: Place ID
         in: path
@@ -190,6 +225,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.ThingsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Get things by place ID
@@ -197,6 +240,8 @@ paths:
       - Places
   /v1/things:
     post:
+      consumes:
+      - application/json
       parameters:
       - description: Request body
         in: body
@@ -214,9 +259,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            items:
-              $ref: '#/definitions/dto.ValidateErrorResponse'
-            type: array
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Add thing
@@ -224,6 +271,8 @@ paths:
       - Things
   /v1/things/{id}:
     delete:
+      consumes:
+      - application/json
       parameters:
       - description: Thing ID
         in: path
@@ -237,12 +286,22 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Delete thing
       tags:
       - Things
     get:
+      consumes:
+      - application/json
       parameters:
       - description: Thing ID
         in: path
@@ -256,16 +315,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.ThingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
         "404":
           description: Not Found
           schema:
             $ref: '#/definitions/dto.EmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Get one thing by ID
       tags:
       - Things
     put:
+      consumes:
+      - application/json
       parameters:
       - description: Thing ID
         in: path
@@ -285,13 +354,19 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.ThingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Update thing
       tags:
       - Things
-produces:
-- application/json
 securityDefinitions:
   BasicAuth:
     type: basic

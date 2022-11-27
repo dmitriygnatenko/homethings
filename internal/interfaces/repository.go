@@ -10,6 +10,7 @@ import (
 type IThingRepository interface {
 	Get(ctx context.Context, thingID int) (*models.Thing, error)
 	GetByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error)
+	GetAllByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error)
 	Add(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) (int, error)
 	Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error
 	Delete(ctx context.Context, thingID int, tx *sql.Tx) error
@@ -17,7 +18,14 @@ type IThingRepository interface {
 	CommitTx(tx *sql.Tx) error
 }
 
+type IPlaceRepository interface {
+	Get(ctx context.Context, placeID int) (*models.Place, error)
+	Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error)
+	Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error
+}
+
 type IPlaceThingRepository interface {
+	GetByThingID(ctx context.Context, thingID int) (*models.PlaceThing, error)
 	Add(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) error
 	UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) error
 	DeleteThing(ctx context.Context, thingID int, tx *sql.Tx) error

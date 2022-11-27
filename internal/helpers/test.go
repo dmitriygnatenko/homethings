@@ -12,6 +12,16 @@ func ConvertBodyToString(body io.ReadCloser) string {
 	return buf.String()
 }
 
+func ConvertDTOToIOReader(data interface{}) io.Reader {
+	var res io.Reader
+	if data != nil {
+		bytesData, _ := json.Marshal(data)
+		res = bytes.NewReader(bytesData)
+	}
+
+	return res
+}
+
 func MarshalResponse(data interface{}) string {
 	res, _ := json.Marshal(data)
 	return string(res)

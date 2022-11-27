@@ -10,9 +10,12 @@ import (
 // @Router 		/v1/places/{id}/things [get]
 // @Param       id path int true "Place ID"
 // @Success     200 {object} dto.ThingsResponse
+// @Failure     400 {object} dto.ErrorResponse
+// @Failure     500 {object} dto.ErrorResponse
 // @Summary     Get things by place ID
 // @Tags  		Places
 // @security 	BasicAuth
+// @Accept      json
 // @Produce     json
 func GetPlaceThingsHandler(sp interfaces.IServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
@@ -22,7 +25,7 @@ func GetPlaceThingsHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
-		res, err := sp.GetThingRepository().GetByPlaceID(ctx, id)
+		res, err := sp.GetThingRepository().GetAllByPlaceID(ctx, id)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}

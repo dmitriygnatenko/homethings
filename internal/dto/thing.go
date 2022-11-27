@@ -2,14 +2,14 @@ package dto
 
 type AddThingRequest struct {
 	PlaceID     int    `json:"place_id" validate:"required"`
-	Title       string `json:"title"  validate:"required"`
+	Title       string `json:"title" validate:"required"`
 	Description string `json:"description"`
 }
 
 type UpdateThingRequest struct {
-	PlaceID     *int    `json:"place_id"`
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
+	PlaceID     int    `json:"place_id" validate:"required"`
+	Title       string `json:"title" validate:"required"`
+	Description string `json:"description"`
 }
 
 type ThingResponse struct {

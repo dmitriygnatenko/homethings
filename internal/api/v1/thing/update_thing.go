@@ -6,6 +6,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,9 +14,12 @@ import (
 // @Param       id path int true "Thing ID"
 // @Param       data body dto.UpdateThingRequest true "Request body"
 // @Success     200 {object} dto.ThingResponse
+// @Failure     400 {object} dto.ErrorResponse
+// @Failure     500 {object} dto.ErrorResponse
 // @Summary     Update thing
 // @Tags  		Things
 // @security 	BasicAuth
+// @Accept      json
 // @Produce     json
 func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
@@ -30,20 +34,35 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
+		var validate = validator.New()
+		if err = validate.Struct(req); err != nil {
+			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
+		}
+
+		thing, err := sp.GetThingRepository().Get(ctx, id)
+		if err != nil {
+			return factory.CreateBadRequestResponse(fctx, err)
+		}
+
+		placeThing, err := sp.GetPlaceThingRepository().GetByThingID(ctx, id)
+		if err != nil {
+			return factory.CreateBadRequestResponse(fctx, err)
+		}
+
 		tx, err := sp.GetThingRepository().BeginTx(ctx, v1.DefaultTxLevel)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		if req.Title != nil || req.Description != nil {
+		if req.Title != thing.Title || req.Description != req.Description {
 			err = sp.GetThingRepository().Update(ctx, mappers.ConvertToUpdateThingRequestModel(id, req), tx)
 			if err != nil {
 				return factory.CreateInternalErrorResponse(fctx, err)
 			}
 		}
 
-		if req.PlaceID != nil {
-			err = sp.GetPlaceThingRepository().UpdatePlace(ctx, mappers.ConvertToUpdatePlaceThingRequestModel(id, *req.PlaceID), tx)
+		if placeThing.PlaceID != req.PlaceID {
+			err = sp.GetPlaceThingRepository().UpdatePlace(ctx, mappers.ConvertToUpdatePlaceThingRequestModel(id, req.PlaceID), tx)
 			if err != nil {
 				return factory.CreateInternalErrorResponse(fctx, err)
 			}

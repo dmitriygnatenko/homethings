@@ -1,7 +1,5 @@
 package models
 
-import "database/sql"
-
 type Thing struct {
 	ID          int
 	Title       string
@@ -17,8 +15,8 @@ type AddThingRequest struct {
 
 type UpdateThingRequest struct {
 	ID          int
-	Title       sql.NullString
-	Description sql.NullString
+	Title       string
+	Description string
 }
 
 type AddPlaceThingRequest struct {

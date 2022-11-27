@@ -2,6 +2,7 @@ package place
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http/httptest"
 	"strconv"
@@ -20,8 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_GetPlaceThingsHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.IThingRepository
+func Test_GetPlaceHandler(t *testing.T) {
+	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceRepository
 
 	type req struct {
 		method string
@@ -31,47 +32,28 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 	var (
 		mc        = minimock.NewController(t)
 		placeID   = gofakeit.Number(1, 1000)
+		parentID  = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/places/" + strconv.Itoa(placeID) + "/things",
+			route:  "/v1/places/" + strconv.Itoa(placeID),
 		}
 
-		thingRepoRes = []models.Thing{
-			{
-				ID:          gofakeit.Number(1, 1000),
-				Title:       gofakeit.Phrase(),
-				Description: gofakeit.Phrase(),
-				CreatedAt:   gofakeit.Date().String(),
-				UpdatedAt:   gofakeit.Date().String(),
-			},
-			{
-				ID:          gofakeit.Number(1, 1000),
-				Title:       gofakeit.Phrase(),
-				Description: gofakeit.Phrase(),
-				CreatedAt:   gofakeit.Date().String(),
-				UpdatedAt:   gofakeit.Date().String(),
-			},
+		repoRes = models.Place{
+			ID:        placeID,
+			ParentID:  sql.NullInt64{Int64: int64(parentID), Valid: true},
+			Title:     gofakeit.Phrase(),
+			CreatedAt: gofakeit.Date().String(),
+			UpdatedAt: gofakeit.Date().String(),
 		}
 
-		expectedRes = dto.ThingsResponse{
-			Things: []dto.ThingResponse{
-				{
-					ID:          thingRepoRes[0].ID,
-					Title:       thingRepoRes[0].Title,
-					Description: thingRepoRes[0].Description,
-					CreatedAt:   thingRepoRes[0].CreatedAt,
-					UpdatedAt:   thingRepoRes[0].UpdatedAt,
-				},
-				{
-					ID:          thingRepoRes[1].ID,
-					Title:       thingRepoRes[1].Title,
-					Description: thingRepoRes[1].Description,
-					CreatedAt:   thingRepoRes[1].CreatedAt,
-					UpdatedAt:   thingRepoRes[1].UpdatedAt,
-				},
-			},
+		expectedRes = dto.PlaceResponse{
+			ID:        placeID,
+			Title:     repoRes.Title,
+			ParentID:  &parentID,
+			CreatedAt: repoRes.CreatedAt,
+			UpdatedAt: repoRes.UpdatedAt,
 		}
 	)
 
@@ -80,20 +62,29 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		thingRepoMock thingRepoMockFunc
+		placeRepoMock placeRepoMockFunc
 	}{
 		{
 			name:    "positive case",
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
-
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
+				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
-				}).Return(thingRepoRes, nil)
-
+				}).Return(&repoRes, nil)
+				return mock
+			},
+		},
+		{
+			name:    "negative case - not found",
+			req:     correctReq,
+			resCode: fiber.StatusNotFound,
+			resBody: dto.EmptyResponse{},
+			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
+				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+				mock.GetMock.Return(nil, sql.ErrNoRows)
 				return mock
 			},
 		},
@@ -102,9 +93,9 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(nil, testError)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
+				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+				mock.GetMock.Return(nil, testError)
 				return mock
 			},
 		},
@@ -112,12 +103,12 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			name: "negative case - bad request",
 			req: req{
 				method: fiber.MethodGet,
-				route:  "/v1/places/" + gofakeit.Word() + "/things",
+				route:  "/v1/places/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
 			resBody: nil,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
+				return repoMocks.NewIPlaceRepositoryMock(mc)
 			},
 		},
 	}
@@ -125,9 +116,9 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.thingRepoMock(mc))
+			serviceProvider := sp.InitMock(tt.placeRepoMock(mc))
 
-			fiberApp.Get("/v1/places/:id/things", GetPlaceThingsHandler(serviceProvider))
+			fiberApp.Get("/v1/places/:id", GetPlaceHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), v1.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

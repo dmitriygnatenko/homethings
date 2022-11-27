@@ -1,12 +1,9 @@
 package thing
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -29,9 +26,10 @@ func Test_UpdateThingHandler(t *testing.T) {
 	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceThingRepository
 
 	type req struct {
-		method string
-		route  string
-		body   *dto.UpdateThingRequest
+		method      string
+		route       string
+		body        *dto.UpdateThingRequest
+		contentType string
 	}
 
 	var (
@@ -46,10 +44,26 @@ func Test_UpdateThingHandler(t *testing.T) {
 			method: fiber.MethodPut,
 			route:  "/v1/things/" + strconv.Itoa(thingID),
 			body: &dto.UpdateThingRequest{
-				PlaceID:     &placeID,
-				Title:       &title,
-				Description: &description,
+				PlaceID:     placeID,
+				Title:       title,
+				Description: description,
 			},
+			contentType: fiber.MIMEApplicationJSON,
+		}
+
+		repoResBeforeUpdate = models.Thing{
+			ID:          thingID,
+			Title:       gofakeit.Phrase(),
+			Description: gofakeit.Phrase(),
+			CreatedAt:   gofakeit.Date().String(),
+			UpdatedAt:   gofakeit.Date().String(),
+		}
+
+		placeThingRepoResBeforeUpdate = models.PlaceThing{
+			PlaceID:   gofakeit.Number(1, 1000),
+			ThingID:   thingID,
+			CreatedAt: gofakeit.Date().String(),
+			UpdatedAt: gofakeit.Date().String(),
 		}
 
 		repoRes = models.Thing{
@@ -68,6 +82,8 @@ func Test_UpdateThingHandler(t *testing.T) {
 			UpdatedAt:   repoRes.UpdatedAt,
 		}
 	)
+
+	_ = expectedRes
 
 	tests := []struct {
 		name               string
@@ -88,20 +104,28 @@ func Test_UpdateThingHandler(t *testing.T) {
 				mock.BeginTxMock.Return(nil, nil)
 
 				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) {
-					assert.Equal(mc, title, req.Title.String)
-					assert.Equal(mc, description, req.Description.String)
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
 				}).Return(nil)
 
 				mock.CommitTxMock.Return(nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Set(func(ctx context.Context, id int) (*models.Thing, error) {
 					assert.Equal(mc, thingID, id)
-				}).Return(&repoRes, nil)
+					if mock.GetAfterCounter() == 0 {
+						return &repoResBeforeUpdate, nil
+					}
+					return &repoRes, nil
+				})
 
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&placeThingRepoResBeforeUpdate, nil)
 
 				mock.UpdatePlaceMock.Inspect(func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) {
 					assert.Equal(mc, placeID, req.PlaceID)
@@ -140,16 +164,95 @@ func Test_UpdateThingHandler(t *testing.T) {
 			},
 		},
 		{
+			name: "negative case - request without place_id",
+			req: req{
+				method:      fiber.MethodPut,
+				route:       "/v1/things/" + strconv.Itoa(thingID),
+				contentType: fiber.MIMEApplicationJSON,
+				body: &dto.UpdateThingRequest{
+					Title: title,
+				},
+			},
+			resCode: fiber.StatusBadRequest,
+			resBody: []*dto.ValidateErrorResponse{
+				{
+					Field: "UpdateThingRequest.PlaceID",
+					Tag:   "required",
+				},
+			},
+			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
+				return repoMocks.NewIThingRepositoryMock(mc)
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
+				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			},
+		},
+		{
+			name: "negative case - request without title",
+			req: req{
+				method:      fiber.MethodPut,
+				route:       "/v1/things/" + strconv.Itoa(thingID),
+				contentType: fiber.MIMEApplicationJSON,
+				body: &dto.UpdateThingRequest{
+					PlaceID: placeID,
+				},
+			},
+			resCode: fiber.StatusBadRequest,
+			resBody: []*dto.ValidateErrorResponse{
+				{
+					Field: "UpdateThingRequest.Title",
+					Tag:   "required",
+				},
+			},
+			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
+				return repoMocks.NewIThingRepositoryMock(mc)
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
+				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - repository error (get thing)",
+			req:     correctReq,
+			resCode: fiber.StatusBadRequest,
+			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
+				mock := repoMocks.NewIThingRepositoryMock(mc)
+				mock.GetMock.Return(nil, sql.ErrNoRows)
+				return mock
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
+				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - repository error (get place thing)",
+			req:     correctReq,
+			resCode: fiber.StatusBadRequest,
+			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
+				mock := repoMocks.NewIThingRepositoryMock(mc)
+				mock.GetMock.Return(&repoResBeforeUpdate, nil)
+				return mock
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
+				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock.GetByThingIDMock.Return(nil, sql.ErrNoRows)
+				return mock
+			},
+		},
+		{
 			name:    "negative case - repository error (begin tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
+				mock.GetMock.Return(&repoResBeforeUpdate, nil)
 				mock.BeginTxMock.Return(nil, testError)
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
+				return mock
 			},
 		},
 		{
@@ -158,12 +261,15 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
+				mock.GetMock.Return(&repoResBeforeUpdate, nil)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.UpdateMock.Return(testError)
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
+				return mock
 			},
 		},
 		{
@@ -172,12 +278,14 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
+				mock.GetMock.Return(&repoResBeforeUpdate, nil)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.UpdateMock.Return(nil)
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
 				mock.UpdatePlaceMock.Return(testError)
 				return mock
 			},
@@ -188,6 +296,7 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
+				mock.GetMock.Return(&repoResBeforeUpdate, nil)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.UpdateMock.Return(nil)
 				mock.CommitTxMock.Return(testError)
@@ -195,6 +304,7 @@ func Test_UpdateThingHandler(t *testing.T) {
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
 				mock.UpdatePlaceMock.Return(nil)
 				return mock
 			},
@@ -205,14 +315,23 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
+
+				mock.GetMock.Set(func(ctx context.Context, thingID int) (*models.Thing, error) {
+					if mock.GetAfterCounter() == 0 {
+						return &repoResBeforeUpdate, nil
+					}
+					return nil, sql.ErrNoRows
+				})
+
 				mock.BeginTxMock.Return(nil, nil)
 				mock.UpdateMock.Return(nil)
 				mock.CommitTxMock.Return(nil)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
 				mock.UpdatePlaceMock.Return(nil)
 				return mock
 			},
@@ -226,14 +345,8 @@ func Test_UpdateThingHandler(t *testing.T) {
 
 			fiberApp.Put("/v1/things/:id", UpdateThingHandler(serviceProvider))
 
-			var reqBody io.Reader
-			if tt.req.body != nil {
-				b, _ := json.Marshal(tt.req.body)
-				reqBody = bytes.NewReader(b)
-			}
-
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, reqBody)
-			fiberReq.Header.Add(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDTOToIOReader(tt.req.body))
+			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
 			fiberRes, _ := fiberApp.Test(fiberReq, v1.DefaultTestTimeOut)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

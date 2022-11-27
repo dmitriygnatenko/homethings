@@ -1,12 +1,9 @@
 package thing
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http/httptest"
 	"testing"
 
@@ -28,9 +25,10 @@ func Test_AddThingHandler(t *testing.T) {
 	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceThingRepository
 
 	type req struct {
-		method string
-		route  string
-		body   *dto.AddThingRequest
+		method      string
+		route       string
+		body        *dto.AddThingRequest
+		contentType string
 	}
 
 	var (
@@ -49,6 +47,7 @@ func Test_AddThingHandler(t *testing.T) {
 				Title:       title,
 				Description: description,
 			},
+			contentType: fiber.MIMEApplicationJSON,
 		}
 
 		repoRes = models.Thing{
@@ -127,8 +126,9 @@ func Test_AddThingHandler(t *testing.T) {
 		{
 			name: "negative case - request without place_id",
 			req: req{
-				method: fiber.MethodPost,
-				route:  "/v1/things",
+				method:      fiber.MethodPost,
+				route:       "/v1/things",
+				contentType: fiber.MIMEApplicationJSON,
 				body: &dto.AddThingRequest{
 					Title:       title,
 					Description: description,
@@ -151,8 +151,9 @@ func Test_AddThingHandler(t *testing.T) {
 		{
 			name: "negative case - request without title",
 			req: req{
-				method: fiber.MethodPost,
-				route:  "/v1/things",
+				method:      fiber.MethodPost,
+				route:       "/v1/things",
+				contentType: fiber.MIMEApplicationJSON,
 				body: &dto.AddThingRequest{
 					PlaceID:     placeID,
 					Description: description,
@@ -263,14 +264,8 @@ func Test_AddThingHandler(t *testing.T) {
 
 			fiberApp.Post("/v1/things", AddThingHandler(serviceProvider))
 
-			var reqBody io.Reader
-			if tt.req.body != nil {
-				b, _ := json.Marshal(tt.req.body)
-				reqBody = bytes.NewReader(b)
-			}
-
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, reqBody)
-			fiberReq.Header.Add(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDTOToIOReader(tt.req.body))
+			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
 			fiberRes, _ := fiberApp.Test(fiberReq, v1.DefaultTestTimeOut)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
