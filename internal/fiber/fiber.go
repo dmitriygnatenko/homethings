@@ -2,6 +2,8 @@ package fiber
 
 import (
 	apiV1 "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
+	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
 	_ "git.dmitriygnatenko.ru/dima/homethings/internal/docs" //nolint
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
@@ -71,13 +73,13 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Get("/v1/tags", apiV1.GetTagsHandler(sp))
 
 	r.Get("/v1/places/:id<int>", apiV1.GetPlaceHandler(sp))
-	r.Get("/v1/places/:id<int>/things", apiV1.GetPlaceThingsHandler(sp))
+	r.Get("/v1/places/:id<int>/things", placeAPI.GetPlaceThingsHandler(sp))
 	r.Post("/v1/places", apiV1.AddPlaceHandler(sp))
 	r.Put("/v1/places/:id<int>", apiV1.UpdatePlaceHandler(sp))
 	r.Delete("/v1/places/:id<int>", apiV1.DeletePlaceHandler(sp))
 
-	r.Get("/v1/things/:id<int>", apiV1.GetThingHandler(sp))
-	r.Post("/v1/things", apiV1.AddThingHandler(sp))
-	r.Put("/v1/things/:id<int>", apiV1.UpdateThingHandler(sp))
-	r.Delete("/v1/things/:id<int>", apiV1.DeleteThingHandler(sp))
+	r.Get("/v1/things/:id<int>", thingAPI.GetThingHandler(sp))
+	r.Post("/v1/things", thingAPI.AddThingHandler(sp))
+	r.Put("/v1/things/:id<int>", thingAPI.UpdateThingHandler(sp))
+	r.Delete("/v1/things/:id<int>", thingAPI.DeleteThingHandler(sp))
 }

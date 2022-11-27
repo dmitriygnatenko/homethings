@@ -1,16 +1,20 @@
-package v1
+package thing
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
@@ -19,19 +23,49 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_DeleteThingHandler(t *testing.T) {
+func Test_AddThingHandler(t *testing.T) {
 	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.IThingRepository
 	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceThingRepository
 
 	type req struct {
 		method string
 		route  string
+		body   *dto.AddThingRequest
 	}
 
 	var (
-		mc        = minimock.NewController(t)
-		thingID   = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		mc          = minimock.NewController(t)
+		placeID     = gofakeit.Number(1, 1000)
+		thingID     = gofakeit.Number(1, 1000)
+		title       = gofakeit.Phrase()
+		description = gofakeit.Phrase()
+		testError   = errors.New(gofakeit.Phrase())
+
+		correctReq = req{
+			method: fiber.MethodPost,
+			route:  "/v1/things",
+			body: &dto.AddThingRequest{
+				PlaceID:     placeID,
+				Title:       title,
+				Description: description,
+			},
+		}
+
+		repoRes = models.Thing{
+			ID:          thingID,
+			Title:       title,
+			Description: description,
+			CreatedAt:   gofakeit.Date().String(),
+			UpdatedAt:   gofakeit.Date().String(),
+		}
+
+		expectedRes = dto.ThingResponse{
+			ID:          thingID,
+			Title:       title,
+			Description: description,
+			CreatedAt:   repoRes.CreatedAt,
+			UpdatedAt:   repoRes.UpdatedAt,
+		}
 	)
 
 	tests := []struct {
@@ -43,65 +77,108 @@ func Test_DeleteThingHandler(t *testing.T) {
 		placeThingRepoMock placeThingRepoMockFunc
 	}{
 		{
-			name: "negative case - bad request",
+			name:    "positive case",
+			req:     correctReq,
+			resCode: fiber.StatusOK,
+			resBody: expectedRes,
+			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
+				mock := repoMocks.NewIThingRepositoryMock(mc)
+
+				mock.BeginTxMock.Return(nil, nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(thingID, nil)
+
+				mock.CommitTxMock.Return(nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&repoRes, nil)
+
+				return mock
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
+				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, thingID, req.ThingID)
+					assert.Equal(mc, placeID, req.PlaceID)
+				}).Return(nil)
+
+				return mock
+			},
+		},
+		{
+			name: "negative case - body parse error",
 			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + gofakeit.Word(),
+				method: fiber.MethodPost,
+				route:  "/v1/things",
 			},
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
-				return mock
+				return repoMocks.NewIThingRepositoryMock(mc)
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				return repoMocks.NewIPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
-			name: "negative case - bad request (thing not found)",
+			name: "negative case - request without place_id",
 			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
+				method: fiber.MethodPost,
+				route:  "/v1/things",
+				body: &dto.AddThingRequest{
+					Title:       title,
+					Description: description,
+				},
 			},
 			resCode: fiber.StatusBadRequest,
+			resBody: []*dto.ValidateErrorResponse{
+				{
+					Field: "AddThingRequest.PlaceID",
+					Tag:   "required",
+				},
+			},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
-				return mock
+				return repoMocks.NewIThingRepositoryMock(mc)
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				return repoMocks.NewIPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
-			name: "negative case - repository error (get thing)",
+			name: "negative case - request without title",
 			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
+				method: fiber.MethodPost,
+				route:  "/v1/things",
+				body: &dto.AddThingRequest{
+					PlaceID:     placeID,
+					Description: description,
+				},
 			},
+			resCode: fiber.StatusBadRequest,
+			resBody: []*dto.ValidateErrorResponse{
+				{
+					Field: "AddThingRequest.Title",
+					Tag:   "required",
+				},
+			},
+			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
+				return repoMocks.NewIThingRepositoryMock(mc)
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
+				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - repository error (begin tx)",
+			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, testError)
-				return mock
-			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
-			},
-		},
-		{
-			name: "negative case - repository error (begin tx)",
-			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
-			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
 				mock.BeginTxMock.Return(nil, testError)
 				return mock
 			},
@@ -110,101 +187,70 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 		},
 		{
-			name: "negative case - repository error (delete place thing)",
-			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
+			name:    "negative case - repository error (add thing)",
+			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
 				mock.BeginTxMock.Return(nil, nil)
+				mock.AddMock.Return(0, testError)
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(testError)
-				return mock
+				return repoMocks.NewIPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
-			name: "negative case - repository error (delete thing)",
-			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
+			name:    "negative case - repository error (add place thing)",
+			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(testError)
+				mock.AddMock.Return(thingID, nil)
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(nil)
+				mock.AddMock.Return(testError)
 				return mock
 			},
 		},
 		{
-			name: "negative case - commit tx error",
-			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
+			name:    "negative case - repository error (commit tx)",
+			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(nil)
-
-				return mock.CommitTxMock.Return(testError)
+				mock.AddMock.Return(thingID, nil)
+				mock.CommitTxMock.Return(testError)
+				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(nil)
+				mock.AddMock.Return(nil)
 				return mock
 			},
 		},
 		{
-			name: "positive case",
-			req: req{
-				method: fiber.MethodDelete,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
-			resCode: fiber.StatusOK,
-			resBody: dto.EmptyResponse{},
+			name:    "negative case - repository error (get thing)",
+			req:     correctReq,
+			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(nil)
+				mock.AddMock.Return(thingID, nil)
 				mock.CommitTxMock.Return(nil)
+				mock.GetMock.Return(nil, sql.ErrNoRows)
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
 				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
-					assert.Equal(mc, thingID, id)
-				}).Return(nil)
+				mock.AddMock.Return(nil)
 				return mock
 			},
 		},
@@ -215,9 +261,18 @@ func Test_DeleteThingHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.thingRepoMock(mc), tt.placeThingRepoMock(mc))
 
-			fiberApp.Delete("/v1/things/:id", DeleteThingHandler(serviceProvider))
+			fiberApp.Post("/v1/things", AddThingHandler(serviceProvider))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil))
+			var reqBody io.Reader
+			if tt.req.body != nil {
+				b, _ := json.Marshal(tt.req.body)
+				reqBody = bytes.NewReader(b)
+			}
+
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, reqBody)
+			fiberReq.Header.Add(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
+			fiberRes, _ := fiberApp.Test(fiberReq, v1.DefaultTestTimeOut)
+
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
 				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))

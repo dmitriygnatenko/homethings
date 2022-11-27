@@ -1,8 +1,9 @@
-package v1
+package thing
 
 import (
 	"database/sql"
 
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -32,7 +33,7 @@ func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		tx, err := sp.GetThingRepository().BeginTx(ctx, defaultTxLevel)
+		tx, err := sp.GetThingRepository().BeginTx(ctx, v1.DefaultTxLevel)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}

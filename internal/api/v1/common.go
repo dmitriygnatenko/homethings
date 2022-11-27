@@ -3,5 +3,6 @@ package v1
 import "database/sql"
 
 const (
-	defaultTxLevel = sql.LevelReadCommitted
+	DefaultTxLevel     = sql.LevelReadCommitted
+	DefaultTestTimeOut = -1
 )

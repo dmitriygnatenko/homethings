@@ -1,4 +1,4 @@
-package v1
+package place
 
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"

@@ -1,4 +1,4 @@
-package v1
+package thing
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -32,6 +33,11 @@ func Test_GetThingHandler(t *testing.T) {
 		mc        = minimock.NewController(t)
 		thingID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
+
+		correctReq = req{
+			method: fiber.MethodGet,
+			route:  "/v1/things/" + strconv.Itoa(thingID),
+		}
 
 		thingRepoRes = models.Thing{
 			ID:          thingID,
@@ -58,11 +64,8 @@ func Test_GetThingHandler(t *testing.T) {
 		thingRepoMock thingRepoMockFunc
 	}{
 		{
-			name: "positive case",
-			req: req{
-				method: fiber.MethodGet,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
+			name:    "positive case",
+			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
@@ -76,11 +79,8 @@ func Test_GetThingHandler(t *testing.T) {
 			},
 		},
 		{
-			name: "negative case - not found",
-			req: req{
-				method: fiber.MethodGet,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
+			name:    "negative case - not found",
+			req:     correctReq,
 			resCode: fiber.StatusNotFound,
 			resBody: dto.EmptyResponse{},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
@@ -90,11 +90,8 @@ func Test_GetThingHandler(t *testing.T) {
 			},
 		},
 		{
-			name: "negative case - repository error",
-			req: req{
-				method: fiber.MethodGet,
-				route:  "/v1/things/" + strconv.Itoa(thingID),
-			},
+			name:    "negative case - repository error",
+			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
@@ -124,7 +121,7 @@ func Test_GetThingHandler(t *testing.T) {
 
 			fiberApp.Get("/v1/things/:id", GetThingHandler(serviceProvider))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil))
+			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), v1.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
 				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))

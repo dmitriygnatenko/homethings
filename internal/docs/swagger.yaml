@@ -23,15 +23,6 @@ definitions:
     type: object
   dto.EmptyResponse:
     type: object
-  dto.ErrorResponse:
-    properties:
-      field:
-        type: string
-      tag:
-        type: string
-      value:
-        type: string
-    type: object
   dto.PlaceResponse:
     properties:
       created_at:
@@ -58,6 +49,13 @@ definitions:
       updated_at:
         type: string
     type: object
+  dto.ThingsResponse:
+    properties:
+      things:
+        items:
+          $ref: '#/definitions/dto.ThingResponse'
+        type: array
+    type: object
   dto.UpdatePlaceRequest:
     properties:
       parent_id:
@@ -72,6 +70,15 @@ definitions:
       place_id:
         type: integer
       title:
+        type: string
+    type: object
+  dto.ValidateErrorResponse:
+    properties:
+      field:
+        type: string
+      tag:
+        type: string
+      value:
         type: string
     type: object
 info:
@@ -182,9 +189,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.ThingResponse'
-            type: array
+            $ref: '#/definitions/dto.ThingsResponse'
       security:
       - BasicAuth: []
       summary: Get things by place ID
@@ -210,7 +215,7 @@ paths:
           description: Bad Request
           schema:
             items:
-              $ref: '#/definitions/dto.ErrorResponse'
+              $ref: '#/definitions/dto.ValidateErrorResponse'
             type: array
       security:
       - BasicAuth: []

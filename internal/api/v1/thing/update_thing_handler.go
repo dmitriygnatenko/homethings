@@ -1,6 +1,7 @@
-package v1
+package thing
 
 import (
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -26,10 +27,10 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		req := dto.UpdateThingRequest{}
 		if err = fctx.BodyParser(&req); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
-		tx, err := sp.GetThingRepository().BeginTx(ctx, defaultTxLevel)
+		tx, err := sp.GetThingRepository().BeginTx(ctx, v1.DefaultTxLevel)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
@@ -48,7 +49,7 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			}
 		}
 
-		if err = tx.Commit(); err != nil {
+		if err = sp.GetThingRepository().CommitTx(tx); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 

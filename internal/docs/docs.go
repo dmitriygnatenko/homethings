@@ -191,10 +191,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.ThingResponse"
-                            }
+                            "$ref": "#/definitions/dto.ThingsResponse"
                         }
                     }
                 }
@@ -237,7 +234,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.ErrorResponse"
+                                "$ref": "#/definitions/dto.ValidateErrorResponse"
                             }
                         }
                     }
@@ -391,20 +388,6 @@ const docTemplate = `{
         "dto.EmptyResponse": {
             "type": "object"
         },
-        "dto.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "field": {
-                    "type": "string"
-                },
-                "tag": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.PlaceResponse": {
             "type": "object",
             "properties": {
@@ -445,6 +428,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ThingsResponse": {
+            "type": "object",
+            "properties": {
+                "things": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ThingResponse"
+                    }
+                }
+            }
+        },
         "dto.UpdatePlaceRequest": {
             "type": "object",
             "properties": {
@@ -466,6 +460,20 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ValidateErrorResponse": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }
