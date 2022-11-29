@@ -66,6 +66,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/places/tree": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Places"
+                ],
+                "summary": "Get places tree",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PlaceTreeResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/places/{id}": {
             "get": {
                 "security": [
@@ -524,6 +557,31 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.PlaceTree": {
+            "type": "object",
+            "properties": {
+                "nested": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PlaceTree"
+                    }
+                },
+                "place": {
+                    "$ref": "#/definitions/dto.PlaceResponse"
+                }
+            }
+        },
+        "dto.PlaceTreeResponse": {
+            "type": "object",
+            "properties": {
+                "places": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PlaceTree"
+                    }
                 }
             }
         },

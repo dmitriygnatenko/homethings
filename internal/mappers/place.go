@@ -2,6 +2,7 @@ package mappers
 
 import (
 	"database/sql"
+	"sort"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
@@ -46,4 +47,53 @@ func ConvertToUpdatePlaceRequestModel(id int, req dto.UpdatePlaceRequest) models
 	}
 
 	return res
+}
+
+func ConvertToPlaceTreeResponseDTO(req []models.Place) dto.PlaceTreeResponse {
+	var res []dto.PlaceTree
+	parentMap := make(map[int][]models.Place, len(req))
+
+	for _, p := range req {
+		if !p.ParentID.Valid {
+			res = append(res, dto.PlaceTree{
+				Place: ConvertToPlaceResponseDTO(p),
+			})
+			continue
+		}
+
+		parentID := int(p.ParentID.Int64)
+		parentMap[parentID] = append(parentMap[parentID], p)
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].Place.Title < res[j].Place.Title
+	})
+
+	for i := range res {
+		recursiveFillNested(&res[i], parentMap)
+	}
+
+	return dto.PlaceTreeResponse{
+		Places: res,
+	}
+}
+
+func recursiveFillNested(item *dto.PlaceTree, parentMap map[int][]models.Place) {
+	id := item.Place.ID
+
+	if _, ok := parentMap[id]; ok {
+		for _, childPlace := range parentMap[id] {
+			nestedItem := dto.PlaceTree{
+				Place: ConvertToPlaceResponseDTO(childPlace),
+			}
+
+			recursiveFillNested(&nestedItem, parentMap)
+
+			item.NestedPlaces = append(item.NestedPlaces, nestedItem)
+		}
+
+		sort.Slice(item.NestedPlaces, func(i, j int) bool {
+			return item.NestedPlaces[i].Place.Title < item.NestedPlaces[j].Place.Title
+		})
+	}
 }

@@ -17,3 +17,12 @@ type PlaceResponse struct {
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
+
+type PlaceTreeResponse struct {
+	Places []PlaceTree `json:"places"`
+}
+
+type PlaceTree struct {
+	Place        PlaceResponse `json:"place"`
+	NestedPlaces []PlaceTree   `json:"nested"`
+}

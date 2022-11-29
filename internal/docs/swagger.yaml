@@ -41,6 +41,22 @@ definitions:
       updated_at:
         type: string
     type: object
+  dto.PlaceTree:
+    properties:
+      nested:
+        items:
+          $ref: '#/definitions/dto.PlaceTree'
+        type: array
+      place:
+        $ref: '#/definitions/dto.PlaceResponse'
+    type: object
+  dto.PlaceTreeResponse:
+    properties:
+      places:
+        items:
+          $ref: '#/definitions/dto.PlaceTree'
+        type: array
+    type: object
   dto.ThingResponse:
     properties:
       created_at:
@@ -236,6 +252,26 @@ paths:
       security:
       - BasicAuth: []
       summary: Get things by place ID
+      tags:
+      - Places
+  /v1/places/tree:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlaceTreeResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Get places tree
       tags:
       - Places
   /v1/things:

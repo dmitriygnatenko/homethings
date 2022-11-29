@@ -31,6 +31,12 @@ type IPlaceRepositoryMock struct {
 	beforeGetCounter uint64
 	GetMock          mIPlaceRepositoryMockGet
 
+	funcGetAll          func(ctx context.Context) (pa1 []models.Place, err error)
+	inspectFuncGetAll   func(ctx context.Context)
+	afterGetAllCounter  uint64
+	beforeGetAllCounter uint64
+	GetAllMock          mIPlaceRepositoryMockGetAll
+
 	funcUpdate          func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) (err error)
 	inspectFuncUpdate   func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx)
 	afterUpdateCounter  uint64
@@ -50,6 +56,9 @@ func NewIPlaceRepositoryMock(t minimock.Tester) *IPlaceRepositoryMock {
 
 	m.GetMock = mIPlaceRepositoryMockGet{mock: m}
 	m.GetMock.callArgs = []*IPlaceRepositoryMockGetParams{}
+
+	m.GetAllMock = mIPlaceRepositoryMockGetAll{mock: m}
+	m.GetAllMock.callArgs = []*IPlaceRepositoryMockGetAllParams{}
 
 	m.UpdateMock = mIPlaceRepositoryMockUpdate{mock: m}
 	m.UpdateMock.callArgs = []*IPlaceRepositoryMockUpdateParams{}
@@ -492,6 +501,222 @@ func (m *IPlaceRepositoryMock) MinimockGetInspect() {
 	}
 }
 
+type mIPlaceRepositoryMockGetAll struct {
+	mock               *IPlaceRepositoryMock
+	defaultExpectation *IPlaceRepositoryMockGetAllExpectation
+	expectations       []*IPlaceRepositoryMockGetAllExpectation
+
+	callArgs []*IPlaceRepositoryMockGetAllParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceRepositoryMockGetAllExpectation specifies expectation struct of the IPlaceRepository.GetAll
+type IPlaceRepositoryMockGetAllExpectation struct {
+	mock    *IPlaceRepositoryMock
+	params  *IPlaceRepositoryMockGetAllParams
+	results *IPlaceRepositoryMockGetAllResults
+	Counter uint64
+}
+
+// IPlaceRepositoryMockGetAllParams contains parameters of the IPlaceRepository.GetAll
+type IPlaceRepositoryMockGetAllParams struct {
+	ctx context.Context
+}
+
+// IPlaceRepositoryMockGetAllResults contains results of the IPlaceRepository.GetAll
+type IPlaceRepositoryMockGetAllResults struct {
+	pa1 []models.Place
+	err error
+}
+
+// Expect sets up expected params for IPlaceRepository.GetAll
+func (mmGetAll *mIPlaceRepositoryMockGetAll) Expect(ctx context.Context) *mIPlaceRepositoryMockGetAll {
+	if mmGetAll.mock.funcGetAll != nil {
+		mmGetAll.mock.t.Fatalf("IPlaceRepositoryMock.GetAll mock is already set by Set")
+	}
+
+	if mmGetAll.defaultExpectation == nil {
+		mmGetAll.defaultExpectation = &IPlaceRepositoryMockGetAllExpectation{}
+	}
+
+	mmGetAll.defaultExpectation.params = &IPlaceRepositoryMockGetAllParams{ctx}
+	for _, e := range mmGetAll.expectations {
+		if minimock.Equal(e.params, mmGetAll.defaultExpectation.params) {
+			mmGetAll.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetAll.defaultExpectation.params)
+		}
+	}
+
+	return mmGetAll
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceRepository.GetAll
+func (mmGetAll *mIPlaceRepositoryMockGetAll) Inspect(f func(ctx context.Context)) *mIPlaceRepositoryMockGetAll {
+	if mmGetAll.mock.inspectFuncGetAll != nil {
+		mmGetAll.mock.t.Fatalf("Inspect function is already set for IPlaceRepositoryMock.GetAll")
+	}
+
+	mmGetAll.mock.inspectFuncGetAll = f
+
+	return mmGetAll
+}
+
+// Return sets up results that will be returned by IPlaceRepository.GetAll
+func (mmGetAll *mIPlaceRepositoryMockGetAll) Return(pa1 []models.Place, err error) *IPlaceRepositoryMock {
+	if mmGetAll.mock.funcGetAll != nil {
+		mmGetAll.mock.t.Fatalf("IPlaceRepositoryMock.GetAll mock is already set by Set")
+	}
+
+	if mmGetAll.defaultExpectation == nil {
+		mmGetAll.defaultExpectation = &IPlaceRepositoryMockGetAllExpectation{mock: mmGetAll.mock}
+	}
+	mmGetAll.defaultExpectation.results = &IPlaceRepositoryMockGetAllResults{pa1, err}
+	return mmGetAll.mock
+}
+
+// Set uses given function f to mock the IPlaceRepository.GetAll method
+func (mmGetAll *mIPlaceRepositoryMockGetAll) Set(f func(ctx context.Context) (pa1 []models.Place, err error)) *IPlaceRepositoryMock {
+	if mmGetAll.defaultExpectation != nil {
+		mmGetAll.mock.t.Fatalf("Default expectation is already set for the IPlaceRepository.GetAll method")
+	}
+
+	if len(mmGetAll.expectations) > 0 {
+		mmGetAll.mock.t.Fatalf("Some expectations are already set for the IPlaceRepository.GetAll method")
+	}
+
+	mmGetAll.mock.funcGetAll = f
+	return mmGetAll.mock
+}
+
+// When sets expectation for the IPlaceRepository.GetAll which will trigger the result defined by the following
+// Then helper
+func (mmGetAll *mIPlaceRepositoryMockGetAll) When(ctx context.Context) *IPlaceRepositoryMockGetAllExpectation {
+	if mmGetAll.mock.funcGetAll != nil {
+		mmGetAll.mock.t.Fatalf("IPlaceRepositoryMock.GetAll mock is already set by Set")
+	}
+
+	expectation := &IPlaceRepositoryMockGetAllExpectation{
+		mock:   mmGetAll.mock,
+		params: &IPlaceRepositoryMockGetAllParams{ctx},
+	}
+	mmGetAll.expectations = append(mmGetAll.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceRepository.GetAll return parameters for the expectation previously defined by the When method
+func (e *IPlaceRepositoryMockGetAllExpectation) Then(pa1 []models.Place, err error) *IPlaceRepositoryMock {
+	e.results = &IPlaceRepositoryMockGetAllResults{pa1, err}
+	return e.mock
+}
+
+// GetAll implements interfaces.IPlaceRepository
+func (mmGetAll *IPlaceRepositoryMock) GetAll(ctx context.Context) (pa1 []models.Place, err error) {
+	mm_atomic.AddUint64(&mmGetAll.beforeGetAllCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetAll.afterGetAllCounter, 1)
+
+	if mmGetAll.inspectFuncGetAll != nil {
+		mmGetAll.inspectFuncGetAll(ctx)
+	}
+
+	mm_params := &IPlaceRepositoryMockGetAllParams{ctx}
+
+	// Record call args
+	mmGetAll.GetAllMock.mutex.Lock()
+	mmGetAll.GetAllMock.callArgs = append(mmGetAll.GetAllMock.callArgs, mm_params)
+	mmGetAll.GetAllMock.mutex.Unlock()
+
+	for _, e := range mmGetAll.GetAllMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.pa1, e.results.err
+		}
+	}
+
+	if mmGetAll.GetAllMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetAll.GetAllMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetAll.GetAllMock.defaultExpectation.params
+		mm_got := IPlaceRepositoryMockGetAllParams{ctx}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetAll.t.Errorf("IPlaceRepositoryMock.GetAll got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetAll.GetAllMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetAll.t.Fatal("No results are set for the IPlaceRepositoryMock.GetAll")
+		}
+		return (*mm_results).pa1, (*mm_results).err
+	}
+	if mmGetAll.funcGetAll != nil {
+		return mmGetAll.funcGetAll(ctx)
+	}
+	mmGetAll.t.Fatalf("Unexpected call to IPlaceRepositoryMock.GetAll. %v", ctx)
+	return
+}
+
+// GetAllAfterCounter returns a count of finished IPlaceRepositoryMock.GetAll invocations
+func (mmGetAll *IPlaceRepositoryMock) GetAllAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetAll.afterGetAllCounter)
+}
+
+// GetAllBeforeCounter returns a count of IPlaceRepositoryMock.GetAll invocations
+func (mmGetAll *IPlaceRepositoryMock) GetAllBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetAll.beforeGetAllCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceRepositoryMock.GetAll.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetAll *mIPlaceRepositoryMockGetAll) Calls() []*IPlaceRepositoryMockGetAllParams {
+	mmGetAll.mutex.RLock()
+
+	argCopy := make([]*IPlaceRepositoryMockGetAllParams, len(mmGetAll.callArgs))
+	copy(argCopy, mmGetAll.callArgs)
+
+	mmGetAll.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetAllDone returns true if the count of the GetAll invocations corresponds
+// the number of defined expectations
+func (m *IPlaceRepositoryMock) MinimockGetAllDone() bool {
+	for _, e := range m.GetAllMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetAllMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetAll != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetAllInspect logs each unmet expectation
+func (m *IPlaceRepositoryMock) MinimockGetAllInspect() {
+	for _, e := range m.GetAllMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.GetAll with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetAllMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		if m.GetAllMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceRepositoryMock.GetAll")
+		} else {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.GetAll with params: %#v", *m.GetAllMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetAll != nil && mm_atomic.LoadUint64(&m.afterGetAllCounter) < 1 {
+		m.t.Error("Expected call to IPlaceRepositoryMock.GetAll")
+	}
+}
+
 type mIPlaceRepositoryMockUpdate struct {
 	mock               *IPlaceRepositoryMock
 	defaultExpectation *IPlaceRepositoryMockUpdateExpectation
@@ -716,6 +941,8 @@ func (m *IPlaceRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetInspect()
 
+		m.MinimockGetAllInspect()
+
 		m.MinimockUpdateInspect()
 		m.t.FailNow()
 	}
@@ -742,5 +969,6 @@ func (m *IPlaceRepositoryMock) minimockDone() bool {
 	return done &&
 		m.MinimockAddDone() &&
 		m.MinimockGetDone() &&
+		m.MinimockGetAllDone() &&
 		m.MinimockUpdateDone()
 }
