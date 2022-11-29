@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="static/vue-resource/vue-resource.min.js"></script>
+    <script src="static/vue/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="counter">
+    Счётчик: {{ counter }}
+</div>
+
+    <script type="text/javascript">
+        const Counter = {
+            data() {
+                return {
+                    counter: 0
+                }
+            },
+            mounted() {
+                setInterval(() => {
+                    this.counter++
+                }, 1000)
+            }
+        }
+
+        Vue.createApp(Counter).mount('#counter')
+    </script>
+</body>
+</html>
