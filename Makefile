@@ -6,6 +6,7 @@ usage:
 	@echo "make run"
 	@echo "make test"
 	@echo "make test-cover"
+	@echo "make swag"
 	@echo "make lint"
 	@echo "make migration-status"
 	@echo "make migration-up"
@@ -15,7 +16,7 @@ usage:
 	@echo "make docker-down"
 	@echo "make install-deps"
 
-run: run-swag
+run:
 	cd cmd/app && go run main.go
 
 test:
@@ -28,8 +29,8 @@ test-cover:
 lint:
 	golangci-lint run --timeout=3m
 
-run-swag:
-	swag init --pd -o "./internal/docs"  -d "cmd/app,internal/api/v1"
+swag:
+	swag init -o "docs" -d "cmd/app,internal/api/v1,internal/dto"
 
 migration-status:
 	goose -dir migrations mysql ${GOOSE_DB_STRING} status
