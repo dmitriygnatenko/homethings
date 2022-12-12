@@ -1,16 +1,6 @@
-const tokenKey = "x326gjdskfh8ndhskjfhs"
+import {getAuth} from './auth.js';
 
-function getAuth() {
-    //   token = localStorage.getItem(tokenKey)
-    //   console.log(token)
-    var user = "admin"
-    var password = "12345"
-    var token = user + ":" + password;
-    const auth = "Basic " + btoa(token)
-    return auth
-}
-
-function serverRequest(method, url) {
+export function request(method, url) {
     const res = {
         data: {},
         status: undefined,
@@ -30,7 +20,9 @@ function serverRequest(method, url) {
         return response.json()
     }).then((data) => {
         res.data = data
-    }).catch((error) => {
+    }).catch((e) => {
+        let error = e.toString()
+        error = error.replace(/["']/g,'')
         res.error = error
     })
 

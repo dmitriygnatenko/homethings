@@ -4,21 +4,32 @@ export const loginPageComponent = {
     },
     data() {
         return {
-            form: {
-                dataList: [{name: null, amount: null}]
+            ruleForm: {
+                login: "",
+                password: "",
             },
             rules: {
-                name: [{ required: true, message: 'name is mandatory!', trigger: 'blur' }],
-                amount: [{ required: true, message: 'amounts is mandatory!', trigger: 'blur' }],
-            }
-        }
+                login: {
+                    required: true,
+                    message: "Имя пользователя обязательно для заполнения",
+                    trigger: "blur",
+                },
+                password: {
+                    required: true,
+                    message: "Пароль обязателен для заполнения",
+                    trigger: "blur",
+                },
+            },
+        };
     },
     methods: {
-        submitForm(formName) {
-            this.$refs[formName].validate((valid) => {
+        onSubmit() {
+        },
+        submitForm() {
+            this.$refs.ruleForm.validate((valid) => {
                 if (valid) {
-                    alert("submit")
-                    console.log('submit')
+                    // TODO
+                    alert("submit!");
                 } else {
                     return false;
                 }
@@ -27,40 +38,19 @@ export const loginPageComponent = {
     },
     template: `
     <template v-if="show">
-    
-      <el-form :model="form" ref="form" label-width="20px">
-        <el-table :data="form.dataList" border stripe>
-          <el-table-column label="name">
-            <template #default="scope">
-              <el-form-item
-                v-if="scope && scope.$index >= 0"
-                label=" "
-                :prop="'dataList.' + scope.$index + '.name'"
-                :rules="rules.name"
-              >
-              <el-input v-model="scope.row.name"></el-input>
-            </el-form-item>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="amount">
-            <template #default="scope">
-              <el-form-item
-                v-if="scope && scope.$index >= 0"
-                label=" "
-                :prop="'dataList.' + scope.$index + '.amount'"
-                :rules="rules.amount"
-              >
-              <el-input v-model="scope.row.amount"></el-input>
-            </el-form-item>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-form-item>
-          <el-button type="primary" @click="submitForm('form')">Submit</el-button>
-        </el-form-item>
-      </el-form>
-
+        <el-main class="login-page">
+            <el-card>
+                <el-form ref="ruleForm" :model="ruleForm" :rules="rules">
+                    <el-form-item prop="login">
+                        <el-input type="text" v-model="ruleForm.login" placeholder="Имя пользователя"></el-input>
+                    </el-form-item>
+                    <el-form-item prop="password">
+                        <el-input type="password" v-model="ruleForm.password" placeholder="Пароль"></el-input>
+                    </el-form-item>
+                    <el-button type="primary" @click="submitForm">Авторизоваться</el-button>       
+                </el-form>
+            </el-card>
+        </el-main>
     </template>
     `
 }
