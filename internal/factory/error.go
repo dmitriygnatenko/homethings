@@ -30,6 +30,14 @@ func CreateNotFoundResponse(fctx *fiber.Ctx, err error) error {
 	return fctx.Status(fiber.StatusNotFound).JSON(CreateErrorResponse(err))
 }
 
+func CreateForbiddenResponse(fctx *fiber.Ctx, err error) error {
+	if err == nil {
+		return fctx.Status(fiber.StatusForbidden).JSON(CreateEmptyResponse())
+	}
+
+	return fctx.Status(fiber.StatusForbidden).JSON(CreateErrorResponse(err))
+}
+
 func CreateValidateErrorResponse(errors error) []dto.ValidateErrorResponse {
 	var res []dto.ValidateErrorResponse //nolint
 

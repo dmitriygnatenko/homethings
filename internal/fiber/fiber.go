@@ -4,6 +4,7 @@ import (
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
 	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
@@ -56,7 +57,7 @@ func getBasicAuthConfig(sp interfaces.IServiceProvider) basicauth.Config {
 			user: password,
 		},
 		Unauthorized: func(c *fiber.Ctx) error {
-			return c.SendStatus(fiber.StatusForbidden)
+			return factory.CreateForbiddenResponse(c, nil)
 		},
 	}
 }
