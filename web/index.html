@@ -2,10 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="static/element-plus/element-plus.min.css">
-    <link rel="stylesheet" href="static/homethings/app.css">
-    <script src="static/vue/vue.global.js"></script>
-    <script src="static/element-plus/element-plus.min.js"></script>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/homethings/css/app.css">
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/vue/js/vue.global.prod.js"></script>
 </head>
 <body>
 <el-container id="app">
@@ -14,10 +14,9 @@
 </el-container>
 
 <script type="module">
-    import {app} from './static/homethings/app.js';
+    import {app} from './static/homethings/js/app';
 
     const homethingsApp = Vue.createApp(app);
-    homethingsApp.use(ElementPlus);
     homethingsApp.mount("#app");
 </script>
 </body>

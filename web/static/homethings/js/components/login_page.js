@@ -1,3 +1,6 @@
+import {request} from '../client.js';
+import { ElMessage } from 'element-plus'
+
 export const loginPageComponent = {
     props: {
         show: Boolean,
@@ -28,8 +31,14 @@ export const loginPageComponent = {
         submitForm() {
             this.$refs.ruleForm.validate((valid) => {
                 if (valid) {
-                    // TODO
-                    alert("submit!");
+                    let res = request("GET", "/api/v1/places/tree")
+                    if (res.status === 200) {
+                        alert("OK")
+                    }
+
+                    this.$refs.ruleForm.resetFields()
+
+                    ElMessage.error('Oops, this is a error message.')
                 } else {
                     return false;
                 }
