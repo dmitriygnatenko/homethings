@@ -1,23 +1,20 @@
 <!doctype html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/homethings/css/app.css">
     <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="static/vue/js/vue.global.prod.js"></script>
 </head>
-<body>
-<el-container id="app">
+<body id="app">
     <login-page :show=!isAuth></login-page>
     <main-page :show=isAuth></main-page>
-</el-container>
 
-<script type="module">
-    import {app} from './static/homethings/js/app';
-
-    const homethingsApp = Vue.createApp(app);
-    homethingsApp.mount("#app");
-</script>
+    <script type="module">
+        import {app} from './static/homethings/js/app.js';
+        const homethingsApp = Vue.createApp(app);
+        homethingsApp.mount("#app");
+    </script>
 </body>
 </html>
