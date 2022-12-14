@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -191,7 +191,7 @@ func Test_DeleteThingHandler(t *testing.T) {
 
 			fiberApp.Delete("/v1/things/:id", DeleteThingHandler(serviceProvider))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), v1.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
 				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))

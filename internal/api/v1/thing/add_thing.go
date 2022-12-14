@@ -1,7 +1,7 @@
 package thing
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -33,7 +33,7 @@ func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		tx, err := sp.GetThingRepository().BeginTx(ctx, v1.DefaultTxLevel)
+		tx, err := sp.GetThingRepository().BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}

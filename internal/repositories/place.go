@@ -32,6 +32,10 @@ func (r placeRepository) GetAll(ctx context.Context) ([]models.Place, error) {
 		From(placeTableName).
 		ToSql()
 
+	if err != nil {
+		return nil, err
+	}
+
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
