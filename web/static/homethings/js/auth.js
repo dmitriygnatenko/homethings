@@ -13,3 +13,7 @@ export function getAuth() {
 
     return "Basic " + token
 }
+
+export function clearAuth() {
+    localStorage.removeItem(authTokenKey)
+}
