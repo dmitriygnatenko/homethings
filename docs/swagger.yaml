@@ -103,6 +103,30 @@ info:
   title: Homethings API
   version: "1.0"
 paths:
+  /v1/auth/check:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Check username/password
+      tags:
+      - Auth
   /v1/places:
     post:
       consumes:

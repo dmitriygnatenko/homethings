@@ -54,7 +54,7 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		if req.Title != thing.Title || req.Description != req.Description {
+		if req.Title != thing.Title || req.Description != thing.Description {
 			err = sp.GetThingRepository().Update(ctx, mappers.ConvertToUpdateThingRequestModel(id, req), tx)
 			if err != nil {
 				return factory.CreateInternalErrorResponse(fctx, err)
