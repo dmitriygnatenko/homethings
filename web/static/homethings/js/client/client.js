@@ -1,6 +1,11 @@
-import {getAuth} from './auth.js';
+import {getToken} from '../auth/auth.js';
+
+export const statusOK = 200
+
+export const methodGet = "GET"
 
 export const routeCheckAuth = "/api/v1/auth/check"
+export const routeGetPlacesTree = "/api/v1/places/tree"
 
 export function request(method, url) {
     let xhr = new XMLHttpRequest();
@@ -9,7 +14,7 @@ export function request(method, url) {
 
     xhr.setRequestHeader('Accept', 'application/json')
     xhr.setRequestHeader('Content-Type', 'application/json')
-    xhr.setRequestHeader('Authorization', getAuth())
+    xhr.setRequestHeader('Authorization', 'Basic ' + getToken())
 
     xhr.send();
 

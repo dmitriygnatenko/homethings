@@ -1,19 +1,19 @@
 const authTokenKey = "xuen4sFsjdfhKJHf"
 
-export function setAuth(login, password) {
+export function setToken(login, password) {
     let token = login + ":" + password;
     localStorage.setItem(authTokenKey, btoa(token))
 }
 
-export function getAuth() {
+export function getToken() {
     let token = localStorage.getItem(authTokenKey)
     if (token == null) {
         return ""
     }
 
-    return "Basic " + token
+    return token
 }
 
-export function clearAuth() {
+export function clearToken() {
     localStorage.removeItem(authTokenKey)
 }

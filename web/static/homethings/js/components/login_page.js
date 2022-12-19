@@ -1,9 +1,9 @@
-import * as client from '../client.js';
-import * as auth from '../auth.js'
+import * as client from '../client/client.js';
+import * as auth from '../auth/auth.js'
 
 export const loginPageComponent = {
     props: {
-        show: Boolean,
+        isAuth: Boolean,
     },
     data() {
         return {
@@ -17,6 +17,11 @@ export const loginPageComponent = {
             },
         };
     },
+    computed: {
+        showLoginPage() {
+            return !this.isAuth
+        }
+    },
     methods: {
         submitForm() {
             this.errors.username = this.form.username === "";
@@ -26,27 +31,25 @@ export const loginPageComponent = {
                 return
             }
 
-            auth.setAuth(this.form.username, this.form.password)
+            auth.setToken(this.form.username, this.form.password)
 
-            let res = client.request("GET", client.routeCheckAuth)
-
-            if (res.status === 200) {
+            let res = client.request(client.methodGet, client.routeCheckAuth)
+            if (res.status === client.statusOK) {
                 this.errors.username = false
                 this.errors.password = false
                 this.form.username = ""
                 this.form.password = ""
-
                 this.$emit('eventsetauth', true)
                 return
             }
 
-            auth.clearAuth()
+            auth.clearToken()
             this.errors.username = true
             this.errors.password = true
         },
     },
     template: `
-    <template v-if="show">
+    <template v-if="showLoginPage">
         <main class="login-form">
             <form>
                 <div class="form-floating">

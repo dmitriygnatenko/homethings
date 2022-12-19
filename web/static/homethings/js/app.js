@@ -1,6 +1,6 @@
 import {loginPageComponent} from './components/login_page.js';
 import {mainPageComponent} from './components/main_page.js';
-import * as client from "./client.js";
+import * as client from "./client/client.js";
 
 export const app = {
     components: {
@@ -13,14 +13,14 @@ export const app = {
         };
     },
     created() {
-        let res = client.request("GET", client.routeCheckAuth)
-        if (res.status === 200) {
+        let res = client.request(client.methodGet, client.routeCheckAuth)
+        if (res.status === client.statusOK) {
             this.isAuth = true
         }
     },
     methods: {
-        setAuth(isAuth) {
+        setIsAuth(isAuth) {
             this.isAuth = isAuth
-        }
+        },
     }
 };
