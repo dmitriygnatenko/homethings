@@ -67,7 +67,7 @@ func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]model
 		From(thingTableName+" t").
 		Join(placeThingTableName+" p ON p.thing_id = t.id").
 		Where(sq.Eq{"p.place_id": placeID}).
-		OrderBy("t.created_at", "desc").
+		OrderBy("t.updated_at", "desc").
 		ToSql()
 
 	if err != nil {
@@ -120,7 +120,7 @@ func (r thingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]mo
 		"SELECT t.id, t.title, t.description, t.created_at, t.updated_at " +
 		"FROM cte, " + placeThingTableName + " pt, " + thingTableName + " t " +
 		"WHERE pt.place_id = cte.id and t.id = pt.thing_id " +
-		"ORDER BY t.created_at DESC"
+		"ORDER BY t.updated_at DESC"
 
 	rows, err := r.db.QueryContext(ctx, query, placeID)
 	if err != nil {

@@ -6,6 +6,7 @@ export const methodGet = "GET"
 
 export const routeCheckAuth = "/api/v1/auth/check"
 export const routeGetPlacesTree = "/api/v1/places/tree"
+export const routeGetPlaceThings = "/api/v1/places/{id}/things"
 
 export function request(method, url) {
     let xhr = new XMLHttpRequest();
@@ -19,7 +20,7 @@ export function request(method, url) {
     xhr.send();
 
     return {
-        data: xhr.responseText,
+        data: JSON.parse(xhr.responseText),
         status: xhr.status,
     };
 }

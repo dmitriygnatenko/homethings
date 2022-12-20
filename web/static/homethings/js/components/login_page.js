@@ -26,7 +26,6 @@ export const loginPageComponent = {
         submitForm() {
             this.errors.username = this.form.username === "";
             this.errors.password = this.form.password === "";
-
             if (this.errors.username || this.errors.password) {
                 return
             }
@@ -53,11 +52,25 @@ export const loginPageComponent = {
         <main class="login-form">
             <form>
                 <div class="form-floating">
-                    <input v-model.trim="form.username" :class="{'is-invalid': errors.username}" type="text" class="form-control" id="floatingUsername" placeholder="Имя пользователя">
+                    <input
+                        type="text"
+                        class="form-control" 
+                        id="floatingUsername" 
+                        placeholder="Имя пользователя"
+                        v-model.trim="form.username"
+                        :class="{'is-invalid': errors.username}"
+                    >
                     <label for="floatingUsername">Имя пользователя</label>
                 </div>
                 <div class="form-floating">
-                    <input v-model.trim="form.password" :class="{'is-invalid': errors.password}" type="password" class="form-control" id="floatingPassword" placeholder="Пароль">
+                    <input
+                        type="password" 
+                        class="form-control" 
+                        id="floatingPassword"
+                        placeholder="Пароль"
+                        v-model.trim="form.password"
+                        :class="{'is-invalid': errors.password}" 
+                    >
                     <label for="floatingPassword">Пароль</label>
                 </div>
                 <button class="w-100 btn btn-primary" type="button" @click="submitForm">Авторизоваться</button>

@@ -26,3 +26,194 @@ body {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+/* Main page */
+.container-fluid {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #f7f7f7;
+}
+.col-l {
+    width: 34%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.col-c, .col-r {
+    width: 33%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.list {
+    overflow: auto;
+}
+.places .header, .things .header, .info .header {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 8px 0 0 14px;
+    height: 43px;
+}
+.header .buttons {
+    margin: 0;
+    position: relative;
+    padding: 0 10px 0 0;
+}
+.header .buttons .btn {
+    color: white;
+    padding: 0 5px 2px 5px;
+    margin-left: 3px;
+}
+.header .buttons .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+.places {
+    background-color: #ffffff;
+    height: 100%;
+    margin: 0 8px 0 15px;
+}
+.places .header {
+    background-color: #3082c2;
+    color: #ffffff;
+}
+
+/*.places .buttons .btn.add {*/
+/*    display: inline-block;*/
+/*}*/
+/*.places .buttons .btn:hover {*/
+/*    background-color: #2871a9;*/
+/*    border-color: #2871a9;*/
+/*}*/
+/*.places > .list {*/
+/*    margin-top: 5px;*/
+/*    padding-left: 3px;*/
+/*}*/
+/*.places .child-places {*/
+/*    margin-left: 17px;*/
+/*}*/
+/*.places > .list .btn {*/
+/*    white-space: nowrap;*/
+/*    display: inline-flex;*/
+/*    align-items: center;*/
+/*    background-color: transparent;*/
+/*    padding: 0 10px 0 5px;*/
+/*    font-size: 14px;*/
+/*    border: 0;*/
+/*}*/
+/*.places > .list .btn.selected {*/
+/*    font-weight: bold;*/
+/*}*/
+/*.places > .list .btn:hover {*/
+/*    color: #0d6efd;*/
+/*}*/
+/*.place-btn-toggle {*/
+/*    padding-left: 2px !important;*/
+/*}*/
+/*.place-btn-toggle::before {*/
+/*    line-height: 0;*/
+/*    content: url("/assets/icons/caret-right-fill.svg");*/
+/*    transition: transform .35s ease;*/
+/*    transform-origin: .5em 50%;*/
+/*}*/
+/*.place-btn-toggle[aria-expanded="true"]::before {*/
+/*    transform: rotate(90deg);*/
+/*}*/
+
+.things {
+    background-color: #ffffff;
+    height: 100%;
+    margin: 0 8px;
+}
+.things .header {
+    background-color: #2aad55;
+    color: #ffffff;
+}
+.things .list .btn {
+    width: 100%;
+    text-align: left;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 1px dashed #b6b6b6;
+    border-radius: 0;
+}
+.things .list .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+.things .list .title {
+    font-size: 14px;
+    font-weight: bold;
+}
+.things .list .desc {
+    color: gray;
+    font-size: 12px;
+    margin-top: 3px;
+}
+.things .list .date {
+    color: gray;
+    font-size: 12px;
+    text-align: right;
+    margin-top: 3px;
+}
+.things .list .btn:hover {
+    background-color: #f8f8f8;
+}
+.things .list .btn.selected  {
+    background-color: #f3fff7;
+}
+.things .buttons .btn:hover {
+    background-color: #229346;
+    border-color: #229346;
+}
+
+
+
+
+.info {
+    background-color: #ffffff;
+    height: 100%;
+    margin: 0 15px 0 8px;
+}
+.info .header {
+    background-color: #dfc00c;
+    color: #ffffff;
+}
+/*.info .buttons .btn:hover {*/
+/*    background-color: #bfa616;*/
+/*    border-color: #bfa616;*/
+/*}*/
+/*.info .list .btn {*/
+/*    width: 100%;*/
+/*    text-align: left;*/
+/*    border-left: 0;*/
+/*    border-right: 0;*/
+/*    border-top: 0;*/
+/*    border-bottom: 1px dashed #b6b6b6;*/
+/*    border-radius: 0;*/
+/*}*/
+/*.info .list .date {*/
+/*    color: gray;*/
+/*    font-size: 12px;*/
+/*    text-align: right;*/
+/*    margin-bottom: 1px;*/
+/*    margin-top: 3px;*/
+/*}*/
+/*.info .list .btn img {*/
+/*    margin-top: 7px;*/
+/*}*/
+/*#edit-place-modal .form-label {*/
+/*    margin: 10px 0 3px 0;*/
+/*    padding: 0;*/
+/*}*/
+/*#edit-thing-modal .form-label {*/
+/*    margin: 10px 0 3px 0;*/
+/*    padding: 0;*/
+/*}*/
