@@ -49,6 +49,22 @@ func ConvertToUpdatePlaceRequestModel(id int, req dto.UpdatePlaceRequest) models
 	return res
 }
 
+func ConvertToPlacesResponseDTO(req []models.Place) dto.PlacesResponse {
+	var res []dto.PlaceResponse
+
+	for _, p := range req {
+		res = append(res, ConvertToPlaceResponseDTO(p))
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].Title < res[j].Title
+	})
+
+	return dto.PlacesResponse{
+		Places: res,
+	}
+}
+
 func ConvertToPlaceTreeResponseDTO(req []models.Place) dto.PlaceTreeResponse {
 	var res []dto.PlaceTree
 	parentMap := make(map[int][]models.Place, len(req))

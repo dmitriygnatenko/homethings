@@ -57,6 +57,13 @@ definitions:
           $ref: '#/definitions/dto.PlaceTree'
         type: array
     type: object
+  dto.PlacesResponse:
+    properties:
+      places:
+        items:
+          $ref: '#/definitions/dto.PlaceResponse'
+        type: array
+    type: object
   dto.ThingResponse:
     properties:
       created_at:
@@ -128,6 +135,25 @@ paths:
       tags:
       - Auth
   /v1/places:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlacesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Get places
+      tags:
+      - Places
     post:
       consumes:
       - application/json

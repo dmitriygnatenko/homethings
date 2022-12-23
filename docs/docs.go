@@ -56,6 +56,37 @@ const docTemplate = `{
             }
         },
         "/v1/places": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Places"
+                ],
+                "summary": "Get places",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PlacesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -620,6 +651,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.PlaceTree"
+                    }
+                }
+            }
+        },
+        "dto.PlacesResponse": {
+            "type": "object",
+            "properties": {
+                "places": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PlaceResponse"
                     }
                 }
             }

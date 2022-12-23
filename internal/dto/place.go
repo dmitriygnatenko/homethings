@@ -18,6 +18,10 @@ type PlaceResponse struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
+type PlacesResponse struct {
+	Places []PlaceResponse `json:"places"`
+}
+
 type PlaceTreeResponse struct {
 	Places []PlaceTree `json:"places"`
 }

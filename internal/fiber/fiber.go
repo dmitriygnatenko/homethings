@@ -71,6 +71,7 @@ func getCORSConfig(sp interfaces.IServiceProvider) cors.Config {
 }
 
 func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
+	r.Get("/v1/places", placeAPI.GetPlacesHandler(sp))
 	r.Get("/v1/places/tree", placeAPI.GetPlaceTreeHandler(sp))
 	r.Get("/v1/places/:id<int>", placeAPI.GetPlaceHandler(sp))
 	r.Get("/v1/places/:id<int>/things", placeAPI.GetPlaceThingsHandler(sp))
