@@ -80,49 +80,26 @@ body {
     background-color: #3082c2;
     color: #ffffff;
 }
-
-/*.places .buttons .btn.add {*/
-/*    display: inline-block;*/
-/*}*/
-/*.places .buttons .btn:hover {*/
-/*    background-color: #2871a9;*/
-/*    border-color: #2871a9;*/
-/*}*/
-/*.places > .list {*/
-/*    margin-top: 5px;*/
-/*    padding-left: 3px;*/
-/*}*/
-/*.places .child-places {*/
-/*    margin-left: 17px;*/
-/*}*/
-/*.places > .list .btn {*/
-/*    white-space: nowrap;*/
-/*    display: inline-flex;*/
-/*    align-items: center;*/
-/*    background-color: transparent;*/
-/*    padding: 0 10px 0 5px;*/
-/*    font-size: 14px;*/
-/*    border: 0;*/
-/*}*/
-/*.places > .list .btn.selected {*/
-/*    font-weight: bold;*/
-/*}*/
-/*.places > .list .btn:hover {*/
-/*    color: #0d6efd;*/
-/*}*/
-/*.place-btn-toggle {*/
-/*    padding-left: 2px !important;*/
-/*}*/
-/*.place-btn-toggle::before {*/
-/*    line-height: 0;*/
-/*    content: url("/assets/icons/caret-right-fill.svg");*/
-/*    transition: transform .35s ease;*/
-/*    transform-origin: .5em 50%;*/
-/*}*/
-/*.place-btn-toggle[aria-expanded="true"]::before {*/
-/*    transform: rotate(90deg);*/
-/*}*/
-
+.places .list ul {
+    list-style-type: none;
+    padding-left: 15px;
+    font-size: 14px;
+}
+.places .list > ul {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+.places .list div {
+    display: inline-block;
+    cursor: pointer;
+}
+.places .list div.selected {
+    font-weight: bold;
+}
+.places .buttons .btn:hover {
+    background-color: #215d8c;
+    border-color: #215d8c;
+}
 .things {
     background-color: #ffffff;
     height: 100%;
@@ -173,10 +150,6 @@ body {
     background-color: #229346;
     border-color: #229346;
 }
-
-
-
-
 .info {
     background-color: #ffffff;
     height: 100%;

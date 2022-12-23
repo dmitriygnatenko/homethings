@@ -38,7 +38,7 @@ export const loginPageComponent = {
                 this.errors.password = false
                 this.form.username = ""
                 this.form.password = ""
-                this.$emit('eventsetauth', true)
+                this.$emit('event-set-auth', true)
                 return
             }
 

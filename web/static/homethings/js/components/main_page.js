@@ -1,7 +1,11 @@
+import {placeTreeItemComponent} from "./place_tree_item.js";
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
 
 export const mainPageComponent = {
+    components: {
+        'place-tree-item': placeTreeItemComponent,
+    },
     props: {
         isAuth: Boolean,
     },
@@ -20,25 +24,29 @@ export const mainPageComponent = {
     },
     created() {
         if (this.isAuth) {
-            this.refreshTree()
+            this.refreshPlaces()
         }
     },
     watch: {
         isAuth(val) {
             if (val) {
-                this.refreshTree()
+                this.refreshPlaces()
             }
         }
     },
     methods: {
-        refreshTree() {
+        refreshPlaces() {
             this.selectedPlace = 0
             this.selectedThing = 0
-            this.placesTree = []
+            this.placesTree = [{
+                place: {"title": "Все", id: 0},
+                nested: [],
+            }]
+
             this.thingsList = []
             let res = this.request(client.methodGet, client.routeGetPlacesTree)
             if (Array.isArray(res.data.places) && res.data.places.length) {
-                this.placesTree = res.data.places
+                this.placesTree[0].nested = res.data.places
             }
         },
         refreshThings(placeID) {
@@ -54,6 +62,12 @@ export const mainPageComponent = {
                         "date": formatDate(thing.updated_at),
                     })
                 });
+            }
+        },
+        setSelectedPlace: function(id) {
+            if (this.selectedPlace !== id) {
+                this.selectedPlace = id
+                this.refreshThings(id)
             }
         },
         addPlace() {
@@ -77,7 +91,7 @@ export const mainPageComponent = {
         request(method, route) {
             let res = client.request(method, route)
             if (res.status !== client.statusOK) {
-                this.$emit('eventsetauth', false)
+                this.$emit('event-set-auth', false)
             }
             return res
         },
@@ -117,7 +131,16 @@ export const mainPageComponent = {
                                 </button>
                             </div>
                         </div>
-                        <div class="list"></div>
+                        <div class="list">
+                            <ul>
+                                <place-tree-item
+                                    v-for="item in placesTree"
+                                    :item="item"
+                                    :selected="selectedPlace"
+                                    @set-selected-place="setSelectedPlace"
+                                ></place-tree-item>
+                            </ul>
+                        </div>
                     </div>
                 </div>
         
