@@ -1,22 +1,21 @@
-
 export const placeTreeItemComponent = {
     name: 'place-tree-item',
     props: {
         item: Object,
-        selected: Number,
+        selectedPlace: Number,
     },
-    data: function() {
+    data: function () {
         return {
             isOpen: false
         };
     },
     computed: {
-        isFolder: function() {
+        isFolder: function () {
             return this.item.nested && this.item.nested.length;
         }
     },
     methods: {
-        toggle: function() {
+        toggle: function () {
             if (this.isFolder) {
                 this.isOpen = !this.isOpen;
             }
@@ -27,7 +26,7 @@ export const placeTreeItemComponent = {
     <li>
         <div
             data-id="{{ item.place.id }}"
-            :class="{selected: item.place.id == selected}"
+            :class="{selected: item.place.id == selectedPlace}"
             @click="toggle"
         >
             <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>
@@ -38,7 +37,7 @@ export const placeTreeItemComponent = {
                 v-for="(nested, index) in item.nested"
                 :key="index"
                 :item="nested"
-                :selected="selected"
+                :selected-place="selectedPlace"
                 @set-selected-place="$emit('set-selected-place', $event)"
             ></place-tree-item>
         </ul>

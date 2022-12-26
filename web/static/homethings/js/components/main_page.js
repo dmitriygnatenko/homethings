@@ -1,10 +1,12 @@
 import {placeTreeItemComponent} from "./place_tree_item.js";
+import {modalAddThingComponent} from "./modal_add_thing.js";
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
 
 export const mainPageComponent = {
     components: {
         'place-tree-item': placeTreeItemComponent,
+        'modal-add-thing': modalAddThingComponent,
     },
     props: {
         isAuth: Boolean,
@@ -35,15 +37,28 @@ export const mainPageComponent = {
         }
     },
     methods: {
+        setSelectedPlace(id) {
+            if (this.selectedPlace !== id) {
+                this.selectedPlace = id
+                this.refreshThings(id)
+            }
+        },
+        request(method, route) {
+            let res = client.request(method, route)
+            if (res.status !== client.statusOK) {
+                this.$emit('event-set-auth', false)
+            }
+            return res
+        },
         refreshPlaces() {
             this.selectedPlace = 0
             this.selectedThing = 0
+            this.thingsList = []
             this.placesTree = [{
                 place: {"title": "Все", id: 0},
                 nested: [],
             }]
 
-            this.thingsList = []
             let res = this.request(client.methodGet, client.routeGetPlacesTree)
             if (Array.isArray(res.data.places) && res.data.places.length) {
                 this.placesTree[0].nested = res.data.places
@@ -64,12 +79,6 @@ export const mainPageComponent = {
                 });
             }
         },
-        setSelectedPlace: function(id) {
-            if (this.selectedPlace !== id) {
-                this.selectedPlace = id
-                this.refreshThings(id)
-            }
-        },
         addPlace() {
             console.log("Add place " + this.selectedPlace)
         },
@@ -80,20 +89,19 @@ export const mainPageComponent = {
             console.log("Delete place " + this.selectedPlace)
         },
         addThing() {
-            console.log("Add thing for place " + this.selectedPlace)
+            if (this.selectedPlace === 0) {
+                return
+            }
+
+            this.$refs.modalAddThing.initForm();
+            const addThingModal = new bootstrap.Modal(document.getElementById('add-thing-modal'), {})
+            addThingModal.show()
         },
         updateThing() {
             console.log("Edit thing " + this.selectedThing)
         },
         deleteThing() {
             console.log("Delete thing " + this.selectedThing)
-        },
-        request(method, route) {
-            let res = client.request(method, route)
-            if (res.status !== client.statusOK) {
-                this.$emit('event-set-auth', false)
-            }
-            return res
         },
     },
     template: `
@@ -136,7 +144,7 @@ export const mainPageComponent = {
                                 <place-tree-item
                                     v-for="item in placesTree"
                                     :item="item"
-                                    :selected="selectedPlace"
+                                    :selected-place="selectedPlace"
                                     @set-selected-place="setSelectedPlace"
                                 ></place-tree-item>
                             </ul>
@@ -193,17 +201,22 @@ export const mainPageComponent = {
         
                 <div class="col-r">
                     <div class="info rounded-3 shadow d-flex flex-column">
-                    <div class="header rounded-top">
-                        Фото
-                        <div class="buttons float-end">
-                            <button class="btn add"></button>
+                        <div class="header rounded-top">
+                            Фото
+                            <div class="buttons float-end">
+                                <button class="btn add"></button>
+                            </div>
                         </div>
+                        <div class="list"></div>
                     </div>
-                    <div class="list"></div>
                 </div>
             
             </div>
         </main>
+        <modal-add-thing
+            ref="modalAddThing"
+            :selected-place="selectedPlace"
+        ></modal-add-thing>
     </template>
     `
 }

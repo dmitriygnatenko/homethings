@@ -5,6 +5,7 @@ export const statusOK = 200
 export const methodGet = "GET"
 
 export const routeCheckAuth = "/api/v1/auth/check"
+export const routeGetPlace = "/api/v1/places/{id}"
 export const routeGetPlacesTree = "/api/v1/places/tree"
 export const routeGetPlaceThings = "/api/v1/places/{id}/things"
 
