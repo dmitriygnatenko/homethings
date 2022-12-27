@@ -11,7 +11,9 @@ export const methodDelete = "DELETE"
 
 export const routeCheckAuth = "/api/v1/auth/check"
 export const routeAddPlace = "/api/v1/places"
+export const routeUpdatePlace = "/api/v1/places/{id}"
 export const routeGetPlace = "/api/v1/places/{id}"
+export const routeGetPlaces = "/api/v1/places"
 export const routeGetPlacesTree = "/api/v1/places/tree"
 export const routeGetPlaceThings = "/api/v1/places/{id}/things"
 

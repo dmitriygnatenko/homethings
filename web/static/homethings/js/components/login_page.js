@@ -7,6 +7,7 @@ export const loginPageComponent = {
     props: {
         isAuth: Boolean,
     },
+    emits: ["set-auth"],
     data() {
         return {
             form: {

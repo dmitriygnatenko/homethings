@@ -2,6 +2,7 @@
 
 import {placeTreeItemComponent} from "./place_tree_item.js";
 import {modalAddPlaceComponent} from "./modal_add_place.js";
+import {modalUpdatePlaceComponent} from "./modal_update_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
@@ -10,8 +11,10 @@ export const mainPageComponent = {
     components: {
         'place-tree-item': placeTreeItemComponent,
         'modal-add-place': modalAddPlaceComponent,
+        'modal-update-place': modalUpdatePlaceComponent,
         'modal-add-thing': modalAddThingComponent,
     },
+    emits: ["set-auth"],
     props: {
         isAuth: Boolean,
     },
@@ -91,22 +94,15 @@ export const mainPageComponent = {
             this.$refs.modalAddPlace.init();
         },
         updatePlace() {
-            console.log("Edit place " + this.selectedPlace)
+            this.$refs.modalUpdatePlace.init()
         },
         deletePlace() {
-            console.log("Delete place " + this.selectedPlace)
         },
         addThing() {
-            if (this.selectedPlace === 0) {
-                return
-            }
-            this.$refs.modalAddThing.initForm();
         },
         updateThing() {
-            console.log("Edit thing " + this.selectedThing)
         },
         deleteThing() {
-            console.log("Delete thing " + this.selectedThing)
         },
     },
     template: `
@@ -212,16 +208,9 @@ export const mainPageComponent = {
             </div>
         </main>
 
-        <modal-add-place
-            ref="modalAddPlace"
-            :selected-place="selectedPlace"
-            @refresh-places="refreshPlaces"
-            >
-        </modal-add-place>
-        <modal-add-thing
-            ref="modalAddThing"
-            :selected-place="selectedPlace">
-        </modal-add-thing>
+        <modal-add-place ref="modalAddPlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-add-place>
+        <modal-update-place ref="modalUpdatePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-update-place>
+        <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace"></modal-add-thing>
     </template>
     `
 }
