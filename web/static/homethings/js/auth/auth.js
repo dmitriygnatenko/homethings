@@ -1,3 +1,5 @@
+'use strict'
+
 const authTokenKey = "xuen4sFsjdfhKJHf"
 
 export function setToken(login, password) {

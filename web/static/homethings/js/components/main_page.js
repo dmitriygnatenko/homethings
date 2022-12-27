@@ -1,4 +1,7 @@
+'use strict'
+
 import {placeTreeItemComponent} from "./place_tree_item.js";
+import {modalAddPlaceComponent} from "./modal_add_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
@@ -6,6 +9,7 @@ import {formatDate} from "../helpers/date.js";
 export const mainPageComponent = {
     components: {
         'place-tree-item': placeTreeItemComponent,
+        'modal-add-place': modalAddPlaceComponent,
         'modal-add-thing': modalAddThingComponent,
     },
     props: {
@@ -46,11 +50,11 @@ export const mainPageComponent = {
         request(method, route) {
             let res = client.request(method, route)
             if (res.status !== client.statusOK) {
-                this.$emit('event-set-auth', false)
+                this.$emit('set-auth', false)
             }
             return res
         },
-        refreshPlaces() {
+        refreshPlaces(id) {
             this.selectedPlace = 0
             this.selectedThing = 0
             this.thingsList = []
@@ -58,6 +62,10 @@ export const mainPageComponent = {
                 place: {"title": "Все", id: 0},
                 nested: [],
             }]
+
+            if (id > 0) {
+                this.selectedPlace = id
+            }
 
             let res = this.request(client.methodGet, client.routeGetPlacesTree)
             if (Array.isArray(res.data.places) && res.data.places.length) {
@@ -80,7 +88,7 @@ export const mainPageComponent = {
             }
         },
         addPlace() {
-            console.log("Add place " + this.selectedPlace)
+            this.$refs.modalAddPlace.init();
         },
         updatePlace() {
             console.log("Edit place " + this.selectedPlace)
@@ -92,10 +100,7 @@ export const mainPageComponent = {
             if (this.selectedPlace === 0) {
                 return
             }
-
             this.$refs.modalAddThing.initForm();
-            const addThingModal = new bootstrap.Modal(document.getElementById('add-thing-modal'), {})
-            addThingModal.show()
         },
         updateThing() {
             console.log("Edit thing " + this.selectedThing)
@@ -117,24 +122,21 @@ export const mainPageComponent = {
                                 <button
                                     class="btn add"
                                     title="Добавить место"
-                                    @click="addPlace"
-                                >
+                                    @click="addPlace">
                                     <i class="bi bi-plus-circle-fill"></i>
                                 </button>
                                 <button
                                     class="btn edit"
                                     title="Редактировать место"
                                     v-if="selectedPlace > 0"
-                                    @click="updatePlace"
-                                >
+                                    @click="updatePlace">
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
                                 <button 
                                     class="btn delete"
                                     title="Удалить место"
                                     v-if="selectedPlace > 0"
-                                    @click="deletePlace"
-                                >
+                                    @click="deletePlace">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </div>
@@ -145,8 +147,8 @@ export const mainPageComponent = {
                                     v-for="item in placesTree"
                                     :item="item"
                                     :selected-place="selectedPlace"
-                                    @set-selected-place="setSelectedPlace"
-                                ></place-tree-item>
+                                    @set-selected-place="setSelectedPlace">
+                                </place-tree-item>
                             </ul>
                         </div>
                     </div>
@@ -161,24 +163,21 @@ export const mainPageComponent = {
                                     class="btn add"
                                     title="Добавить вещь"
                                     v-if="selectedPlace > 0"
-                                    @click="addThing"
-                                >
+                                    @click="addThing">
                                     <i class="bi bi-plus-circle-fill"></i>
                                 </button>
                                 <button
                                     class="btn edit"
                                     title="Редактировать вещь"
                                     v-if="selectedThing > 0"
-                                    @click="updateThing"
-                                >
+                                    @click="updateThing">
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
                                 <button 
                                     class="btn delete"
                                     title="Удалить вещь"
                                     v-if="selectedThing > 0"
-                                    @click="deleteThing"
-                                >
+                                    @click="deleteThing">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </div>
@@ -189,8 +188,7 @@ export const mainPageComponent = {
                                 data-id="{{ thing.id }}" 
                                 v-for="thing in thingsList"
                                 @click="selectedThing = thing.id"
-                                :class="{ selected : selectedThing == thing.id }"
-                            >
+                                :class="{ selected : selectedThing == thing.id }">
                                 <div class="title">{{ thing.title }}</div>    
                                 <div class="desc" v-if="thing.desc">{{ thing.desc }}</div>
                                 <div class="date">{{ thing.date }}</div>
@@ -213,10 +211,17 @@ export const mainPageComponent = {
             
             </div>
         </main>
+
+        <modal-add-place
+            ref="modalAddPlace"
+            :selected-place="selectedPlace"
+            @refresh-places="refreshPlaces"
+            >
+        </modal-add-place>
         <modal-add-thing
             ref="modalAddThing"
-            :selected-place="selectedPlace"
-        ></modal-add-thing>
+            :selected-place="selectedPlace">
+        </modal-add-thing>
     </template>
     `
 }

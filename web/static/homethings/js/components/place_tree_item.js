@@ -1,3 +1,5 @@
+'use strict'
+
 export const placeTreeItemComponent = {
     name: 'place-tree-item',
     props: {
@@ -6,18 +8,31 @@ export const placeTreeItemComponent = {
     },
     data: function () {
         return {
-            isOpen: false
+            open: false
         };
     },
     computed: {
-        isFolder: function () {
+        isFolder() {
             return this.item.nested && this.item.nested.length;
+        },
+        isOpen() {
+            if (this.item.nested && this.item.nested.length) {
+                let obj = this
+                this.item.nested.forEach(function(item) {
+                    if (item.place.id === obj.selectedPlace) {
+                        obj.open = true
+                        return
+                    }
+                });
+            }
+
+            return this.open
         }
     },
     methods: {
-        toggle: function () {
+        toggle() {
             if (this.isFolder) {
-                this.isOpen = !this.isOpen;
+                this.open = !this.open;
             }
             this.$emit("set-selected-place", this.item.place.id);
         },
@@ -27,8 +42,7 @@ export const placeTreeItemComponent = {
         <div
             data-id="{{ item.place.id }}"
             :class="{selected: item.place.id == selectedPlace}"
-            @click="toggle"
-        >
+            @click="toggle">
             <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>
             {{ item.place.title }}
         </div>
@@ -38,8 +52,8 @@ export const placeTreeItemComponent = {
                 :key="index"
                 :item="nested"
                 :selected-place="selectedPlace"
-                @set-selected-place="$emit('set-selected-place', $event)"
-            ></place-tree-item>
+                @set-selected-place="$emit('set-selected-place', $event)">
+            </place-tree-item>
         </ul>
     </li>
 `

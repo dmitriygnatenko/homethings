@@ -1,3 +1,5 @@
+'use strict'
+
 export function formatDate(str) {
     let date = new Date(str);
     let res = date.getDate() + " "

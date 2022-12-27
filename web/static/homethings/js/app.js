@@ -1,3 +1,5 @@
+'use strict'
+
 import {loginPageComponent} from './components/login_page.js';
 import {mainPageComponent} from './components/main_page.js';
 import * as client from "./client/client.js";

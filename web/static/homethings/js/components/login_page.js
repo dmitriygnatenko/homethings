@@ -1,3 +1,5 @@
+'use strict'
+
 import * as client from '../client/client.js';
 import * as auth from '../auth/auth.js'
 
@@ -38,7 +40,7 @@ export const loginPageComponent = {
                 this.errors.password = false
                 this.form.username = ""
                 this.form.password = ""
-                this.$emit('event-set-auth', true)
+                this.$emit('set-auth', true)
                 return
             }
 
@@ -55,23 +57,21 @@ export const loginPageComponent = {
                     <input
                         type="text"
                         class="form-control" 
-                        id="floatingUsername" 
+                        id="formUsername" 
                         placeholder="Имя пользователя"
                         v-model.trim="form.username"
-                        :class="{'is-invalid': errors.username}"
-                    >
-                    <label for="floatingUsername">Имя пользователя</label>
+                        :class="{'is-invalid': errors.username}">
+                    <label for="formUsername">Имя пользователя</label>
                 </div>
                 <div class="form-floating">
                     <input
                         type="password" 
                         class="form-control" 
-                        id="floatingPassword"
+                        id="formPassword"
                         placeholder="Пароль"
                         v-model.trim="form.password"
-                        :class="{'is-invalid': errors.password}" 
-                    >
-                    <label for="floatingPassword">Пароль</label>
+                        :class="{'is-invalid': errors.password}">
+                    <label for="formPassword">Пароль</label>
                 </div>
                 <button class="w-100 btn btn-primary" type="button" @click="submitForm">Авторизоваться</button>
             </form>

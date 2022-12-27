@@ -9,8 +9,8 @@
     <script src="static/vue/js/vue.global.js"></script>
 </head>
 <body id="app">
-    <login-page :is-auth=isAuth @event-set-auth="setIsAuth"></login-page>
-    <main-page :is-auth=isAuth></main-page>
+    <login-page :is-auth=isAuth @set-auth="setIsAuth"></login-page>
+    <main-page :is-auth=isAuth @set-auth="setIsAuth"></main-page>
 
     <script type="module">
         import {app} from './static/homethings/js/app.js';
