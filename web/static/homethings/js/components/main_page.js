@@ -3,6 +3,7 @@
 import {placeTreeItemComponent} from "./place_tree_item.js";
 import {modalAddPlaceComponent} from "./modal_add_place.js";
 import {modalUpdatePlaceComponent} from "./modal_update_place.js";
+import {modalDeletePlaceComponent} from "./modal_delete_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
@@ -12,7 +13,9 @@ export const mainPageComponent = {
         'place-tree-item': placeTreeItemComponent,
         'modal-add-place': modalAddPlaceComponent,
         'modal-update-place': modalUpdatePlaceComponent,
+        'modal-delete-place': modalDeletePlaceComponent,
         'modal-add-thing': modalAddThingComponent,
+
     },
     emits: ["set-auth"],
     props: {
@@ -97,6 +100,7 @@ export const mainPageComponent = {
             this.$refs.modalUpdatePlace.init()
         },
         deletePlace() {
+            this.$refs.modalDeletePlace.init()
         },
         addThing() {
         },
@@ -210,6 +214,7 @@ export const mainPageComponent = {
 
         <modal-add-place ref="modalAddPlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-add-place>
         <modal-update-place ref="modalUpdatePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-update-place>
+        <modal-delete-place ref="modalDeletePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-delete-place>
         <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace"></modal-add-thing>
     </template>
     `
