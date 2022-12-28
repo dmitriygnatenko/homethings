@@ -1,5 +1,6 @@
 'use strict'
 
+import {getPlacesListWithNestedTitles} from "../helpers/places.js";
 import * as client from "../client/client.js";
 
 export const modalUpdatePlaceComponent = {
@@ -38,11 +39,10 @@ export const modalUpdatePlaceComponent = {
                         "title": "",
                     })
 
-                    res.data.places.forEach(place => {
+                    getPlacesListWithNestedTitles(res.data.places).forEach(place => {
                         if (place.id !== obj.selectedPlace) {
                             obj.form.placesList.push({
                                 "id": place.id,
-                                "parent_id": place.parent_id,
                                 "title": place.title,
                             })
                         } else {
@@ -83,7 +83,7 @@ export const modalUpdatePlaceComponent = {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <div class="row">
+                    <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
                             Родительское место
                         </label>
@@ -95,7 +95,7 @@ export const modalUpdatePlaceComponent = {
                             </select>
                         </div>       
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
                             Название
                         </label>
@@ -105,9 +105,9 @@ export const modalUpdatePlaceComponent = {
                                 class="form-control form-control-sm"
                                 v-model.trim="form.title"
                                 :class="{'is-invalid': errors.title}">
-                                <div v-if="errors.title" class="invalid-feedback">
-                                    {{ errors.title }}
-                                </div>
+                            <div v-if="errors.title" class="invalid-feedback">
+                                {{ errors.title }}
+                            </div>
                         </div>
                     </div>
                 </div>

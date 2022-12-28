@@ -57,7 +57,7 @@ export const modalAddPlaceComponent = {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <div class="row">
+                    <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
                             Родительское место
                         </label>
@@ -69,7 +69,7 @@ export const modalAddPlaceComponent = {
                                 v-model="form.parentTitle">
                         </div>       
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
                             Название
                         </label>
@@ -79,9 +79,9 @@ export const modalAddPlaceComponent = {
                                 class="form-control form-control-sm" 
                                 v-model.trim="form.title"
                                 :class="{'is-invalid': errors.title}">
-                                <div v-if="errors.title" class="invalid-feedback">
-                                    {{ errors.title }}
-                                </div>
+                            <div v-if="errors.title" class="invalid-feedback">
+                                {{ errors.title }}
+                            </div>
                         </div>
                     </div>
                 </div>

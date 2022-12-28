@@ -103,6 +103,7 @@ export const mainPageComponent = {
             this.$refs.modalDeletePlace.init()
         },
         addThing() {
+            this.$refs.modalAddThing.init()
         },
         updateThing() {
         },
@@ -215,7 +216,7 @@ export const mainPageComponent = {
         <modal-add-place ref="modalAddPlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-add-place>
         <modal-update-place ref="modalUpdatePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-update-place>
         <modal-delete-place ref="modalDeletePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-delete-place>
-        <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace"></modal-add-thing>
+        <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @refresh-things="refreshThings"></modal-add-thing>
     </template>
     `
 }

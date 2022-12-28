@@ -39,7 +39,7 @@ func (r thingRepository) CommitTx(tx *sql.Tx) error {
 }
 
 func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, error) {
-	query, args, err := sq.Select("thingID", "title", "description", "created_at", "updated_at").
+	query, args, err := sq.Select("id", "title", "description", "created_at", "updated_at").
 		From(thingTableName).
 		Where(sq.Eq{"id": thingID}).
 		ToSql()
