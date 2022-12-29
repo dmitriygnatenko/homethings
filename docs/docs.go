@@ -678,6 +678,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "place_id": {
+                    "type": "integer"
+                },
                 "title": {
                     "type": "string"
                 },

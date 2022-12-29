@@ -52,6 +52,7 @@ func Test_AddThingHandler(t *testing.T) {
 
 		repoRes = models.Thing{
 			ID:          thingID,
+			PlaceID:     placeID,
 			Title:       title,
 			Description: description,
 			CreatedAt:   gofakeit.Date().String(),
@@ -60,6 +61,7 @@ func Test_AddThingHandler(t *testing.T) {
 
 		expectedRes = dto.ThingResponse{
 			ID:          thingID,
+			PlaceID:     placeID,
 			Title:       title,
 			Description: description,
 			CreatedAt:   repoRes.CreatedAt,

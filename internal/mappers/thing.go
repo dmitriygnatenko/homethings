@@ -37,6 +37,7 @@ func ConvertToUpdatePlaceThingRequestModel(thingID int, placeID int) models.Upda
 func ConvertToThingResponseDTO(req models.Thing) dto.ThingResponse {
 	return dto.ThingResponse{
 		ID:          req.ID,
+		PlaceID:     req.PlaceID,
 		Title:       req.Title,
 		Description: req.Description,
 		CreatedAt:   req.CreatedAt,

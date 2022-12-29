@@ -14,6 +14,7 @@ type UpdateThingRequest struct {
 
 type ThingResponse struct {
 	ID          int    `json:"id"`
+	PlaceID     int    `json:"place_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	CreatedAt   string `json:"created_at"`

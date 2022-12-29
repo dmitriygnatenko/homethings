@@ -2,6 +2,7 @@ package models
 
 type Thing struct {
 	ID          int
+	PlaceID     int
 	Title       string
 	Description string
 	CreatedAt   string

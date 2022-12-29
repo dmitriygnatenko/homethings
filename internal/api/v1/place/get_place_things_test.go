@@ -41,6 +41,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 		thingRepoRes = []models.Thing{
 			{
 				ID:          gofakeit.Number(1, 1000),
+				PlaceID:     placeID,
 				Title:       gofakeit.Phrase(),
 				Description: gofakeit.Phrase(),
 				CreatedAt:   gofakeit.Date().String(),
@@ -48,6 +49,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			},
 			{
 				ID:          gofakeit.Number(1, 1000),
+				PlaceID:     placeID,
 				Title:       gofakeit.Phrase(),
 				Description: gofakeit.Phrase(),
 				CreatedAt:   gofakeit.Date().String(),
@@ -59,6 +61,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			Things: []dto.ThingResponse{
 				{
 					ID:          thingRepoRes[0].ID,
+					PlaceID:     thingRepoRes[0].PlaceID,
 					Title:       thingRepoRes[0].Title,
 					Description: thingRepoRes[0].Description,
 					CreatedAt:   thingRepoRes[0].CreatedAt,
@@ -66,6 +69,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 				},
 				{
 					ID:          thingRepoRes[1].ID,
+					PlaceID:     thingRepoRes[1].PlaceID,
 					Title:       thingRepoRes[1].Title,
 					Description: thingRepoRes[1].Description,
 					CreatedAt:   thingRepoRes[1].CreatedAt,

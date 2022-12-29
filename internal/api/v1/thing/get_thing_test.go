@@ -32,6 +32,7 @@ func Test_GetThingHandler(t *testing.T) {
 	var (
 		mc        = minimock.NewController(t)
 		thingID   = gofakeit.Number(1, 1000)
+		placeID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
 
 		correctReq = req{
@@ -41,6 +42,7 @@ func Test_GetThingHandler(t *testing.T) {
 
 		thingRepoRes = models.Thing{
 			ID:          thingID,
+			PlaceID:     placeID,
 			Title:       gofakeit.Phrase(),
 			Description: gofakeit.Phrase(),
 			CreatedAt:   gofakeit.Date().String(),
@@ -49,6 +51,7 @@ func Test_GetThingHandler(t *testing.T) {
 
 		expectedRes = dto.ThingResponse{
 			ID:          thingID,
+			PlaceID:     placeID,
 			Title:       thingRepoRes.Title,
 			Description: thingRepoRes.Description,
 			CreatedAt:   thingRepoRes.CreatedAt,
