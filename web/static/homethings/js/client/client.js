@@ -17,6 +17,9 @@ export const routeGetPlace = "/api/v1/places/{id}"
 export const routeGetPlaces = "/api/v1/places"
 export const routeGetPlacesTree = "/api/v1/places/tree"
 export const routeAddThing = "/api/v1/things"
+export const routeGetThing = "/api/v1/things/{id}"
+export const routeUpdateThing = "/api/v1/things/{id}"
+export const routeDeleteThing = "/api/v1/things/{id}"
 export const routeGetPlaceThings = "/api/v1/places/{id}/things"
 
 export function request(method, url, data) {

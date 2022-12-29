@@ -5,6 +5,8 @@ import {modalAddPlaceComponent} from "./modal_add_place.js";
 import {modalUpdatePlaceComponent} from "./modal_update_place.js";
 import {modalDeletePlaceComponent} from "./modal_delete_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
+import {modalUpdateThingComponent} from "./modal_update_thing.js";
+
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
 
@@ -15,7 +17,7 @@ export const mainPageComponent = {
         'modal-update-place': modalUpdatePlaceComponent,
         'modal-delete-place': modalDeletePlaceComponent,
         'modal-add-thing': modalAddThingComponent,
-
+        'modal-update-thing': modalUpdateThingComponent,
     },
     emits: ["set-auth"],
     props: {
@@ -106,6 +108,7 @@ export const mainPageComponent = {
             this.$refs.modalAddThing.init()
         },
         updateThing() {
+            this.$refs.modalUpdateThing.init()
         },
         deleteThing() {
         },
@@ -217,6 +220,7 @@ export const mainPageComponent = {
         <modal-update-place ref="modalUpdatePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-update-place>
         <modal-delete-place ref="modalDeletePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-delete-place>
         <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @refresh-things="refreshThings"></modal-add-thing>
+        <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @refresh-things="refreshThings" @refresh-places="refreshPlaces"></modal-update-thing>
     </template>
     `
 }
