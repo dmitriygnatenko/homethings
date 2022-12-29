@@ -6,6 +6,7 @@ import {modalUpdatePlaceComponent} from "./modal_update_place.js";
 import {modalDeletePlaceComponent} from "./modal_delete_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
 import {modalUpdateThingComponent} from "./modal_update_thing.js";
+import {modalDeleteThingComponent} from "./modal_delete_thing.js";
 
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
@@ -18,6 +19,7 @@ export const mainPageComponent = {
         'modal-delete-place': modalDeletePlaceComponent,
         'modal-add-thing': modalAddThingComponent,
         'modal-update-thing': modalUpdateThingComponent,
+        'modal-delete-thing': modalDeleteThingComponent,
     },
     emits: ["set-auth"],
     props: {
@@ -29,6 +31,7 @@ export const mainPageComponent = {
             thingsList: [],
             selectedPlace: 0,
             selectedThing: 0,
+            selectedImage: 0,
         }
     },
     computed: {
@@ -111,6 +114,13 @@ export const mainPageComponent = {
             this.$refs.modalUpdateThing.init()
         },
         deleteThing() {
+            this.$refs.modalDeleteThing.init()
+        },
+        addImage() {
+
+        },
+        deleteImage() {
+
         },
     },
     template: `
@@ -206,7 +216,20 @@ export const mainPageComponent = {
                         <div class="header rounded-top">
                             Фото
                             <div class="buttons float-end">
-                                <button class="btn add"></button>
+                                <button
+                                    class="btn add"
+                                    title="Добавить фото"
+                                    v-if="selectedPlace > 0 || selectedThing > 0"
+                                    @click="addImage">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                </button>
+                                <button 
+                                    class="btn delete"
+                                    title="Удалить фото"
+                                    v-if="selectedImage > 0"
+                                    @click="deleteImage">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="list"></div>
@@ -221,6 +244,7 @@ export const mainPageComponent = {
         <modal-delete-place ref="modalDeletePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-delete-place>
         <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @refresh-things="refreshThings"></modal-add-thing>
         <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @refresh-things="refreshThings" @refresh-places="refreshPlaces"></modal-update-thing>
+        <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @refresh-things="refreshThings"></modal-delete-thing>
     </template>
     `
 }

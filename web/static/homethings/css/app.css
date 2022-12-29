@@ -159,10 +159,11 @@ body {
     background-color: #dfc00c;
     color: #ffffff;
 }
-/*.info .buttons .btn:hover {*/
-/*    background-color: #bfa616;*/
-/*    border-color: #bfa616;*/
-/*}*/
+.info .buttons .btn:hover {
+    background-color: #bfa616;
+    border-color: #bfa616;
+}
+
 /*.info .list .btn {*/
 /*    width: 100%;*/
 /*    text-align: left;*/
@@ -181,12 +182,4 @@ body {
 /*}*/
 /*.info .list .btn img {*/
 /*    margin-top: 7px;*/
-/*}*/
-/*#edit-place-modal .form-label {*/
-/*    margin: 10px 0 3px 0;*/
-/*    padding: 0;*/
-/*}*/
-/*#edit-thing-modal .form-label {*/
-/*    margin: 10px 0 3px 0;*/
-/*    padding: 0;*/
 /*}*/
