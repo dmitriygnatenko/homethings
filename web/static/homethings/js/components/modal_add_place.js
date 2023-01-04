@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 import * as client from "../client/client.js";
 
@@ -26,13 +26,13 @@ export const modalAddPlaceComponent = {
             this.form.parentID = this.selectedPlace
 
             if (this.selectedPlace > 0) {
-                let res = client.request(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
+                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
                 if (res.status === client.statusOK) {
                     this.form.parentTitle = res.data.title
                 }
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById('add-place-modal'), {})
+            this.modal = new bootstrap.Modal(document.getElementById("add-place-modal"), {})
             this.modal.show()
         },
         submitForm() {
@@ -43,9 +43,9 @@ export const modalAddPlaceComponent = {
 
             let data = {title: this.form.title}
             if (this.form.parentID > 0) {
-                data['parent_id'] = this.form.parentID
+                data["parent_id"] = this.form.parentID
             }
-            let res = client.request(client.methodPost, client.routeAddPlace, data)
+            let res = client.jsonRequest(client.methodPost, client.routeAddPlace, data)
             if (res.status === client.statusOK) {
                 this.$emit("refresh-places", res.data.id);
             }

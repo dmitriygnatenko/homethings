@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 import {placeTreeItemComponent} from "./place_tree_item.js";
 import {modalAddPlaceComponent} from "./modal_add_place.js";
@@ -7,19 +7,21 @@ import {modalDeletePlaceComponent} from "./modal_delete_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
 import {modalUpdateThingComponent} from "./modal_update_thing.js";
 import {modalDeleteThingComponent} from "./modal_delete_thing.js";
+import {modalAddImageComponent} from "./modal_add_image.js";
 
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
 
 export const mainPageComponent = {
     components: {
-        'place-tree-item': placeTreeItemComponent,
-        'modal-add-place': modalAddPlaceComponent,
-        'modal-update-place': modalUpdatePlaceComponent,
-        'modal-delete-place': modalDeletePlaceComponent,
-        'modal-add-thing': modalAddThingComponent,
-        'modal-update-thing': modalUpdateThingComponent,
-        'modal-delete-thing': modalDeleteThingComponent,
+        "place-tree-item": placeTreeItemComponent,
+        "modal-add-place": modalAddPlaceComponent,
+        "modal-update-place": modalUpdatePlaceComponent,
+        "modal-delete-place": modalDeletePlaceComponent,
+        "modal-add-thing": modalAddThingComponent,
+        "modal-update-thing": modalUpdateThingComponent,
+        "modal-delete-thing": modalDeleteThingComponent,
+        "modal-add-image": modalAddImageComponent,
     },
     emits: ["set-auth"],
     props: {
@@ -59,9 +61,9 @@ export const mainPageComponent = {
             }
         },
         request(method, route) {
-            let res = client.request(method, route)
+            let res = client.jsonRequest(method, route)
             if (res.status !== client.statusOK) {
-                this.$emit('set-auth', false)
+                this.$emit("set-auth", false)
             }
             return res
         },
@@ -117,7 +119,7 @@ export const mainPageComponent = {
             this.$refs.modalDeleteThing.init()
         },
         addImage() {
-
+            this.$refs.modalAddImage.init()
         },
         deleteImage() {
 
@@ -245,6 +247,7 @@ export const mainPageComponent = {
         <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @refresh-things="refreshThings"></modal-add-thing>
         <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @refresh-things="refreshThings" @refresh-places="refreshPlaces"></modal-update-thing>
         <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @refresh-things="refreshThings"></modal-delete-thing>
+        <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @refresh-places="refreshPlaces"></modal-add-image>
     </template>
     `
 }

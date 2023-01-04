@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 export function formatDate(str) {
     let date = new Date(str);

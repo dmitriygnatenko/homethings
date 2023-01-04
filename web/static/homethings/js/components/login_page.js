@@ -1,7 +1,7 @@
-'use strict'
+"use strict"
 
-import * as client from '../client/client.js';
-import * as auth from '../auth/auth.js'
+import * as client from "../client/client.js";
+import * as auth from "../auth/auth.js"
 
 export const loginPageComponent = {
     props: {
@@ -35,13 +35,13 @@ export const loginPageComponent = {
 
             auth.setToken(this.form.username, this.form.password)
 
-            let res = client.request(client.methodGet, client.routeCheckAuth)
+            let res = client.jsonRequest(client.methodGet, client.routeCheckAuth)
             if (res.status === client.statusOK) {
                 this.errors.username = false
                 this.errors.password = false
                 this.form.username = ""
                 this.form.password = ""
-                this.$emit('set-auth', true)
+                this.$emit("set-auth", true)
                 return
             }
 

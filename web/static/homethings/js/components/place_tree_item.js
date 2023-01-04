@@ -1,7 +1,7 @@
-'use strict'
+"use strict"
 
 export const placeTreeItemComponent = {
-    name: 'place-tree-item',
+    name: "place-tree-item",
     props: {
         item: Object,
         selectedPlace: Number,

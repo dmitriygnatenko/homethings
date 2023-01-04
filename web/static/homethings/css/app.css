@@ -163,23 +163,9 @@ body {
     background-color: #bfa616;
     border-color: #bfa616;
 }
-
-/*.info .list .btn {*/
-/*    width: 100%;*/
-/*    text-align: left;*/
-/*    border-left: 0;*/
-/*    border-right: 0;*/
-/*    border-top: 0;*/
-/*    border-bottom: 1px dashed #b6b6b6;*/
-/*    border-radius: 0;*/
-/*}*/
-/*.info .list .date {*/
-/*    color: gray;*/
-/*    font-size: 12px;*/
-/*    text-align: right;*/
-/*    margin-bottom: 1px;*/
-/*    margin-top: 3px;*/
-/*}*/
-/*.info .list .btn img {*/
-/*    margin-top: 7px;*/
-/*}*/
+#add-image-modal .btn.add {
+    color: green;
+}
+#add-image-modal .btn.delete {
+    color: #cf0000;
+}

@@ -1,13 +1,13 @@
-'use strict'
+"use strict"
 
-import {loginPageComponent} from './components/login_page.js';
-import {mainPageComponent} from './components/main_page.js';
+import {loginPageComponent} from "./components/login_page.js";
+import {mainPageComponent} from "./components/main_page.js";
 import * as client from "./client/client.js";
 
 export const app = {
     components: {
-        'login-page': loginPageComponent,
-        'main-page': mainPageComponent,
+        "login-page": loginPageComponent,
+        "main-page": mainPageComponent,
     },
     data() {
         return {
@@ -15,7 +15,7 @@ export const app = {
         };
     },
     created() {
-        let res = client.request(client.methodGet, client.routeCheckAuth)
+        let res = client.jsonRequest(client.methodGet, client.routeCheckAuth)
         if (res.status === client.statusOK) {
             this.isAuth = true
         }

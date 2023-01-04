@@ -28,7 +28,7 @@ export const modalUpdatePlaceComponent = {
             this.errors.title = ""
             this.form.title = ""
 
-            let res = client.request(client.methodGet, client.routeGetPlaces)
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlaces)
             if (res.status === client.statusOK) {
                 this.form.placesList = []
                 if (Array.isArray(res.data.places) && res.data.places.length) {
@@ -70,7 +70,7 @@ export const modalUpdatePlaceComponent = {
                 data['parent_id'] = this.form.parentID
             }
 
-            let res = client.request(client.methodPut, client.routeUpdatePlace.replace("{id}", this.selectedPlace), data)
+            let res = client.jsonRequest(client.methodPut, client.routeUpdatePlace.replace("{id}", this.selectedPlace), data)
             if (res.status === client.statusOK) {
                 this.$emit("refresh-places", res.data.id);
             }

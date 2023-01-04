@@ -30,7 +30,7 @@ export const modalUpdateThingComponent = {
             this.form.title = ""
             this.form.desc = ""
 
-            let res = client.request(client.methodGet, client.routeGetThing.replace("{id}", this.selectedThing))
+            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{id}", this.selectedThing))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
                 this.form.desc = res.data.description
@@ -41,7 +41,7 @@ export const modalUpdateThingComponent = {
                 return
             }
 
-            let pres = client.request(client.methodGet, client.routeGetPlaces)
+            let pres = client.jsonRequest(client.methodGet, client.routeGetPlaces)
             if (pres.status === client.statusOK) {
                 this.form.placesList = []
                 if (Array.isArray(pres.data.places) && pres.data.places.length) {
@@ -71,7 +71,7 @@ export const modalUpdateThingComponent = {
                 place_id: this.form.placeID,
             }
 
-            let res = client.request(client.methodPut, client.routeUpdateThing.replace("{id}", this.selectedThing), data)
+            let res = client.jsonRequest(client.methodPut, client.routeUpdateThing.replace("{id}", this.selectedThing), data)
             if (res.status === client.statusOK) {
                 this.$emit("refresh-places", data.place_id);
                 this.$emit("refresh-things", data.place_id);

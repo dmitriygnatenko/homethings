@@ -1,6 +1,6 @@
-'use strict'
+"use strict"
 
-import {getToken} from '../auth/auth.js';
+import {getToken} from "../auth/auth.js";
 
 export const statusOK = 200
 
@@ -21,21 +21,38 @@ export const routeGetThing = "/api/v1/things/{id}"
 export const routeUpdateThing = "/api/v1/things/{id}"
 export const routeDeleteThing = "/api/v1/things/{id}"
 export const routeGetPlaceThings = "/api/v1/places/{id}/things"
+export const routeAddImage = "/api/v1/images"
 
-export function request(method, url, data) {
+export function jsonRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
 
     xhr.open(method, url, false);
 
-    xhr.setRequestHeader('Accept', 'application/json')
-    xhr.setRequestHeader('Content-Type', 'application/json')
-    xhr.setRequestHeader('Authorization', 'Basic ' + getToken())
+    xhr.setRequestHeader("Accept", "application/json")
+    xhr.setRequestHeader("Authorization", "Basic " + getToken())
+    xhr.setRequestHeader("Content-Type", "application/json")
 
     if (data !== undefined) {
         xhr.send(JSON.stringify(data));
     } else {
         xhr.send();
     }
+
+    return {
+        data: JSON.parse(xhr.responseText),
+        status: xhr.status,
+    };
+}
+
+export function formDataRequest(method, url, data) {
+    let xhr = new XMLHttpRequest();
+
+    xhr.open(method, url, false);
+
+    xhr.setRequestHeader("Accept", "application/json")
+    xhr.setRequestHeader("Authorization", "Basic " + getToken())
+
+    xhr.send(data);
 
     return {
         data: JSON.parse(xhr.responseText),

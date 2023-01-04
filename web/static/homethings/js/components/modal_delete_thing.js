@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 import * as client from "../client/client.js";
 
@@ -23,7 +23,7 @@ export const modalDeleteThingComponent = {
             this.form.placeID = 0
             this.form.title = ""
 
-            let res = client.request(client.methodGet, client.routeGetThing.replace("{id}", this.selectedThing))
+            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{id}", this.selectedThing))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
                 this.form.placeID = res.data.place_id
@@ -33,7 +33,7 @@ export const modalDeleteThingComponent = {
             this.modal.show()
         },
         submitForm() {
-            let res = client.request(client.methodDelete, client.routeDeleteThing.replace("{id}", this.selectedThing))
+            let res = client.jsonRequest(client.methodDelete, client.routeDeleteThing.replace("{id}", this.selectedThing))
             if (res.status === client.statusOK) {
                 this.$emit("refresh-things", this.form.placeID);
             }

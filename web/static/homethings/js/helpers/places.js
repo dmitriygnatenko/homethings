@@ -1,12 +1,12 @@
-'use strict'
+"use strict"
 
 export function getPlacesListWithNestedTitles(places) {
     let res = [], map = {}
 
     places.forEach(place => {
         map[place.id] = {
-            'title': place.title,
-            'parent_id': place.parent_id,
+            "title": place.title,
+            "parent_id": place.parent_id,
         }
     });
 

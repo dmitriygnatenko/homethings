@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 import * as client from "../client/client.js";
 
@@ -21,16 +21,16 @@ export const modalDeletePlaceComponent = {
             }
             this.form.title = ""
 
-            let res = client.request(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById('delete-place-modal'), {})
+            this.modal = new bootstrap.Modal(document.getElementById("delete-place-modal"), {})
             this.modal.show()
         },
         submitForm() {
-            let res = client.request(client.methodDelete, client.routeDeletePlace.replace("{id}", this.selectedPlace))
+            let res = client.jsonRequest(client.methodDelete, client.routeDeletePlace.replace("{id}", this.selectedPlace))
             if (res.status === client.statusOK) {
                 this.$emit("refresh-places");
             }

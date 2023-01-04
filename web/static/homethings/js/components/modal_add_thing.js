@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 import * as client from "../client/client.js";
 import {getPlacesListWithNestedTitles} from "../helpers/places.js";
@@ -31,7 +31,7 @@ export const modalAddThingComponent = {
             this.form.desc = ""
             this.errors.title = ""
 
-            let res = client.request(client.methodGet, client.routeGetPlaces)
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlaces)
             if (res.status === client.statusOK) {
                 this.form.placesList = []
                 if (Array.isArray(res.data.places) && res.data.places.length) {
@@ -46,7 +46,7 @@ export const modalAddThingComponent = {
                 }
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById('add-thing-modal'), {})
+            this.modal = new bootstrap.Modal(document.getElementById("add-thing-modal"), {})
             this.modal.show()
         },
         submitForm() {
@@ -61,7 +61,7 @@ export const modalAddThingComponent = {
                 place_id: this.form.placeID,
             }
 
-            let res = client.request(client.methodPost, client.routeAddThing, data)
+            let res = client.jsonRequest(client.methodPost, client.routeAddThing, data)
             if (res.status === client.statusOK) {
                 this.$emit("refresh-things", data.place_id);
             }
