@@ -32,6 +32,18 @@ type IPlaceThingRepository interface {
 	DeleteThing(ctx context.Context, thingID int, tx *sql.Tx) error
 }
 
+type IPlaceImageRepository interface {
+	Add(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) error
+	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+	CommitTx(tx *sql.Tx) error
+}
+
+type IThingImageRepository interface {
+	Add(ctx context.Context, req models.AddThingImageRequest, tx *sql.Tx) error
+	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+	CommitTx(tx *sql.Tx) error
+}
+
 type ITagRepository interface {
 	GetAll(ctx context.Context) ([]models.Tag, error)
 }

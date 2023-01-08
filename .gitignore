@@ -3,3 +3,4 @@
 /config/.env
 /build/docker/mysql/
 /build/coverage.out
+/web/files/

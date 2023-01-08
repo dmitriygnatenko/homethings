@@ -3,6 +3,7 @@ package fiber
 import (
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
+	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
 	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
 	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
@@ -83,6 +84,8 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Post("/v1/things", thingAPI.AddThingHandler(sp))
 	r.Put("/v1/things/:id<int>", thingAPI.UpdateThingHandler(sp))
 	r.Delete("/v1/things/:id<int>", thingAPI.DeleteThingHandler(sp))
+
+	r.Post("/v1/images", imageAPI.AddImageHandler(sp))
 
 	r.Get("/v1/auth/check", authAPI.CheckAuthHandler(sp))
 }

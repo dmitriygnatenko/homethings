@@ -6,4 +6,6 @@ type IServiceProvider interface {
 	GetThingRepository() IThingRepository
 	GetPlaceThingRepository() IPlaceThingRepository
 	GetTagRepository() ITagRepository
+	GetPlaceImageRepository() IPlaceImageRepository
+	GetThingImageRepository() IThingImageRepository
 }

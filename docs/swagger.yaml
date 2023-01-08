@@ -136,6 +136,46 @@ paths:
       summary: Check username/password
       tags:
       - Auth
+  /v1/images:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Place ID
+        in: formData
+        name: place_id
+        type: integer
+      - description: Thing ID
+        in: formData
+        name: thing_id
+        type: integer
+      - description: Files
+        in: formData
+        items:
+          type: file
+        name: files
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Add images
+      tags:
+      - Images
   /v1/places:
     get:
       consumes:
