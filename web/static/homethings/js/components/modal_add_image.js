@@ -14,7 +14,7 @@ export const modalAddImageComponent = {
             typeThing: "thing",
             modal: Object,
             form: {
-                files: [null],
+                files: null,
                 type: null,
                 placeTitle: "",
                 thingTitle: "",
@@ -23,7 +23,7 @@ export const modalAddImageComponent = {
     },
     methods: {
         init() {
-            this.form.files = [null]
+            this.form.files = [""]
             this.form.placeTitle = ""
             this.form.thingTitle = ""
 
@@ -71,10 +71,11 @@ export const modalAddImageComponent = {
                 this.$emit("refresh-places", this.selectedPlace);
             }
 
+            this.form.files = null
             this.modal.hide()
         },
         addField() {
-            this.form.files.push(null)
+            this.form.files.push("")
         },
         removeField() {
             this.form.files.pop()
