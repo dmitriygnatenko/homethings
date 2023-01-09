@@ -36,6 +36,10 @@ definitions:
         type: integer
       image:
         type: string
+      place_id:
+        type: integer
+      thing_id:
+        type: integer
     type: object
   dto.ImagesResponse:
     properties:
@@ -190,6 +194,36 @@ paths:
       security:
       - BasicAuth: []
       summary: Add images
+      tags:
+      - Images
+  /v1/images/place/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Place ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ImagesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Get images by place ID (with child places)
       tags:
       - Images
   /v1/images/thing/{id}:

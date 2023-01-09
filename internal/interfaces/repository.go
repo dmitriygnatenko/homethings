@@ -34,6 +34,7 @@ type IPlaceThingRepository interface {
 
 type IPlaceImageRepository interface {
 	Add(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) error
+	GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error)
 	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
 	CommitTx(tx *sql.Tx) error
 }
@@ -41,6 +42,7 @@ type IPlaceImageRepository interface {
 type IThingImageRepository interface {
 	Add(ctx context.Context, req models.AddThingImageRequest, tx *sql.Tx) error
 	GetByThingID(ctx context.Context, thingID int) ([]models.Image, error)
+	GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error)
 	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
 	CommitTx(tx *sql.Tx) error
 }

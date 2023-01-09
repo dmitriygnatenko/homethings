@@ -36,6 +36,12 @@ type IPlaceImageRepositoryMock struct {
 	afterCommitTxCounter  uint64
 	beforeCommitTxCounter uint64
 	CommitTxMock          mIPlaceImageRepositoryMockCommitTx
+
+	funcGetByPlaceID          func(ctx context.Context, placeID int) (ia1 []models.Image, err error)
+	inspectFuncGetByPlaceID   func(ctx context.Context, placeID int)
+	afterGetByPlaceIDCounter  uint64
+	beforeGetByPlaceIDCounter uint64
+	GetByPlaceIDMock          mIPlaceImageRepositoryMockGetByPlaceID
 }
 
 // NewIPlaceImageRepositoryMock returns a mock for interfaces.IPlaceImageRepository
@@ -53,6 +59,9 @@ func NewIPlaceImageRepositoryMock(t minimock.Tester) *IPlaceImageRepositoryMock 
 
 	m.CommitTxMock = mIPlaceImageRepositoryMockCommitTx{mock: m}
 	m.CommitTxMock.callArgs = []*IPlaceImageRepositoryMockCommitTxParams{}
+
+	m.GetByPlaceIDMock = mIPlaceImageRepositoryMockGetByPlaceID{mock: m}
+	m.GetByPlaceIDMock.callArgs = []*IPlaceImageRepositoryMockGetByPlaceIDParams{}
 
 	return m
 }
@@ -706,6 +715,223 @@ func (m *IPlaceImageRepositoryMock) MinimockCommitTxInspect() {
 	}
 }
 
+type mIPlaceImageRepositoryMockGetByPlaceID struct {
+	mock               *IPlaceImageRepositoryMock
+	defaultExpectation *IPlaceImageRepositoryMockGetByPlaceIDExpectation
+	expectations       []*IPlaceImageRepositoryMockGetByPlaceIDExpectation
+
+	callArgs []*IPlaceImageRepositoryMockGetByPlaceIDParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceImageRepositoryMockGetByPlaceIDExpectation specifies expectation struct of the IPlaceImageRepository.GetByPlaceID
+type IPlaceImageRepositoryMockGetByPlaceIDExpectation struct {
+	mock    *IPlaceImageRepositoryMock
+	params  *IPlaceImageRepositoryMockGetByPlaceIDParams
+	results *IPlaceImageRepositoryMockGetByPlaceIDResults
+	Counter uint64
+}
+
+// IPlaceImageRepositoryMockGetByPlaceIDParams contains parameters of the IPlaceImageRepository.GetByPlaceID
+type IPlaceImageRepositoryMockGetByPlaceIDParams struct {
+	ctx     context.Context
+	placeID int
+}
+
+// IPlaceImageRepositoryMockGetByPlaceIDResults contains results of the IPlaceImageRepository.GetByPlaceID
+type IPlaceImageRepositoryMockGetByPlaceIDResults struct {
+	ia1 []models.Image
+	err error
+}
+
+// Expect sets up expected params for IPlaceImageRepository.GetByPlaceID
+func (mmGetByPlaceID *mIPlaceImageRepositoryMockGetByPlaceID) Expect(ctx context.Context, placeID int) *mIPlaceImageRepositoryMockGetByPlaceID {
+	if mmGetByPlaceID.mock.funcGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("IPlaceImageRepositoryMock.GetByPlaceID mock is already set by Set")
+	}
+
+	if mmGetByPlaceID.defaultExpectation == nil {
+		mmGetByPlaceID.defaultExpectation = &IPlaceImageRepositoryMockGetByPlaceIDExpectation{}
+	}
+
+	mmGetByPlaceID.defaultExpectation.params = &IPlaceImageRepositoryMockGetByPlaceIDParams{ctx, placeID}
+	for _, e := range mmGetByPlaceID.expectations {
+		if minimock.Equal(e.params, mmGetByPlaceID.defaultExpectation.params) {
+			mmGetByPlaceID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetByPlaceID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetByPlaceID
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceImageRepository.GetByPlaceID
+func (mmGetByPlaceID *mIPlaceImageRepositoryMockGetByPlaceID) Inspect(f func(ctx context.Context, placeID int)) *mIPlaceImageRepositoryMockGetByPlaceID {
+	if mmGetByPlaceID.mock.inspectFuncGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("Inspect function is already set for IPlaceImageRepositoryMock.GetByPlaceID")
+	}
+
+	mmGetByPlaceID.mock.inspectFuncGetByPlaceID = f
+
+	return mmGetByPlaceID
+}
+
+// Return sets up results that will be returned by IPlaceImageRepository.GetByPlaceID
+func (mmGetByPlaceID *mIPlaceImageRepositoryMockGetByPlaceID) Return(ia1 []models.Image, err error) *IPlaceImageRepositoryMock {
+	if mmGetByPlaceID.mock.funcGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("IPlaceImageRepositoryMock.GetByPlaceID mock is already set by Set")
+	}
+
+	if mmGetByPlaceID.defaultExpectation == nil {
+		mmGetByPlaceID.defaultExpectation = &IPlaceImageRepositoryMockGetByPlaceIDExpectation{mock: mmGetByPlaceID.mock}
+	}
+	mmGetByPlaceID.defaultExpectation.results = &IPlaceImageRepositoryMockGetByPlaceIDResults{ia1, err}
+	return mmGetByPlaceID.mock
+}
+
+// Set uses given function f to mock the IPlaceImageRepository.GetByPlaceID method
+func (mmGetByPlaceID *mIPlaceImageRepositoryMockGetByPlaceID) Set(f func(ctx context.Context, placeID int) (ia1 []models.Image, err error)) *IPlaceImageRepositoryMock {
+	if mmGetByPlaceID.defaultExpectation != nil {
+		mmGetByPlaceID.mock.t.Fatalf("Default expectation is already set for the IPlaceImageRepository.GetByPlaceID method")
+	}
+
+	if len(mmGetByPlaceID.expectations) > 0 {
+		mmGetByPlaceID.mock.t.Fatalf("Some expectations are already set for the IPlaceImageRepository.GetByPlaceID method")
+	}
+
+	mmGetByPlaceID.mock.funcGetByPlaceID = f
+	return mmGetByPlaceID.mock
+}
+
+// When sets expectation for the IPlaceImageRepository.GetByPlaceID which will trigger the result defined by the following
+// Then helper
+func (mmGetByPlaceID *mIPlaceImageRepositoryMockGetByPlaceID) When(ctx context.Context, placeID int) *IPlaceImageRepositoryMockGetByPlaceIDExpectation {
+	if mmGetByPlaceID.mock.funcGetByPlaceID != nil {
+		mmGetByPlaceID.mock.t.Fatalf("IPlaceImageRepositoryMock.GetByPlaceID mock is already set by Set")
+	}
+
+	expectation := &IPlaceImageRepositoryMockGetByPlaceIDExpectation{
+		mock:   mmGetByPlaceID.mock,
+		params: &IPlaceImageRepositoryMockGetByPlaceIDParams{ctx, placeID},
+	}
+	mmGetByPlaceID.expectations = append(mmGetByPlaceID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceImageRepository.GetByPlaceID return parameters for the expectation previously defined by the When method
+func (e *IPlaceImageRepositoryMockGetByPlaceIDExpectation) Then(ia1 []models.Image, err error) *IPlaceImageRepositoryMock {
+	e.results = &IPlaceImageRepositoryMockGetByPlaceIDResults{ia1, err}
+	return e.mock
+}
+
+// GetByPlaceID implements interfaces.IPlaceImageRepository
+func (mmGetByPlaceID *IPlaceImageRepositoryMock) GetByPlaceID(ctx context.Context, placeID int) (ia1 []models.Image, err error) {
+	mm_atomic.AddUint64(&mmGetByPlaceID.beforeGetByPlaceIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetByPlaceID.afterGetByPlaceIDCounter, 1)
+
+	if mmGetByPlaceID.inspectFuncGetByPlaceID != nil {
+		mmGetByPlaceID.inspectFuncGetByPlaceID(ctx, placeID)
+	}
+
+	mm_params := &IPlaceImageRepositoryMockGetByPlaceIDParams{ctx, placeID}
+
+	// Record call args
+	mmGetByPlaceID.GetByPlaceIDMock.mutex.Lock()
+	mmGetByPlaceID.GetByPlaceIDMock.callArgs = append(mmGetByPlaceID.GetByPlaceIDMock.callArgs, mm_params)
+	mmGetByPlaceID.GetByPlaceIDMock.mutex.Unlock()
+
+	for _, e := range mmGetByPlaceID.GetByPlaceIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ia1, e.results.err
+		}
+	}
+
+	if mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation.params
+		mm_got := IPlaceImageRepositoryMockGetByPlaceIDParams{ctx, placeID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetByPlaceID.t.Errorf("IPlaceImageRepositoryMock.GetByPlaceID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetByPlaceID.GetByPlaceIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetByPlaceID.t.Fatal("No results are set for the IPlaceImageRepositoryMock.GetByPlaceID")
+		}
+		return (*mm_results).ia1, (*mm_results).err
+	}
+	if mmGetByPlaceID.funcGetByPlaceID != nil {
+		return mmGetByPlaceID.funcGetByPlaceID(ctx, placeID)
+	}
+	mmGetByPlaceID.t.Fatalf("Unexpected call to IPlaceImageRepositoryMock.GetByPlaceID. %v %v", ctx, placeID)
+	return
+}
+
+// GetByPlaceIDAfterCounter returns a count of finished IPlaceImageRepositoryMock.GetByPlaceID invocations
+func (mmGetByPlaceID *IPlaceImageRepositoryMock) GetByPlaceIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByPlaceID.afterGetByPlaceIDCounter)
+}
+
+// GetByPlaceIDBeforeCounter returns a count of IPlaceImageRepositoryMock.GetByPlaceID invocations
+func (mmGetByPlaceID *IPlaceImageRepositoryMock) GetByPlaceIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByPlaceID.beforeGetByPlaceIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceImageRepositoryMock.GetByPlaceID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetByPlaceID *mIPlaceImageRepositoryMockGetByPlaceID) Calls() []*IPlaceImageRepositoryMockGetByPlaceIDParams {
+	mmGetByPlaceID.mutex.RLock()
+
+	argCopy := make([]*IPlaceImageRepositoryMockGetByPlaceIDParams, len(mmGetByPlaceID.callArgs))
+	copy(argCopy, mmGetByPlaceID.callArgs)
+
+	mmGetByPlaceID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetByPlaceIDDone returns true if the count of the GetByPlaceID invocations corresponds
+// the number of defined expectations
+func (m *IPlaceImageRepositoryMock) MinimockGetByPlaceIDDone() bool {
+	for _, e := range m.GetByPlaceIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByPlaceIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByPlaceID != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetByPlaceIDInspect logs each unmet expectation
+func (m *IPlaceImageRepositoryMock) MinimockGetByPlaceIDInspect() {
+	for _, e := range m.GetByPlaceIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceImageRepositoryMock.GetByPlaceID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByPlaceIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		if m.GetByPlaceIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceImageRepositoryMock.GetByPlaceID")
+		} else {
+			m.t.Errorf("Expected call to IPlaceImageRepositoryMock.GetByPlaceID with params: %#v", *m.GetByPlaceIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByPlaceID != nil && mm_atomic.LoadUint64(&m.afterGetByPlaceIDCounter) < 1 {
+		m.t.Error("Expected call to IPlaceImageRepositoryMock.GetByPlaceID")
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *IPlaceImageRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
@@ -714,6 +940,8 @@ func (m *IPlaceImageRepositoryMock) MinimockFinish() {
 		m.MinimockBeginTxInspect()
 
 		m.MinimockCommitTxInspect()
+
+		m.MinimockGetByPlaceIDInspect()
 		m.t.FailNow()
 	}
 }
@@ -739,5 +967,6 @@ func (m *IPlaceImageRepositoryMock) minimockDone() bool {
 	return done &&
 		m.MinimockAddDone() &&
 		m.MinimockBeginTxDone() &&
-		m.MinimockCommitTxDone()
+		m.MinimockCommitTxDone() &&
+		m.MinimockGetByPlaceIDDone()
 }

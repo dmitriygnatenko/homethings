@@ -118,6 +118,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/images/place/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Images"
+                ],
+                "summary": "Get images by place ID (with child places)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ImagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/images/thing/{id}": {
             "get": {
                 "security": [
@@ -732,6 +780,12 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
+                },
+                "place_id": {
+                    "type": "integer"
+                },
+                "thing_id": {
+                    "type": "integer"
                 }
             }
         },

@@ -99,3 +99,49 @@ func (r thingImageRepository) GetByThingID(ctx context.Context, thingID int) ([]
 	return res, nil
 
 }
+
+func (r thingImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error) {
+	var res []models.Image
+
+	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
+		"SELECT id, parent_id " +
+		"FROM " + placeTableName + " " +
+		"WHERE id = ? " +
+		"UNION ALL " +
+		"SELECT p.id, p.parent_id " +
+		"FROM " + placeTableName + " p " +
+		"INNER JOIN cte ON p.parent_id = cte.id " +
+		")" +
+		"SELECT ti.id, ti.image, ti.thing_id, ti.created_at " +
+		"FROM cte, " + placeThingTableName + " pt, " + thingImageTableName + " ti " +
+		"WHERE pt.place_id = cte.id AND pt.thing_id = ti.thing_id " +
+		"ORDER BY ti.created_at DESC"
+
+	rows, err := r.db.QueryContext(ctx, query, placeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.Image{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.Image,
+			&resRow.ThingID,
+			&resRow.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

@@ -56,3 +56,49 @@ func (r placeImageRepository) Add(ctx context.Context, req models.AddPlaceImageR
 
 	return err
 }
+
+func (r placeImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error) {
+	var res []models.Image
+
+	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
+		"SELECT id, parent_id " +
+		"FROM " + placeTableName + " " +
+		"WHERE id = ? " +
+		"UNION ALL " +
+		"SELECT p.id, p.parent_id " +
+		"FROM " + placeTableName + " p " +
+		"INNER JOIN cte ON p.parent_id = cte.id " +
+		")" +
+		"SELECT pi.id, pi.image, pi.place_id, pi.created_at " +
+		"FROM cte, " + placeImageTableName + " pi " +
+		"WHERE pi.place_id = cte.id " +
+		"ORDER BY pi.created_at DESC"
+
+	rows, err := r.db.QueryContext(ctx, query, placeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.Image{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.Image,
+			&resRow.PlaceID,
+			&resRow.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
