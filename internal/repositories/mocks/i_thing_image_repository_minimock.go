@@ -36,6 +36,12 @@ type IThingImageRepositoryMock struct {
 	afterCommitTxCounter  uint64
 	beforeCommitTxCounter uint64
 	CommitTxMock          mIThingImageRepositoryMockCommitTx
+
+	funcGetByThingID          func(ctx context.Context, thingID int) (ta1 []models.ThingImage, err error)
+	inspectFuncGetByThingID   func(ctx context.Context, thingID int)
+	afterGetByThingIDCounter  uint64
+	beforeGetByThingIDCounter uint64
+	GetByThingIDMock          mIThingImageRepositoryMockGetByThingID
 }
 
 // NewIThingImageRepositoryMock returns a mock for interfaces.IThingImageRepository
@@ -53,6 +59,9 @@ func NewIThingImageRepositoryMock(t minimock.Tester) *IThingImageRepositoryMock 
 
 	m.CommitTxMock = mIThingImageRepositoryMockCommitTx{mock: m}
 	m.CommitTxMock.callArgs = []*IThingImageRepositoryMockCommitTxParams{}
+
+	m.GetByThingIDMock = mIThingImageRepositoryMockGetByThingID{mock: m}
+	m.GetByThingIDMock.callArgs = []*IThingImageRepositoryMockGetByThingIDParams{}
 
 	return m
 }
@@ -706,6 +715,223 @@ func (m *IThingImageRepositoryMock) MinimockCommitTxInspect() {
 	}
 }
 
+type mIThingImageRepositoryMockGetByThingID struct {
+	mock               *IThingImageRepositoryMock
+	defaultExpectation *IThingImageRepositoryMockGetByThingIDExpectation
+	expectations       []*IThingImageRepositoryMockGetByThingIDExpectation
+
+	callArgs []*IThingImageRepositoryMockGetByThingIDParams
+	mutex    sync.RWMutex
+}
+
+// IThingImageRepositoryMockGetByThingIDExpectation specifies expectation struct of the IThingImageRepository.GetByThingID
+type IThingImageRepositoryMockGetByThingIDExpectation struct {
+	mock    *IThingImageRepositoryMock
+	params  *IThingImageRepositoryMockGetByThingIDParams
+	results *IThingImageRepositoryMockGetByThingIDResults
+	Counter uint64
+}
+
+// IThingImageRepositoryMockGetByThingIDParams contains parameters of the IThingImageRepository.GetByThingID
+type IThingImageRepositoryMockGetByThingIDParams struct {
+	ctx     context.Context
+	thingID int
+}
+
+// IThingImageRepositoryMockGetByThingIDResults contains results of the IThingImageRepository.GetByThingID
+type IThingImageRepositoryMockGetByThingIDResults struct {
+	ta1 []models.ThingImage
+	err error
+}
+
+// Expect sets up expected params for IThingImageRepository.GetByThingID
+func (mmGetByThingID *mIThingImageRepositoryMockGetByThingID) Expect(ctx context.Context, thingID int) *mIThingImageRepositoryMockGetByThingID {
+	if mmGetByThingID.mock.funcGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("IThingImageRepositoryMock.GetByThingID mock is already set by Set")
+	}
+
+	if mmGetByThingID.defaultExpectation == nil {
+		mmGetByThingID.defaultExpectation = &IThingImageRepositoryMockGetByThingIDExpectation{}
+	}
+
+	mmGetByThingID.defaultExpectation.params = &IThingImageRepositoryMockGetByThingIDParams{ctx, thingID}
+	for _, e := range mmGetByThingID.expectations {
+		if minimock.Equal(e.params, mmGetByThingID.defaultExpectation.params) {
+			mmGetByThingID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetByThingID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetByThingID
+}
+
+// Inspect accepts an inspector function that has same arguments as the IThingImageRepository.GetByThingID
+func (mmGetByThingID *mIThingImageRepositoryMockGetByThingID) Inspect(f func(ctx context.Context, thingID int)) *mIThingImageRepositoryMockGetByThingID {
+	if mmGetByThingID.mock.inspectFuncGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("Inspect function is already set for IThingImageRepositoryMock.GetByThingID")
+	}
+
+	mmGetByThingID.mock.inspectFuncGetByThingID = f
+
+	return mmGetByThingID
+}
+
+// Return sets up results that will be returned by IThingImageRepository.GetByThingID
+func (mmGetByThingID *mIThingImageRepositoryMockGetByThingID) Return(ta1 []models.ThingImage, err error) *IThingImageRepositoryMock {
+	if mmGetByThingID.mock.funcGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("IThingImageRepositoryMock.GetByThingID mock is already set by Set")
+	}
+
+	if mmGetByThingID.defaultExpectation == nil {
+		mmGetByThingID.defaultExpectation = &IThingImageRepositoryMockGetByThingIDExpectation{mock: mmGetByThingID.mock}
+	}
+	mmGetByThingID.defaultExpectation.results = &IThingImageRepositoryMockGetByThingIDResults{ta1, err}
+	return mmGetByThingID.mock
+}
+
+// Set uses given function f to mock the IThingImageRepository.GetByThingID method
+func (mmGetByThingID *mIThingImageRepositoryMockGetByThingID) Set(f func(ctx context.Context, thingID int) (ta1 []models.ThingImage, err error)) *IThingImageRepositoryMock {
+	if mmGetByThingID.defaultExpectation != nil {
+		mmGetByThingID.mock.t.Fatalf("Default expectation is already set for the IThingImageRepository.GetByThingID method")
+	}
+
+	if len(mmGetByThingID.expectations) > 0 {
+		mmGetByThingID.mock.t.Fatalf("Some expectations are already set for the IThingImageRepository.GetByThingID method")
+	}
+
+	mmGetByThingID.mock.funcGetByThingID = f
+	return mmGetByThingID.mock
+}
+
+// When sets expectation for the IThingImageRepository.GetByThingID which will trigger the result defined by the following
+// Then helper
+func (mmGetByThingID *mIThingImageRepositoryMockGetByThingID) When(ctx context.Context, thingID int) *IThingImageRepositoryMockGetByThingIDExpectation {
+	if mmGetByThingID.mock.funcGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("IThingImageRepositoryMock.GetByThingID mock is already set by Set")
+	}
+
+	expectation := &IThingImageRepositoryMockGetByThingIDExpectation{
+		mock:   mmGetByThingID.mock,
+		params: &IThingImageRepositoryMockGetByThingIDParams{ctx, thingID},
+	}
+	mmGetByThingID.expectations = append(mmGetByThingID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IThingImageRepository.GetByThingID return parameters for the expectation previously defined by the When method
+func (e *IThingImageRepositoryMockGetByThingIDExpectation) Then(ta1 []models.ThingImage, err error) *IThingImageRepositoryMock {
+	e.results = &IThingImageRepositoryMockGetByThingIDResults{ta1, err}
+	return e.mock
+}
+
+// GetByThingID implements interfaces.IThingImageRepository
+func (mmGetByThingID *IThingImageRepositoryMock) GetByThingID(ctx context.Context, thingID int) (ta1 []models.ThingImage, err error) {
+	mm_atomic.AddUint64(&mmGetByThingID.beforeGetByThingIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetByThingID.afterGetByThingIDCounter, 1)
+
+	if mmGetByThingID.inspectFuncGetByThingID != nil {
+		mmGetByThingID.inspectFuncGetByThingID(ctx, thingID)
+	}
+
+	mm_params := &IThingImageRepositoryMockGetByThingIDParams{ctx, thingID}
+
+	// Record call args
+	mmGetByThingID.GetByThingIDMock.mutex.Lock()
+	mmGetByThingID.GetByThingIDMock.callArgs = append(mmGetByThingID.GetByThingIDMock.callArgs, mm_params)
+	mmGetByThingID.GetByThingIDMock.mutex.Unlock()
+
+	for _, e := range mmGetByThingID.GetByThingIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ta1, e.results.err
+		}
+	}
+
+	if mmGetByThingID.GetByThingIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetByThingID.GetByThingIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetByThingID.GetByThingIDMock.defaultExpectation.params
+		mm_got := IThingImageRepositoryMockGetByThingIDParams{ctx, thingID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetByThingID.t.Errorf("IThingImageRepositoryMock.GetByThingID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetByThingID.GetByThingIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetByThingID.t.Fatal("No results are set for the IThingImageRepositoryMock.GetByThingID")
+		}
+		return (*mm_results).ta1, (*mm_results).err
+	}
+	if mmGetByThingID.funcGetByThingID != nil {
+		return mmGetByThingID.funcGetByThingID(ctx, thingID)
+	}
+	mmGetByThingID.t.Fatalf("Unexpected call to IThingImageRepositoryMock.GetByThingID. %v %v", ctx, thingID)
+	return
+}
+
+// GetByThingIDAfterCounter returns a count of finished IThingImageRepositoryMock.GetByThingID invocations
+func (mmGetByThingID *IThingImageRepositoryMock) GetByThingIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByThingID.afterGetByThingIDCounter)
+}
+
+// GetByThingIDBeforeCounter returns a count of IThingImageRepositoryMock.GetByThingID invocations
+func (mmGetByThingID *IThingImageRepositoryMock) GetByThingIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByThingID.beforeGetByThingIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to IThingImageRepositoryMock.GetByThingID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetByThingID *mIThingImageRepositoryMockGetByThingID) Calls() []*IThingImageRepositoryMockGetByThingIDParams {
+	mmGetByThingID.mutex.RLock()
+
+	argCopy := make([]*IThingImageRepositoryMockGetByThingIDParams, len(mmGetByThingID.callArgs))
+	copy(argCopy, mmGetByThingID.callArgs)
+
+	mmGetByThingID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetByThingIDDone returns true if the count of the GetByThingID invocations corresponds
+// the number of defined expectations
+func (m *IThingImageRepositoryMock) MinimockGetByThingIDDone() bool {
+	for _, e := range m.GetByThingIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByThingIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByThingID != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetByThingIDInspect logs each unmet expectation
+func (m *IThingImageRepositoryMock) MinimockGetByThingIDInspect() {
+	for _, e := range m.GetByThingIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IThingImageRepositoryMock.GetByThingID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByThingIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		if m.GetByThingIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IThingImageRepositoryMock.GetByThingID")
+		} else {
+			m.t.Errorf("Expected call to IThingImageRepositoryMock.GetByThingID with params: %#v", *m.GetByThingIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByThingID != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		m.t.Error("Expected call to IThingImageRepositoryMock.GetByThingID")
+	}
+}
+
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *IThingImageRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
@@ -714,6 +940,8 @@ func (m *IThingImageRepositoryMock) MinimockFinish() {
 		m.MinimockBeginTxInspect()
 
 		m.MinimockCommitTxInspect()
+
+		m.MinimockGetByThingIDInspect()
 		m.t.FailNow()
 	}
 }
@@ -739,5 +967,6 @@ func (m *IThingImageRepositoryMock) minimockDone() bool {
 	return done &&
 		m.MinimockAddDone() &&
 		m.MinimockBeginTxDone() &&
-		m.MinimockCommitTxDone()
+		m.MinimockCommitTxDone() &&
+		m.MinimockGetByThingIDDone()
 }

@@ -28,6 +28,22 @@ definitions:
       error:
         type: string
     type: object
+  dto.ImageResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+    type: object
+  dto.ImagesResponse:
+    properties:
+      images:
+        items:
+          $ref: '#/definitions/dto.ImageResponse'
+        type: array
+    type: object
   dto.PlaceResponse:
     properties:
       created_at:
@@ -174,6 +190,36 @@ paths:
       security:
       - BasicAuth: []
       summary: Add images
+      tags:
+      - Images
+  /v1/images/thing/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thing ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ImagesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Get images by thing ID
       tags:
       - Images
   /v1/places:

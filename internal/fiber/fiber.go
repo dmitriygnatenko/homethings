@@ -85,6 +85,8 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Put("/v1/things/:id<int>", thingAPI.UpdateThingHandler(sp))
 	r.Delete("/v1/things/:id<int>", thingAPI.DeleteThingHandler(sp))
 
+	r.Get("/v1/images/place/:id<int>", imageAPI.GetPlaceImagesHandler(sp))
+	r.Get("/v1/images/thing/:id<int>", imageAPI.GetThingImagesHandler(sp))
 	r.Post("/v1/images", imageAPI.AddImageHandler(sp))
 
 	r.Get("/v1/auth/check", authAPI.CheckAuthHandler(sp))
