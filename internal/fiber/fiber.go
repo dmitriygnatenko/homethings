@@ -88,6 +88,8 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Get("/v1/images/place/:id<int>", imageAPI.GetPlaceImagesHandler(sp))
 	r.Get("/v1/images/thing/:id<int>", imageAPI.GetThingImagesHandler(sp))
 	r.Post("/v1/images", imageAPI.AddImageHandler(sp))
+	r.Delete("/v1/images/place/:id<int>", imageAPI.DeletePlaceImageHandler(sp))
+	r.Delete("/v1/images/thing/:id<int>", imageAPI.DeleteThingImageHandler(sp))
 
 	r.Get("/v1/auth/check", authAPI.CheckAuthHandler(sp))
 }

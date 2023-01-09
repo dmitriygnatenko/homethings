@@ -102,3 +102,22 @@ func (r placeImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]
 
 	return res, nil
 }
+
+func (r placeImageRepository) Delete(ctx context.Context, imageID int, tx *sql.Tx) error {
+	query, args, err := sq.Delete(placeImageTableName).
+		Where(sq.Eq{"id": imageID}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	if tx == nil {
+		_, err = r.db.ExecContext(ctx, query, args...)
+	} else {
+		_, err = tx.ExecContext(ctx, query, args...)
+	}
+
+	return err
+}

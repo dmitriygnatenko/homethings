@@ -197,6 +197,35 @@ paths:
       tags:
       - Images
   /v1/images/place/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Delete image
+      tags:
+      - Images
     get:
       consumes:
       - application/json
@@ -227,6 +256,35 @@ paths:
       tags:
       - Images
   /v1/images/thing/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Delete image
+      tags:
+      - Images
     get:
       consumes:
       - application/json

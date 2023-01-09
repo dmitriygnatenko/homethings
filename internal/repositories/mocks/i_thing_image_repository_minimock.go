@@ -37,6 +37,12 @@ type IThingImageRepositoryMock struct {
 	beforeCommitTxCounter uint64
 	CommitTxMock          mIThingImageRepositoryMockCommitTx
 
+	funcDelete          func(ctx context.Context, imageID int, tx *sql.Tx) (err error)
+	inspectFuncDelete   func(ctx context.Context, imageID int, tx *sql.Tx)
+	afterDeleteCounter  uint64
+	beforeDeleteCounter uint64
+	DeleteMock          mIThingImageRepositoryMockDelete
+
 	funcGetByPlaceID          func(ctx context.Context, placeID int) (ia1 []models.Image, err error)
 	inspectFuncGetByPlaceID   func(ctx context.Context, placeID int)
 	afterGetByPlaceIDCounter  uint64
@@ -65,6 +71,9 @@ func NewIThingImageRepositoryMock(t minimock.Tester) *IThingImageRepositoryMock 
 
 	m.CommitTxMock = mIThingImageRepositoryMockCommitTx{mock: m}
 	m.CommitTxMock.callArgs = []*IThingImageRepositoryMockCommitTxParams{}
+
+	m.DeleteMock = mIThingImageRepositoryMockDelete{mock: m}
+	m.DeleteMock.callArgs = []*IThingImageRepositoryMockDeleteParams{}
 
 	m.GetByPlaceIDMock = mIThingImageRepositoryMockGetByPlaceID{mock: m}
 	m.GetByPlaceIDMock.callArgs = []*IThingImageRepositoryMockGetByPlaceIDParams{}
@@ -724,6 +733,223 @@ func (m *IThingImageRepositoryMock) MinimockCommitTxInspect() {
 	}
 }
 
+type mIThingImageRepositoryMockDelete struct {
+	mock               *IThingImageRepositoryMock
+	defaultExpectation *IThingImageRepositoryMockDeleteExpectation
+	expectations       []*IThingImageRepositoryMockDeleteExpectation
+
+	callArgs []*IThingImageRepositoryMockDeleteParams
+	mutex    sync.RWMutex
+}
+
+// IThingImageRepositoryMockDeleteExpectation specifies expectation struct of the IThingImageRepository.Delete
+type IThingImageRepositoryMockDeleteExpectation struct {
+	mock    *IThingImageRepositoryMock
+	params  *IThingImageRepositoryMockDeleteParams
+	results *IThingImageRepositoryMockDeleteResults
+	Counter uint64
+}
+
+// IThingImageRepositoryMockDeleteParams contains parameters of the IThingImageRepository.Delete
+type IThingImageRepositoryMockDeleteParams struct {
+	ctx     context.Context
+	imageID int
+	tx      *sql.Tx
+}
+
+// IThingImageRepositoryMockDeleteResults contains results of the IThingImageRepository.Delete
+type IThingImageRepositoryMockDeleteResults struct {
+	err error
+}
+
+// Expect sets up expected params for IThingImageRepository.Delete
+func (mmDelete *mIThingImageRepositoryMockDelete) Expect(ctx context.Context, imageID int, tx *sql.Tx) *mIThingImageRepositoryMockDelete {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IThingImageRepositoryMock.Delete mock is already set by Set")
+	}
+
+	if mmDelete.defaultExpectation == nil {
+		mmDelete.defaultExpectation = &IThingImageRepositoryMockDeleteExpectation{}
+	}
+
+	mmDelete.defaultExpectation.params = &IThingImageRepositoryMockDeleteParams{ctx, imageID, tx}
+	for _, e := range mmDelete.expectations {
+		if minimock.Equal(e.params, mmDelete.defaultExpectation.params) {
+			mmDelete.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmDelete.defaultExpectation.params)
+		}
+	}
+
+	return mmDelete
+}
+
+// Inspect accepts an inspector function that has same arguments as the IThingImageRepository.Delete
+func (mmDelete *mIThingImageRepositoryMockDelete) Inspect(f func(ctx context.Context, imageID int, tx *sql.Tx)) *mIThingImageRepositoryMockDelete {
+	if mmDelete.mock.inspectFuncDelete != nil {
+		mmDelete.mock.t.Fatalf("Inspect function is already set for IThingImageRepositoryMock.Delete")
+	}
+
+	mmDelete.mock.inspectFuncDelete = f
+
+	return mmDelete
+}
+
+// Return sets up results that will be returned by IThingImageRepository.Delete
+func (mmDelete *mIThingImageRepositoryMockDelete) Return(err error) *IThingImageRepositoryMock {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IThingImageRepositoryMock.Delete mock is already set by Set")
+	}
+
+	if mmDelete.defaultExpectation == nil {
+		mmDelete.defaultExpectation = &IThingImageRepositoryMockDeleteExpectation{mock: mmDelete.mock}
+	}
+	mmDelete.defaultExpectation.results = &IThingImageRepositoryMockDeleteResults{err}
+	return mmDelete.mock
+}
+
+// Set uses given function f to mock the IThingImageRepository.Delete method
+func (mmDelete *mIThingImageRepositoryMockDelete) Set(f func(ctx context.Context, imageID int, tx *sql.Tx) (err error)) *IThingImageRepositoryMock {
+	if mmDelete.defaultExpectation != nil {
+		mmDelete.mock.t.Fatalf("Default expectation is already set for the IThingImageRepository.Delete method")
+	}
+
+	if len(mmDelete.expectations) > 0 {
+		mmDelete.mock.t.Fatalf("Some expectations are already set for the IThingImageRepository.Delete method")
+	}
+
+	mmDelete.mock.funcDelete = f
+	return mmDelete.mock
+}
+
+// When sets expectation for the IThingImageRepository.Delete which will trigger the result defined by the following
+// Then helper
+func (mmDelete *mIThingImageRepositoryMockDelete) When(ctx context.Context, imageID int, tx *sql.Tx) *IThingImageRepositoryMockDeleteExpectation {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IThingImageRepositoryMock.Delete mock is already set by Set")
+	}
+
+	expectation := &IThingImageRepositoryMockDeleteExpectation{
+		mock:   mmDelete.mock,
+		params: &IThingImageRepositoryMockDeleteParams{ctx, imageID, tx},
+	}
+	mmDelete.expectations = append(mmDelete.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IThingImageRepository.Delete return parameters for the expectation previously defined by the When method
+func (e *IThingImageRepositoryMockDeleteExpectation) Then(err error) *IThingImageRepositoryMock {
+	e.results = &IThingImageRepositoryMockDeleteResults{err}
+	return e.mock
+}
+
+// Delete implements interfaces.IThingImageRepository
+func (mmDelete *IThingImageRepositoryMock) Delete(ctx context.Context, imageID int, tx *sql.Tx) (err error) {
+	mm_atomic.AddUint64(&mmDelete.beforeDeleteCounter, 1)
+	defer mm_atomic.AddUint64(&mmDelete.afterDeleteCounter, 1)
+
+	if mmDelete.inspectFuncDelete != nil {
+		mmDelete.inspectFuncDelete(ctx, imageID, tx)
+	}
+
+	mm_params := &IThingImageRepositoryMockDeleteParams{ctx, imageID, tx}
+
+	// Record call args
+	mmDelete.DeleteMock.mutex.Lock()
+	mmDelete.DeleteMock.callArgs = append(mmDelete.DeleteMock.callArgs, mm_params)
+	mmDelete.DeleteMock.mutex.Unlock()
+
+	for _, e := range mmDelete.DeleteMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmDelete.DeleteMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmDelete.DeleteMock.defaultExpectation.Counter, 1)
+		mm_want := mmDelete.DeleteMock.defaultExpectation.params
+		mm_got := IThingImageRepositoryMockDeleteParams{ctx, imageID, tx}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmDelete.t.Errorf("IThingImageRepositoryMock.Delete got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmDelete.DeleteMock.defaultExpectation.results
+		if mm_results == nil {
+			mmDelete.t.Fatal("No results are set for the IThingImageRepositoryMock.Delete")
+		}
+		return (*mm_results).err
+	}
+	if mmDelete.funcDelete != nil {
+		return mmDelete.funcDelete(ctx, imageID, tx)
+	}
+	mmDelete.t.Fatalf("Unexpected call to IThingImageRepositoryMock.Delete. %v %v %v", ctx, imageID, tx)
+	return
+}
+
+// DeleteAfterCounter returns a count of finished IThingImageRepositoryMock.Delete invocations
+func (mmDelete *IThingImageRepositoryMock) DeleteAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDelete.afterDeleteCounter)
+}
+
+// DeleteBeforeCounter returns a count of IThingImageRepositoryMock.Delete invocations
+func (mmDelete *IThingImageRepositoryMock) DeleteBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDelete.beforeDeleteCounter)
+}
+
+// Calls returns a list of arguments used in each call to IThingImageRepositoryMock.Delete.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmDelete *mIThingImageRepositoryMockDelete) Calls() []*IThingImageRepositoryMockDeleteParams {
+	mmDelete.mutex.RLock()
+
+	argCopy := make([]*IThingImageRepositoryMockDeleteParams, len(mmDelete.callArgs))
+	copy(argCopy, mmDelete.callArgs)
+
+	mmDelete.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockDeleteDone returns true if the count of the Delete invocations corresponds
+// the number of defined expectations
+func (m *IThingImageRepositoryMock) MinimockDeleteDone() bool {
+	for _, e := range m.DeleteMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.DeleteMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcDelete != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockDeleteInspect logs each unmet expectation
+func (m *IThingImageRepositoryMock) MinimockDeleteInspect() {
+	for _, e := range m.DeleteMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IThingImageRepositoryMock.Delete with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.DeleteMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		if m.DeleteMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IThingImageRepositoryMock.Delete")
+		} else {
+			m.t.Errorf("Expected call to IThingImageRepositoryMock.Delete with params: %#v", *m.DeleteMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcDelete != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		m.t.Error("Expected call to IThingImageRepositoryMock.Delete")
+	}
+}
+
 type mIThingImageRepositoryMockGetByPlaceID struct {
 	mock               *IThingImageRepositoryMock
 	defaultExpectation *IThingImageRepositoryMockGetByPlaceIDExpectation
@@ -1167,6 +1393,8 @@ func (m *IThingImageRepositoryMock) MinimockFinish() {
 
 		m.MinimockCommitTxInspect()
 
+		m.MinimockDeleteInspect()
+
 		m.MinimockGetByPlaceIDInspect()
 
 		m.MinimockGetByThingIDInspect()
@@ -1196,6 +1424,7 @@ func (m *IThingImageRepositoryMock) minimockDone() bool {
 		m.MinimockAddDone() &&
 		m.MinimockBeginTxDone() &&
 		m.MinimockCommitTxDone() &&
+		m.MinimockDeleteDone() &&
 		m.MinimockGetByPlaceIDDone() &&
 		m.MinimockGetByThingIDDone()
 }
