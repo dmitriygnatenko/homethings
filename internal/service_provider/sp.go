@@ -15,6 +15,7 @@ type ServiceProvider struct {
 	tagRepository        interfaces.ITagRepository
 	placeImageRepository interfaces.IPlaceImageRepository
 	thingImageRepository interfaces.IThingImageRepository
+	fileRepository       interfaces.IFileRepository
 }
 
 func Init() (interfaces.IServiceProvider, error) {
@@ -39,6 +40,7 @@ func Init() (interfaces.IServiceProvider, error) {
 	sp.tagRepository = repositories.InitTagRepository(db)
 	sp.placeImageRepository = repositories.InitPlaceImageRepository(db)
 	sp.thingImageRepository = repositories.InitThingImageRepository(db)
+	sp.fileRepository = repositories.InitFileRepository()
 
 	return sp, nil
 }
@@ -71,6 +73,10 @@ func (sp *ServiceProvider) GetThingImageRepository() interfaces.IThingImageRepos
 	return sp.thingImageRepository
 }
 
+func (sp *ServiceProvider) GetFileRepository() interfaces.IFileRepository {
+	return sp.fileRepository
+}
+
 func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 	sp := ServiceProvider{}
 
@@ -90,6 +96,8 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 			sp.placeImageRepository = s
 		case interfaces.IThingImageRepository:
 			sp.thingImageRepository = s
+		case interfaces.IFileRepository:
+			sp.fileRepository = s
 		}
 	}
 

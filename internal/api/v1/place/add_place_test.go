@@ -144,7 +144,7 @@ func Test_AddPlaceHandler(t *testing.T) {
 
 			fiberApp.Post("/v1/places", AddPlaceHandler(serviceProvider))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDTOToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
 			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
 

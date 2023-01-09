@@ -51,6 +51,9 @@ func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
+		// TODO delete images
+		// TODO delete tags
+
 		if err = sp.GetThingRepository().CommitTx(tx); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}

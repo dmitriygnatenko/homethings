@@ -63,9 +63,11 @@ func AddImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		date := time.Now().Format(fileDateLayout)
 		for _, file := range form.File["files"] {
 			filename := "/files/" + date + "_" + helpers.GenerateRandomString(10) + filepath.Ext(file.Filename)
-			if err = fctx.SaveFile(file, uploadPath+filename); err != nil {
+
+			if err = sp.GetFileRepository().Save(fctx, file, uploadPath+filename); err != nil {
 				return factory.CreateInternalErrorResponse(fctx, err)
 			}
+
 			files = append(files, filename)
 		}
 

@@ -8,4 +8,5 @@ type IServiceProvider interface {
 	GetTagRepository() ITagRepository
 	GetPlaceImageRepository() IPlaceImageRepository
 	GetThingImageRepository() IThingImageRepository
+	GetFileRepository() IFileRepository
 }

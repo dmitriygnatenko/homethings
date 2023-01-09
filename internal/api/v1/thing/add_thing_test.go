@@ -266,7 +266,7 @@ func Test_AddThingHandler(t *testing.T) {
 
 			fiberApp.Post("/v1/things", AddThingHandler(serviceProvider))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDTOToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
 			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
 

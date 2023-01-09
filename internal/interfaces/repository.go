@@ -3,8 +3,10 @@ package interfaces
 import (
 	"context"
 	"database/sql"
+	"mime/multipart"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/gofiber/fiber/v2"
 )
 
 type IThingRepository interface {
@@ -51,4 +53,8 @@ type IThingImageRepository interface {
 
 type ITagRepository interface {
 	GetAll(ctx context.Context) ([]models.Tag, error)
+}
+
+type IFileRepository interface {
+	Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error
 }
