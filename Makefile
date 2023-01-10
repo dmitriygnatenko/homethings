@@ -50,6 +50,9 @@ docker-up:
 docker-down:
 	docker compose --file build/docker/docker-compose.yml --env-file config/.env --project-name homethings down
 
+app-build:
+	env GOOS=linux GOARCH=amd64 go build -o build/app/app cmd/app/main.go
+
 install-deps: install-lint install-goose install-swagger
 
 install-lint:
