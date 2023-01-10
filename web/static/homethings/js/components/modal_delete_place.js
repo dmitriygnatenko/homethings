@@ -32,7 +32,7 @@ export const modalDeletePlaceComponent = {
         submitForm() {
             let res = client.jsonRequest(client.methodDelete, client.routeDeletePlace.replace("{id}", this.selectedPlace))
             if (res.status === client.statusOK) {
-                this.$emit("refresh-places");
+                this.$emit("after-delete-place");
             }
 
             this.modal.hide()

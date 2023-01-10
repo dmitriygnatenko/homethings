@@ -63,7 +63,7 @@ export const modalAddThingComponent = {
 
             let res = client.jsonRequest(client.methodPost, client.routeAddThing, data)
             if (res.status === client.statusOK) {
-                this.$emit("refresh-things", data.place_id);
+                this.$emit("after-add-thing");
             }
             this.modal.hide()
         },

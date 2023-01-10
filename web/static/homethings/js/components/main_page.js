@@ -166,20 +166,39 @@ export const mainPageComponent = {
         addPlace() {
             this.$refs.modalAddPlace.init();
         },
+        afterAddPlace(id) {
+            this.refreshPlaces(id)
+        },
         updatePlace() {
             this.$refs.modalUpdatePlace.init()
+        },
+        afterUpdatePlace() {
+            this.refreshPlaces(this.selectedPlace)
         },
         deletePlace() {
             this.$refs.modalDeletePlace.init()
         },
+        afterDeletePlace() {
+            this.refreshPlaces()
+        },
         addThing() {
             this.$refs.modalAddThing.init()
+        },
+        afterAddThing() {
+            this.refreshThings(this.selectedPlace)
         },
         updateThing() {
             this.$refs.modalUpdateThing.init()
         },
+        afterUpdateThing() {
+            this.refreshPlaces(this.selectedPlace)
+            this.refreshThings(this.selectedPlace)
+        },
         deleteThing() {
             this.$refs.modalDeleteThing.init()
+        },
+        afterDeleteThing() {
+            this.refreshThings(this.selectedPlace)
         },
         addImage() {
             this.$refs.modalAddImage.init()
@@ -335,12 +354,12 @@ export const mainPageComponent = {
             </div>
         </main>
 
-        <modal-add-place ref="modalAddPlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-add-place>
-        <modal-update-place ref="modalUpdatePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-update-place>
-        <modal-delete-place ref="modalDeletePlace" :selected-place="selectedPlace" @refresh-places="refreshPlaces"></modal-delete-place>
-        <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @refresh-things="refreshThings"></modal-add-thing>
-        <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @refresh-things="refreshThings" @refresh-places="refreshPlaces"></modal-update-thing>
-        <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @refresh-things="refreshThings"></modal-delete-thing>
+        <modal-add-place ref="modalAddPlace" :selected-place="selectedPlace" @after-add-place="afterAddPlace"></modal-add-place>
+        <modal-update-place ref="modalUpdatePlace" :selected-place="selectedPlace"@after-update-place="afterUpdatePlace"></modal-update-place>
+        <modal-delete-place ref="modalDeletePlace" :selected-place="selectedPlace" @after-delete-place="afterDeletePlace"></modal-delete-place>
+        <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @after-add-thing="afterAddThing"></modal-add-thing>
+        <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @after-update-thing="afterUpdateThing"></modal-update-thing>
+        <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @after-delete-thing="afterDeleteThing"></modal-delete-thing>
         <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @after-add-image="afterAddImage"></modal-add-image>
     </template>
     `

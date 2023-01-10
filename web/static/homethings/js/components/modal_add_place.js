@@ -47,7 +47,7 @@ export const modalAddPlaceComponent = {
             }
             let res = client.jsonRequest(client.methodPost, client.routeAddPlace, data)
             if (res.status === client.statusOK) {
-                this.$emit("refresh-places", res.data.id);
+                this.$emit("after-add-place", res.data.id);
             }
             this.modal.hide()
         },
