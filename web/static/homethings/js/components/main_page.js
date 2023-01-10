@@ -7,7 +7,7 @@ import {modalDeletePlaceComponent} from "./modal_delete_place.js";
 import {modalAddThingComponent} from "./modal_add_thing.js";
 import {modalUpdateThingComponent} from "./modal_update_thing.js";
 import {modalDeleteThingComponent} from "./modal_delete_thing.js";
-import {modalAddImageComponent} from "./modal_add_image.js";
+import {modalAddImageComponent, typePlace} from "./modal_add_image.js";
 
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
@@ -31,9 +31,12 @@ export const mainPageComponent = {
         return {
             placesTree: [],
             thingsList: [],
+            imagesList: [],
             selectedPlace: 0,
             selectedThing: 0,
             selectedImage: 0,
+            selectedImagePlace: 0,
+            selectedImageThing: 0,
         }
     },
     computed: {
@@ -54,12 +57,24 @@ export const mainPageComponent = {
         }
     },
     methods: {
+        // Setters
         setSelectedPlace(id) {
             if (this.selectedPlace !== id) {
                 this.selectedPlace = id
                 this.refreshThings(id)
+                this.refreshPlaceImages(id)
             }
         },
+        setSelectedThing(id) {
+            this.selectedThing = id
+            this.refreshThingImages(id)
+        },
+        setSelectedImage(imageID, placeID, thingID) {
+            this.selectedImage = imageID
+            this.selectedImagePlace = placeID
+            this.selectedImageThing = thingID
+        },
+        // Request
         request(method, route) {
             let res = client.jsonRequest(method, route)
             if (res.status !== client.statusOK) {
@@ -67,14 +82,9 @@ export const mainPageComponent = {
             }
             return res
         },
+        // Refresh content methods
         refreshPlaces(id) {
-            this.selectedPlace = 0
-            this.selectedThing = 0
-            this.thingsList = []
-            this.placesTree = [{
-                place: {"title": "Все", id: 0},
-                nested: [],
-            }]
+            this.resetPlaces()
 
             if (id > 0) {
                 this.selectedPlace = id
@@ -85,9 +95,18 @@ export const mainPageComponent = {
                 this.placesTree[0].nested = res.data.places
             }
         },
+        resetPlaces() {
+            this.selectedPlace = 0
+            this.placesTree = [{
+                place: {"title": "Все", id: 0},
+                nested: [],
+            }]
+
+            this.resetThings()
+        },
         refreshThings(placeID) {
-            this.selectedThing = 0
-            this.thingsList = []
+            this.resetThings()
+
             let res = this.request(client.methodGet, client.routeGetPlaceThings.replace("{id}", placeID))
             if (Array.isArray(res.data.things) && res.data.things.length) {
                 res.data.things.forEach(thing => {
@@ -100,6 +119,50 @@ export const mainPageComponent = {
                 });
             }
         },
+        resetThings(){
+            this.selectedThing = 0
+            this.thingsList = []
+            this.resetImages()
+        },
+        refreshPlaceImages(placeID) {
+            this.resetImages()
+
+            let res = this.request(client.methodGet, client.routeGetPlaceImages.replace("{id}", placeID))
+            if (Array.isArray(res.data.images) && res.data.images.length) {
+                res.data.images.forEach(image => {
+                    this.imagesList.push({
+                        "id": image.id,
+                        "image": image.image,
+                        "place_id": image.place_id,
+                        "thing_id": image.thing_id,
+                        "date": formatDate(image.created_at),
+                    })
+                });
+            }
+        },
+        refreshThingImages(thingID) {
+            this.resetImages()
+
+            let res = this.request(client.methodGet, client.routeGetThingImages.replace("{id}", thingID))
+            if (Array.isArray(res.data.images) && res.data.images.length) {
+                res.data.images.forEach(image => {
+                    this.imagesList.push({
+                        "id": image.id,
+                        "image": image.image,
+                        "place_id": image.place_id,
+                        "thing_id": image.thing_id,
+                        "date": formatDate(image.created_at),
+                    })
+                });
+            }
+        },
+        resetImages() {
+            this.selectedImage = 0
+            this.selectedImagePlace = 0
+            this.selectedImageThing = 0
+            this.imagesList = []
+        },
+        // Action methods
         addPlace() {
             this.$refs.modalAddPlace.init();
         },
@@ -120,6 +183,13 @@ export const mainPageComponent = {
         },
         addImage() {
             this.$refs.modalAddImage.init()
+        },
+        afterAddImage(res) {
+            if (res === typePlace) {
+                this.refreshPlaceImages(this.selectedPlace)
+            } else {
+                this.refreshThingImages(this.selectedThing)
+            }
         },
         deleteImage() {
 
@@ -201,9 +271,8 @@ export const mainPageComponent = {
                         <div class="list">
                             <button 
                                 class="btn"
-                                data-id="{{ thing.id }}" 
                                 v-for="thing in thingsList"
-                                @click="selectedThing = thing.id"
+                                @click="setSelectedThing(thing.id)"
                                 :class="{ selected : selectedThing == thing.id }">
                                 <div class="title">{{ thing.title }}</div>    
                                 <div class="desc" v-if="thing.desc">{{ thing.desc }}</div>
@@ -234,7 +303,16 @@ export const mainPageComponent = {
                                 </button>
                             </div>
                         </div>
-                        <div class="list"></div>
+                        <div class="list">
+                            <button 
+                                class="btn"
+                                v-for="image in imagesList"
+                                @click="setSelectedImage(image.id, image.place_id, image.thing_id)"
+                                :class="{ selected : selectedImage == image.id }">
+                                <img class="img-fluid" :src="image.image">
+                                <div class="date">{{ image.date }}</div>
+                            </button>
+                        </div>
                     </div>
                 </div>
             
@@ -247,7 +325,7 @@ export const mainPageComponent = {
         <modal-add-thing ref="modalAddThing" :selected-place="selectedPlace" @refresh-things="refreshThings"></modal-add-thing>
         <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @refresh-things="refreshThings" @refresh-places="refreshPlaces"></modal-update-thing>
         <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @refresh-things="refreshThings"></modal-delete-thing>
-        <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @refresh-places="refreshPlaces"></modal-add-image>
+        <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @after-add-image="afterAddImage"></modal-add-image>
     </template>
     `
 }

@@ -40,7 +40,6 @@ export const placeTreeItemComponent = {
     template: `
     <li>
         <div
-            data-id="{{ item.place.id }}"
             :class="{selected: item.place.id == selectedPlace}"
             @click="toggle">
             <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span>

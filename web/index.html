@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
     <meta charset="utf-8">
+    <title>Homethings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/bootstrap-icons/bootstrap-icons.css">
@@ -14,8 +15,8 @@
 
     <script type="module">
         import {app} from './static/homethings/js/app.js';
-        const homethingsApp = Vue.createApp(app);
-        homethingsApp.mount("#app");
+        const App = Vue.createApp(app);
+        App.mount("#app");
     </script>
 </body>
 </html>

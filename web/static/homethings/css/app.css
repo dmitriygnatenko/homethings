@@ -163,6 +163,38 @@ body {
     background-color: #bfa616;
     border-color: #bfa616;
 }
+.info .list .btn {
+    width: 100%;
+    text-align: left;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 1px dashed #b6b6b6;
+    border-radius: 0;
+}
+.info .list .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+.info .list .btn:hover {
+    background-color: #f8f8f8;
+}
+.info .list .btn.selected  {
+    background-color: #fffef3;
+}
+.info .list .date {
+    color: gray;
+    font-size: 12px;
+    text-align: right;
+    margin-top: 3px;
+}
+.info .list .btn img {
+    border: 1px solid #e3e3e3;
+    margin-top: 7px;
+}
 #add-image-modal .btn.add {
     color: green;
 }

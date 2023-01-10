@@ -2,6 +2,9 @@
 
 import * as client from "../client/client.js";
 
+export const typePlace = "place"
+export const typeThing = "thing"
+
 export const modalAddImageComponent = {
     props: {
         selectedPlace: Number,
@@ -10,8 +13,8 @@ export const modalAddImageComponent = {
     data() {
         return {
             maxFiles: 8,
-            typePlace: "place",
-            typeThing: "thing",
+            typePlace: typePlace,
+            typeThing: typeThing,
             modal: Object,
             form: {
                 files: null,
@@ -68,7 +71,7 @@ export const modalAddImageComponent = {
 
             let res = client.formDataRequest(client.methodPost, client.routeAddImage, formData)
             if (res.status === client.statusOK) {
-                this.$emit("refresh-places", this.selectedPlace);
+                this.$emit("after-add-image", this.form.type);
             }
 
             this.form.files = null

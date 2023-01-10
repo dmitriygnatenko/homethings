@@ -22,6 +22,8 @@ export const routeUpdateThing = "/api/v1/things/{id}"
 export const routeDeleteThing = "/api/v1/things/{id}"
 export const routeGetPlaceThings = "/api/v1/places/{id}/things"
 export const routeAddImage = "/api/v1/images"
+export const routeGetPlaceImages = "/api/v1/images/place/{id}"
+export const routeGetThingImages = "/api/v1/images/thing/{id}"
 
 export function jsonRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
