@@ -10,6 +10,7 @@ import {modalDeleteThingComponent} from "./modal_delete_thing.js";
 import {modalAddImageComponent, typePlace} from "./modal_add_image.js";
 
 import * as client from "../client/client.js";
+import * as auth from "../auth/auth.js"
 import {formatDate} from "../helpers/date.js";
 
 export const mainPageComponent = {
@@ -229,12 +230,23 @@ export const mainPageComponent = {
                 }
             }
         },
+        logout() {
+            auth.clearToken()
+            this.$emit("set-auth", false)
+        }
     },
     template: `
     <template v-if="showMainPage">
         <main class="container-fluid">
             <div class="d-flex flex-grow h-100">
-      
+                <button
+                    type="button"
+                    class="btn btn-sm logout"
+                    title="Выход"
+                    @click="logout">
+                    <i class="bi bi-arrow-right-square"></i>
+                </button>
+                
                 <div class="col-l">
                     <div class="places rounded-3 shadow d-flex flex-column">
                         <div class="header rounded-top">
