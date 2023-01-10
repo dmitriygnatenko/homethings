@@ -192,7 +192,23 @@ export const mainPageComponent = {
             }
         },
         deleteImage() {
+            if (this.selectedImage === 0 || (this.selectedImagePlace === 0 && this.selectedImageThing === 0)) {
+                return
+            }
 
+            if (this.selectedImagePlace > 0) {
+                let res = this.request(client.methodDelete, client.routeDeletePlaceImages.replace("{id}", this.selectedImage))
+                if (res.status === client.statusOK) {
+                    this.refreshPlaceImages(this.selectedImagePlace)
+                }
+            }
+
+            if (this.selectedImageThing > 0) {
+                let res = this.request(client.methodDelete, client.routeDeleteThingImages.replace("{id}", this.selectedImage))
+                if (res.status === client.statusOK) {
+                    this.refreshThingImages(this.selectedImageThing)
+                }
+            }
         },
     },
     template: `
