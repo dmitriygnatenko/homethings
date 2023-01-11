@@ -37,6 +37,12 @@ type IPlaceRepositoryMock struct {
 	beforeGetAllCounter uint64
 	GetAllMock          mIPlaceRepositoryMockGetAll
 
+	funcGetNestedPlaces          func(ctx context.Context, placeID int) (pa1 []models.Place, err error)
+	inspectFuncGetNestedPlaces   func(ctx context.Context, placeID int)
+	afterGetNestedPlacesCounter  uint64
+	beforeGetNestedPlacesCounter uint64
+	GetNestedPlacesMock          mIPlaceRepositoryMockGetNestedPlaces
+
 	funcUpdate          func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) (err error)
 	inspectFuncUpdate   func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx)
 	afterUpdateCounter  uint64
@@ -59,6 +65,9 @@ func NewIPlaceRepositoryMock(t minimock.Tester) *IPlaceRepositoryMock {
 
 	m.GetAllMock = mIPlaceRepositoryMockGetAll{mock: m}
 	m.GetAllMock.callArgs = []*IPlaceRepositoryMockGetAllParams{}
+
+	m.GetNestedPlacesMock = mIPlaceRepositoryMockGetNestedPlaces{mock: m}
+	m.GetNestedPlacesMock.callArgs = []*IPlaceRepositoryMockGetNestedPlacesParams{}
 
 	m.UpdateMock = mIPlaceRepositoryMockUpdate{mock: m}
 	m.UpdateMock.callArgs = []*IPlaceRepositoryMockUpdateParams{}
@@ -717,6 +726,223 @@ func (m *IPlaceRepositoryMock) MinimockGetAllInspect() {
 	}
 }
 
+type mIPlaceRepositoryMockGetNestedPlaces struct {
+	mock               *IPlaceRepositoryMock
+	defaultExpectation *IPlaceRepositoryMockGetNestedPlacesExpectation
+	expectations       []*IPlaceRepositoryMockGetNestedPlacesExpectation
+
+	callArgs []*IPlaceRepositoryMockGetNestedPlacesParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceRepositoryMockGetNestedPlacesExpectation specifies expectation struct of the IPlaceRepository.GetNestedPlaces
+type IPlaceRepositoryMockGetNestedPlacesExpectation struct {
+	mock    *IPlaceRepositoryMock
+	params  *IPlaceRepositoryMockGetNestedPlacesParams
+	results *IPlaceRepositoryMockGetNestedPlacesResults
+	Counter uint64
+}
+
+// IPlaceRepositoryMockGetNestedPlacesParams contains parameters of the IPlaceRepository.GetNestedPlaces
+type IPlaceRepositoryMockGetNestedPlacesParams struct {
+	ctx     context.Context
+	placeID int
+}
+
+// IPlaceRepositoryMockGetNestedPlacesResults contains results of the IPlaceRepository.GetNestedPlaces
+type IPlaceRepositoryMockGetNestedPlacesResults struct {
+	pa1 []models.Place
+	err error
+}
+
+// Expect sets up expected params for IPlaceRepository.GetNestedPlaces
+func (mmGetNestedPlaces *mIPlaceRepositoryMockGetNestedPlaces) Expect(ctx context.Context, placeID int) *mIPlaceRepositoryMockGetNestedPlaces {
+	if mmGetNestedPlaces.mock.funcGetNestedPlaces != nil {
+		mmGetNestedPlaces.mock.t.Fatalf("IPlaceRepositoryMock.GetNestedPlaces mock is already set by Set")
+	}
+
+	if mmGetNestedPlaces.defaultExpectation == nil {
+		mmGetNestedPlaces.defaultExpectation = &IPlaceRepositoryMockGetNestedPlacesExpectation{}
+	}
+
+	mmGetNestedPlaces.defaultExpectation.params = &IPlaceRepositoryMockGetNestedPlacesParams{ctx, placeID}
+	for _, e := range mmGetNestedPlaces.expectations {
+		if minimock.Equal(e.params, mmGetNestedPlaces.defaultExpectation.params) {
+			mmGetNestedPlaces.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetNestedPlaces.defaultExpectation.params)
+		}
+	}
+
+	return mmGetNestedPlaces
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceRepository.GetNestedPlaces
+func (mmGetNestedPlaces *mIPlaceRepositoryMockGetNestedPlaces) Inspect(f func(ctx context.Context, placeID int)) *mIPlaceRepositoryMockGetNestedPlaces {
+	if mmGetNestedPlaces.mock.inspectFuncGetNestedPlaces != nil {
+		mmGetNestedPlaces.mock.t.Fatalf("Inspect function is already set for IPlaceRepositoryMock.GetNestedPlaces")
+	}
+
+	mmGetNestedPlaces.mock.inspectFuncGetNestedPlaces = f
+
+	return mmGetNestedPlaces
+}
+
+// Return sets up results that will be returned by IPlaceRepository.GetNestedPlaces
+func (mmGetNestedPlaces *mIPlaceRepositoryMockGetNestedPlaces) Return(pa1 []models.Place, err error) *IPlaceRepositoryMock {
+	if mmGetNestedPlaces.mock.funcGetNestedPlaces != nil {
+		mmGetNestedPlaces.mock.t.Fatalf("IPlaceRepositoryMock.GetNestedPlaces mock is already set by Set")
+	}
+
+	if mmGetNestedPlaces.defaultExpectation == nil {
+		mmGetNestedPlaces.defaultExpectation = &IPlaceRepositoryMockGetNestedPlacesExpectation{mock: mmGetNestedPlaces.mock}
+	}
+	mmGetNestedPlaces.defaultExpectation.results = &IPlaceRepositoryMockGetNestedPlacesResults{pa1, err}
+	return mmGetNestedPlaces.mock
+}
+
+// Set uses given function f to mock the IPlaceRepository.GetNestedPlaces method
+func (mmGetNestedPlaces *mIPlaceRepositoryMockGetNestedPlaces) Set(f func(ctx context.Context, placeID int) (pa1 []models.Place, err error)) *IPlaceRepositoryMock {
+	if mmGetNestedPlaces.defaultExpectation != nil {
+		mmGetNestedPlaces.mock.t.Fatalf("Default expectation is already set for the IPlaceRepository.GetNestedPlaces method")
+	}
+
+	if len(mmGetNestedPlaces.expectations) > 0 {
+		mmGetNestedPlaces.mock.t.Fatalf("Some expectations are already set for the IPlaceRepository.GetNestedPlaces method")
+	}
+
+	mmGetNestedPlaces.mock.funcGetNestedPlaces = f
+	return mmGetNestedPlaces.mock
+}
+
+// When sets expectation for the IPlaceRepository.GetNestedPlaces which will trigger the result defined by the following
+// Then helper
+func (mmGetNestedPlaces *mIPlaceRepositoryMockGetNestedPlaces) When(ctx context.Context, placeID int) *IPlaceRepositoryMockGetNestedPlacesExpectation {
+	if mmGetNestedPlaces.mock.funcGetNestedPlaces != nil {
+		mmGetNestedPlaces.mock.t.Fatalf("IPlaceRepositoryMock.GetNestedPlaces mock is already set by Set")
+	}
+
+	expectation := &IPlaceRepositoryMockGetNestedPlacesExpectation{
+		mock:   mmGetNestedPlaces.mock,
+		params: &IPlaceRepositoryMockGetNestedPlacesParams{ctx, placeID},
+	}
+	mmGetNestedPlaces.expectations = append(mmGetNestedPlaces.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceRepository.GetNestedPlaces return parameters for the expectation previously defined by the When method
+func (e *IPlaceRepositoryMockGetNestedPlacesExpectation) Then(pa1 []models.Place, err error) *IPlaceRepositoryMock {
+	e.results = &IPlaceRepositoryMockGetNestedPlacesResults{pa1, err}
+	return e.mock
+}
+
+// GetNestedPlaces implements interfaces.IPlaceRepository
+func (mmGetNestedPlaces *IPlaceRepositoryMock) GetNestedPlaces(ctx context.Context, placeID int) (pa1 []models.Place, err error) {
+	mm_atomic.AddUint64(&mmGetNestedPlaces.beforeGetNestedPlacesCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetNestedPlaces.afterGetNestedPlacesCounter, 1)
+
+	if mmGetNestedPlaces.inspectFuncGetNestedPlaces != nil {
+		mmGetNestedPlaces.inspectFuncGetNestedPlaces(ctx, placeID)
+	}
+
+	mm_params := &IPlaceRepositoryMockGetNestedPlacesParams{ctx, placeID}
+
+	// Record call args
+	mmGetNestedPlaces.GetNestedPlacesMock.mutex.Lock()
+	mmGetNestedPlaces.GetNestedPlacesMock.callArgs = append(mmGetNestedPlaces.GetNestedPlacesMock.callArgs, mm_params)
+	mmGetNestedPlaces.GetNestedPlacesMock.mutex.Unlock()
+
+	for _, e := range mmGetNestedPlaces.GetNestedPlacesMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.pa1, e.results.err
+		}
+	}
+
+	if mmGetNestedPlaces.GetNestedPlacesMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetNestedPlaces.GetNestedPlacesMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetNestedPlaces.GetNestedPlacesMock.defaultExpectation.params
+		mm_got := IPlaceRepositoryMockGetNestedPlacesParams{ctx, placeID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetNestedPlaces.t.Errorf("IPlaceRepositoryMock.GetNestedPlaces got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetNestedPlaces.GetNestedPlacesMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetNestedPlaces.t.Fatal("No results are set for the IPlaceRepositoryMock.GetNestedPlaces")
+		}
+		return (*mm_results).pa1, (*mm_results).err
+	}
+	if mmGetNestedPlaces.funcGetNestedPlaces != nil {
+		return mmGetNestedPlaces.funcGetNestedPlaces(ctx, placeID)
+	}
+	mmGetNestedPlaces.t.Fatalf("Unexpected call to IPlaceRepositoryMock.GetNestedPlaces. %v %v", ctx, placeID)
+	return
+}
+
+// GetNestedPlacesAfterCounter returns a count of finished IPlaceRepositoryMock.GetNestedPlaces invocations
+func (mmGetNestedPlaces *IPlaceRepositoryMock) GetNestedPlacesAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetNestedPlaces.afterGetNestedPlacesCounter)
+}
+
+// GetNestedPlacesBeforeCounter returns a count of IPlaceRepositoryMock.GetNestedPlaces invocations
+func (mmGetNestedPlaces *IPlaceRepositoryMock) GetNestedPlacesBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetNestedPlaces.beforeGetNestedPlacesCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceRepositoryMock.GetNestedPlaces.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetNestedPlaces *mIPlaceRepositoryMockGetNestedPlaces) Calls() []*IPlaceRepositoryMockGetNestedPlacesParams {
+	mmGetNestedPlaces.mutex.RLock()
+
+	argCopy := make([]*IPlaceRepositoryMockGetNestedPlacesParams, len(mmGetNestedPlaces.callArgs))
+	copy(argCopy, mmGetNestedPlaces.callArgs)
+
+	mmGetNestedPlaces.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetNestedPlacesDone returns true if the count of the GetNestedPlaces invocations corresponds
+// the number of defined expectations
+func (m *IPlaceRepositoryMock) MinimockGetNestedPlacesDone() bool {
+	for _, e := range m.GetNestedPlacesMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetNestedPlacesMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetNestedPlacesCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetNestedPlaces != nil && mm_atomic.LoadUint64(&m.afterGetNestedPlacesCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetNestedPlacesInspect logs each unmet expectation
+func (m *IPlaceRepositoryMock) MinimockGetNestedPlacesInspect() {
+	for _, e := range m.GetNestedPlacesMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.GetNestedPlaces with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetNestedPlacesMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetNestedPlacesCounter) < 1 {
+		if m.GetNestedPlacesMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceRepositoryMock.GetNestedPlaces")
+		} else {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.GetNestedPlaces with params: %#v", *m.GetNestedPlacesMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetNestedPlaces != nil && mm_atomic.LoadUint64(&m.afterGetNestedPlacesCounter) < 1 {
+		m.t.Error("Expected call to IPlaceRepositoryMock.GetNestedPlaces")
+	}
+}
+
 type mIPlaceRepositoryMockUpdate struct {
 	mock               *IPlaceRepositoryMock
 	defaultExpectation *IPlaceRepositoryMockUpdateExpectation
@@ -943,6 +1169,8 @@ func (m *IPlaceRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetAllInspect()
 
+		m.MinimockGetNestedPlacesInspect()
+
 		m.MinimockUpdateInspect()
 		m.t.FailNow()
 	}
@@ -970,5 +1198,6 @@ func (m *IPlaceRepositoryMock) minimockDone() bool {
 		m.MinimockAddDone() &&
 		m.MinimockGetDone() &&
 		m.MinimockGetAllDone() &&
+		m.MinimockGetNestedPlacesDone() &&
 		m.MinimockUpdateDone()
 }

@@ -76,6 +76,7 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Get("/v1/places/tree", placeAPI.GetPlaceTreeHandler(sp))
 	r.Get("/v1/places/:id<int>", placeAPI.GetPlaceHandler(sp))
 	r.Get("/v1/places/:id<int>/things", placeAPI.GetPlaceThingsHandler(sp))
+	r.Get("/v1/places/:id<int>/nested", placeAPI.GetNestedPlacesHandler(sp))
 	r.Post("/v1/places", placeAPI.AddPlaceHandler(sp))
 	r.Put("/v1/places/:id<int>", placeAPI.UpdatePlaceHandler(sp))
 	r.Delete("/v1/places/:id<int>", placeAPI.DeletePlaceHandler(sp))

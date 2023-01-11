@@ -23,6 +23,7 @@ type IThingRepository interface {
 type IPlaceRepository interface {
 	GetAll(ctx context.Context) ([]models.Place, error)
 	Get(ctx context.Context, placeID int) (*models.Place, error)
+	GetNestedPlaces(ctx context.Context, placeID int) ([]models.Place, error)
 	Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error)
 	Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error
 }

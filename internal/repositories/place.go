@@ -66,6 +66,48 @@ func (r placeRepository) GetAll(ctx context.Context) ([]models.Place, error) {
 	return res, nil
 }
 
+func (r placeRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]models.Place, error) {
+	var res []models.Place
+
+	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
+		From(placeTableName).
+		Where(sq.Eq{"parent_id": placeID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.Place{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.ParentID,
+			&resRow.Title,
+			&resRow.CreatedAt,
+			&resRow.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func (r placeRepository) Get(ctx context.Context, placeID int) (*models.Place, error) {
 	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
 		From(placeTableName).
