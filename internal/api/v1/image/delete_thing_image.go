@@ -1,6 +1,8 @@
 package image
 
 import (
+	"database/sql"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -25,8 +27,20 @@ func DeleteThingImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
-		err = sp.GetThingImageRepository().Delete(ctx, id, nil)
+		image, err := sp.GetThingImageRepository().Get(ctx, id)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return factory.CreateBadRequestResponse(fctx, nil)
+			}
+
+			return factory.CreateInternalErrorResponse(fctx, err)
+		}
+
+		if err = sp.GetThingImageRepository().Delete(ctx, id, nil); err != nil {
+			return factory.CreateInternalErrorResponse(fctx, err)
+		}
+
+		if err = sp.GetFileRepository().Delete(uploadPath + image.Image); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 

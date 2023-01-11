@@ -12,7 +12,6 @@ type ServiceProvider struct {
 	placeRepository      interfaces.IPlaceRepository
 	thingRepository      interfaces.IThingRepository
 	placeThingRepository interfaces.IPlaceThingRepository
-	tagRepository        interfaces.ITagRepository
 	placeImageRepository interfaces.IPlaceImageRepository
 	thingImageRepository interfaces.IThingImageRepository
 	fileRepository       interfaces.IFileRepository
@@ -37,7 +36,6 @@ func Init() (interfaces.IServiceProvider, error) {
 	sp.placeRepository = repositories.InitPlaceRepository(db)
 	sp.thingRepository = repositories.InitThingRepository(db)
 	sp.placeThingRepository = repositories.InitPlaceThingRepository(db)
-	sp.tagRepository = repositories.InitTagRepository(db)
 	sp.placeImageRepository = repositories.InitPlaceImageRepository(db)
 	sp.thingImageRepository = repositories.InitThingImageRepository(db)
 	sp.fileRepository = repositories.InitFileRepository()
@@ -61,10 +59,6 @@ func (sp *ServiceProvider) GetPlaceThingRepository() interfaces.IPlaceThingRepos
 	return sp.placeThingRepository
 }
 
-func (sp *ServiceProvider) GetTagRepository() interfaces.ITagRepository {
-	return sp.tagRepository
-}
-
 func (sp *ServiceProvider) GetPlaceImageRepository() interfaces.IPlaceImageRepository {
 	return sp.placeImageRepository
 }
@@ -84,8 +78,6 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 		switch s := d.(type) {
 		case interfaces.IEnv:
 			sp.env = s
-		case interfaces.ITagRepository:
-			sp.tagRepository = s
 		case interfaces.IPlaceThingRepository:
 			sp.placeThingRepository = s
 		case interfaces.IThingRepository:

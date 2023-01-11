@@ -12,6 +12,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
@@ -22,6 +23,7 @@ import (
 
 func Test_DeleteThingImageHandler(t *testing.T) {
 	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.IThingImageRepository
+	type fileRepoMockFunc func(mc *minimock.Controller) interfaces.IFileRepository
 
 	type req struct {
 		method string
@@ -31,11 +33,16 @@ func Test_DeleteThingImageHandler(t *testing.T) {
 	var (
 		mc        = minimock.NewController(t)
 		imageID   = gofakeit.Number(1, 1000)
+		imageURL  = gofakeit.URL()
 		testError = errors.New(gofakeit.Phrase())
 
 		correctReq = req{
 			method: fiber.MethodDelete,
 			route:  "/v1/images/thing/" + strconv.Itoa(imageID),
+		}
+
+		repoRes = &models.Image{
+			Image: imageURL,
 		}
 	)
 
@@ -45,6 +52,7 @@ func Test_DeleteThingImageHandler(t *testing.T) {
 		resCode            int
 		resBody            interface{}
 		thingImageRepoMock thingImageRepoMockFunc
+		fileRepoMock       fileRepoMockFunc
 	}{
 		{
 			name: "negative case - bad request",
@@ -56,14 +64,72 @@ func Test_DeleteThingImageHandler(t *testing.T) {
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
 				return repoMocks.NewIThingImageRepositoryMock(mc)
 			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
+				return repoMocks.NewIFileRepositoryMock(mc)
+			},
 		},
 		{
-			name:    "negative case - repository error",
+			name:    "negative case - bad request (image not exists)",
+			req:     correctReq,
+			resCode: fiber.StatusBadRequest,
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
+				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+				mock.GetMock.Return(nil, sql.ErrNoRows)
+				return mock
+			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
+				return repoMocks.NewIFileRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - repository error (get)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
 				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+				mock.GetMock.Return(nil, testError)
+				return mock
+			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
+				return repoMocks.NewIFileRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - repository error (delete)",
+			req:     correctReq,
+			resCode: fiber.StatusInternalServerError,
+			resBody: dto.ErrorResponse{Error: testError.Error()},
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
+				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+				mock.GetMock.Return(nil, nil)
+				mock.DeleteMock.Return(testError)
+				return mock
+			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
+				return repoMocks.NewIFileRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - file delete error",
+			req:     correctReq,
+			resCode: fiber.StatusInternalServerError,
+			resBody: dto.ErrorResponse{Error: testError.Error()},
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
+				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, imageID, id)
+				}).Return(repoRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
+				return mock
+			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
+				mock := repoMocks.NewIFileRepositoryMock(mc)
 				mock.DeleteMock.Return(testError)
 				return mock
 			},
@@ -76,10 +142,19 @@ func Test_DeleteThingImageHandler(t *testing.T) {
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
 				mock := repoMocks.NewIThingImageRepositoryMock(mc)
 
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, imageID, id)
+				}).Return(repoRes, nil)
+
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, imageID, id)
 				}).Return(nil)
 
+				return mock
+			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
+				mock := repoMocks.NewIFileRepositoryMock(mc)
+				mock.DeleteMock.Return(nil)
 				return mock
 			},
 		},
@@ -88,7 +163,7 @@ func Test_DeleteThingImageHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.thingImageRepoMock(mc))
+			serviceProvider := sp.InitMock(tt.thingImageRepoMock(mc), tt.fileRepoMock(mc))
 
 			fiberApp.Delete("/v1/images/thing/:id", DeleteThingImageHandler(serviceProvider))
 

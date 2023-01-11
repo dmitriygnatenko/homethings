@@ -6,6 +6,7 @@ package repositories
 
 import (
 	"mime/multipart"
+	"os"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
@@ -19,4 +20,8 @@ func InitFileRepository() interfaces.IFileRepository {
 
 func (r fileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error {
 	return fctx.SaveFile(header, path)
+}
+
+func (r fileRepository) Delete(path string) error {
+	return os.RemoveAll(path)
 }

@@ -57,6 +57,28 @@ func (r thingImageRepository) Add(ctx context.Context, req models.AddThingImageR
 	return err
 }
 
+func (r thingImageRepository) Get(ctx context.Context, imageID int) (*models.Image, error) {
+	query, args, err := sq.Select("id", "image", "thing_id", "created_at").
+		From(thingImageTableName).
+		Where(sq.Eq{"id": imageID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res models.Image
+
+	err = r.db.QueryRowContext(ctx, query, args...).
+		Scan(&res.ID, &res.Image, &res.ThingID, &res.CreatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (r thingImageRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Image, error) {
 	var res []models.Image
 

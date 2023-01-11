@@ -18,6 +18,12 @@ import (
 type IFileRepositoryMock struct {
 	t minimock.Tester
 
+	funcDelete          func(path string) (err error)
+	inspectFuncDelete   func(path string)
+	afterDeleteCounter  uint64
+	beforeDeleteCounter uint64
+	DeleteMock          mIFileRepositoryMockDelete
+
 	funcSave          func(fctx *fiber.Ctx, header *multipart.FileHeader, path string) (err error)
 	inspectFuncSave   func(fctx *fiber.Ctx, header *multipart.FileHeader, path string)
 	afterSaveCounter  uint64
@@ -32,10 +38,228 @@ func NewIFileRepositoryMock(t minimock.Tester) *IFileRepositoryMock {
 		controller.RegisterMocker(m)
 	}
 
+	m.DeleteMock = mIFileRepositoryMockDelete{mock: m}
+	m.DeleteMock.callArgs = []*IFileRepositoryMockDeleteParams{}
+
 	m.SaveMock = mIFileRepositoryMockSave{mock: m}
 	m.SaveMock.callArgs = []*IFileRepositoryMockSaveParams{}
 
 	return m
+}
+
+type mIFileRepositoryMockDelete struct {
+	mock               *IFileRepositoryMock
+	defaultExpectation *IFileRepositoryMockDeleteExpectation
+	expectations       []*IFileRepositoryMockDeleteExpectation
+
+	callArgs []*IFileRepositoryMockDeleteParams
+	mutex    sync.RWMutex
+}
+
+// IFileRepositoryMockDeleteExpectation specifies expectation struct of the IFileRepository.Delete
+type IFileRepositoryMockDeleteExpectation struct {
+	mock    *IFileRepositoryMock
+	params  *IFileRepositoryMockDeleteParams
+	results *IFileRepositoryMockDeleteResults
+	Counter uint64
+}
+
+// IFileRepositoryMockDeleteParams contains parameters of the IFileRepository.Delete
+type IFileRepositoryMockDeleteParams struct {
+	path string
+}
+
+// IFileRepositoryMockDeleteResults contains results of the IFileRepository.Delete
+type IFileRepositoryMockDeleteResults struct {
+	err error
+}
+
+// Expect sets up expected params for IFileRepository.Delete
+func (mmDelete *mIFileRepositoryMockDelete) Expect(path string) *mIFileRepositoryMockDelete {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IFileRepositoryMock.Delete mock is already set by Set")
+	}
+
+	if mmDelete.defaultExpectation == nil {
+		mmDelete.defaultExpectation = &IFileRepositoryMockDeleteExpectation{}
+	}
+
+	mmDelete.defaultExpectation.params = &IFileRepositoryMockDeleteParams{path}
+	for _, e := range mmDelete.expectations {
+		if minimock.Equal(e.params, mmDelete.defaultExpectation.params) {
+			mmDelete.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmDelete.defaultExpectation.params)
+		}
+	}
+
+	return mmDelete
+}
+
+// Inspect accepts an inspector function that has same arguments as the IFileRepository.Delete
+func (mmDelete *mIFileRepositoryMockDelete) Inspect(f func(path string)) *mIFileRepositoryMockDelete {
+	if mmDelete.mock.inspectFuncDelete != nil {
+		mmDelete.mock.t.Fatalf("Inspect function is already set for IFileRepositoryMock.Delete")
+	}
+
+	mmDelete.mock.inspectFuncDelete = f
+
+	return mmDelete
+}
+
+// Return sets up results that will be returned by IFileRepository.Delete
+func (mmDelete *mIFileRepositoryMockDelete) Return(err error) *IFileRepositoryMock {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IFileRepositoryMock.Delete mock is already set by Set")
+	}
+
+	if mmDelete.defaultExpectation == nil {
+		mmDelete.defaultExpectation = &IFileRepositoryMockDeleteExpectation{mock: mmDelete.mock}
+	}
+	mmDelete.defaultExpectation.results = &IFileRepositoryMockDeleteResults{err}
+	return mmDelete.mock
+}
+
+// Set uses given function f to mock the IFileRepository.Delete method
+func (mmDelete *mIFileRepositoryMockDelete) Set(f func(path string) (err error)) *IFileRepositoryMock {
+	if mmDelete.defaultExpectation != nil {
+		mmDelete.mock.t.Fatalf("Default expectation is already set for the IFileRepository.Delete method")
+	}
+
+	if len(mmDelete.expectations) > 0 {
+		mmDelete.mock.t.Fatalf("Some expectations are already set for the IFileRepository.Delete method")
+	}
+
+	mmDelete.mock.funcDelete = f
+	return mmDelete.mock
+}
+
+// When sets expectation for the IFileRepository.Delete which will trigger the result defined by the following
+// Then helper
+func (mmDelete *mIFileRepositoryMockDelete) When(path string) *IFileRepositoryMockDeleteExpectation {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IFileRepositoryMock.Delete mock is already set by Set")
+	}
+
+	expectation := &IFileRepositoryMockDeleteExpectation{
+		mock:   mmDelete.mock,
+		params: &IFileRepositoryMockDeleteParams{path},
+	}
+	mmDelete.expectations = append(mmDelete.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IFileRepository.Delete return parameters for the expectation previously defined by the When method
+func (e *IFileRepositoryMockDeleteExpectation) Then(err error) *IFileRepositoryMock {
+	e.results = &IFileRepositoryMockDeleteResults{err}
+	return e.mock
+}
+
+// Delete implements interfaces.IFileRepository
+func (mmDelete *IFileRepositoryMock) Delete(path string) (err error) {
+	mm_atomic.AddUint64(&mmDelete.beforeDeleteCounter, 1)
+	defer mm_atomic.AddUint64(&mmDelete.afterDeleteCounter, 1)
+
+	if mmDelete.inspectFuncDelete != nil {
+		mmDelete.inspectFuncDelete(path)
+	}
+
+	mm_params := &IFileRepositoryMockDeleteParams{path}
+
+	// Record call args
+	mmDelete.DeleteMock.mutex.Lock()
+	mmDelete.DeleteMock.callArgs = append(mmDelete.DeleteMock.callArgs, mm_params)
+	mmDelete.DeleteMock.mutex.Unlock()
+
+	for _, e := range mmDelete.DeleteMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmDelete.DeleteMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmDelete.DeleteMock.defaultExpectation.Counter, 1)
+		mm_want := mmDelete.DeleteMock.defaultExpectation.params
+		mm_got := IFileRepositoryMockDeleteParams{path}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmDelete.t.Errorf("IFileRepositoryMock.Delete got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmDelete.DeleteMock.defaultExpectation.results
+		if mm_results == nil {
+			mmDelete.t.Fatal("No results are set for the IFileRepositoryMock.Delete")
+		}
+		return (*mm_results).err
+	}
+	if mmDelete.funcDelete != nil {
+		return mmDelete.funcDelete(path)
+	}
+	mmDelete.t.Fatalf("Unexpected call to IFileRepositoryMock.Delete. %v", path)
+	return
+}
+
+// DeleteAfterCounter returns a count of finished IFileRepositoryMock.Delete invocations
+func (mmDelete *IFileRepositoryMock) DeleteAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDelete.afterDeleteCounter)
+}
+
+// DeleteBeforeCounter returns a count of IFileRepositoryMock.Delete invocations
+func (mmDelete *IFileRepositoryMock) DeleteBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDelete.beforeDeleteCounter)
+}
+
+// Calls returns a list of arguments used in each call to IFileRepositoryMock.Delete.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmDelete *mIFileRepositoryMockDelete) Calls() []*IFileRepositoryMockDeleteParams {
+	mmDelete.mutex.RLock()
+
+	argCopy := make([]*IFileRepositoryMockDeleteParams, len(mmDelete.callArgs))
+	copy(argCopy, mmDelete.callArgs)
+
+	mmDelete.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockDeleteDone returns true if the count of the Delete invocations corresponds
+// the number of defined expectations
+func (m *IFileRepositoryMock) MinimockDeleteDone() bool {
+	for _, e := range m.DeleteMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.DeleteMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcDelete != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockDeleteInspect logs each unmet expectation
+func (m *IFileRepositoryMock) MinimockDeleteInspect() {
+	for _, e := range m.DeleteMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IFileRepositoryMock.Delete with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.DeleteMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		if m.DeleteMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IFileRepositoryMock.Delete")
+		} else {
+			m.t.Errorf("Expected call to IFileRepositoryMock.Delete with params: %#v", *m.DeleteMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcDelete != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		m.t.Error("Expected call to IFileRepositoryMock.Delete")
+	}
 }
 
 type mIFileRepositoryMockSave struct {
@@ -258,6 +482,8 @@ func (m *IFileRepositoryMock) MinimockSaveInspect() {
 // MinimockFinish checks that all mocked methods have been called the expected number of times
 func (m *IFileRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
+		m.MinimockDeleteInspect()
+
 		m.MinimockSaveInspect()
 		m.t.FailNow()
 	}
@@ -282,5 +508,6 @@ func (m *IFileRepositoryMock) MinimockWait(timeout mm_time.Duration) {
 func (m *IFileRepositoryMock) minimockDone() bool {
 	done := true
 	return done &&
+		m.MinimockDeleteDone() &&
 		m.MinimockSaveDone()
 }
