@@ -381,6 +381,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
       security:
       - BasicAuth: []
       summary: Delete place

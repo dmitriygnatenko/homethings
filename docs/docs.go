@@ -559,6 +559,18 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
                     }
                 }
             }

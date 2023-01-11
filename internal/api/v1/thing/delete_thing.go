@@ -28,8 +28,7 @@ func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
-		_, err = sp.GetThingRepository().Get(ctx, id)
-		if err != nil {
+		if _, err = sp.GetThingRepository().Get(ctx, id); err != nil {
 			if err == sql.ErrNoRows {
 				return factory.CreateBadRequestResponse(fctx, nil)
 			}
@@ -41,8 +40,7 @@ func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		err = sp.GetPlaceThingRepository().DeleteThing(ctx, id, tx)
-		if err != nil {
+		if err = sp.GetPlaceThingRepository().DeleteThing(ctx, id, tx); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
@@ -60,8 +58,7 @@ func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			}
 		}
 
-		err = sp.GetThingRepository().Delete(ctx, id, tx)
-		if err != nil {
+		if err = sp.GetThingRepository().Delete(ctx, id, tx); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 

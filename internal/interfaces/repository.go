@@ -26,6 +26,9 @@ type IPlaceRepository interface {
 	GetNestedPlaces(ctx context.Context, placeID int) ([]models.Place, error)
 	Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error)
 	Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error
+	Delete(ctx context.Context, placeID int, tx *sql.Tx) error
+	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+	CommitTx(tx *sql.Tx) error
 }
 
 type IPlaceThingRepository interface {

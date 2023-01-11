@@ -7,6 +7,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
@@ -23,6 +24,18 @@ type placeRepository struct {
 
 func InitPlaceRepository(db *sql.DB) interfaces.IPlaceRepository {
 	return placeRepository{db: db}
+}
+
+func (r placeRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
+	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
+}
+
+func (r placeRepository) CommitTx(tx *sql.Tx) error {
+	if tx == nil {
+		return errors.New("empty transaction")
+	}
+
+	return tx.Commit()
 }
 
 func (r placeRepository) GetAll(ctx context.Context) ([]models.Place, error) {
@@ -165,6 +178,25 @@ func (r placeRepository) Update(ctx context.Context, req models.UpdatePlaceReque
 		Set("title", req.Title).
 		Set("parent_id", req.ParentID).
 		Where(sq.Eq{"id": req.ID}).ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	if tx == nil {
+		_, err = r.db.ExecContext(ctx, query, args...)
+	} else {
+		_, err = tx.ExecContext(ctx, query, args...)
+	}
+
+	return err
+}
+
+func (r placeRepository) Delete(ctx context.Context, placeID int, tx *sql.Tx) error {
+	query, args, err := sq.Delete(placeTableName).
+		Where(sq.Eq{"id": placeID}).
+		Limit(1).
+		ToSql()
 
 	if err != nil {
 		return err

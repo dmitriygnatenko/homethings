@@ -85,7 +85,7 @@ func (r thingImageRepository) GetByThingID(ctx context.Context, thingID int) ([]
 	query, args, err := sq.Select("id", "image", "thing_id", "created_at").
 		From(thingImageTableName).
 		Where(sq.Eq{"thing_id": thingID}).
-		OrderBy("created_at desc").
+		OrderBy("created_at DESC").
 		ToSql()
 
 	if err != nil {

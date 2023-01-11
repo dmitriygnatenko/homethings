@@ -25,6 +25,24 @@ type IPlaceRepositoryMock struct {
 	beforeAddCounter uint64
 	AddMock          mIPlaceRepositoryMockAdd
 
+	funcBeginTx          func(ctx context.Context, level sql.IsolationLevel) (tp1 *sql.Tx, err error)
+	inspectFuncBeginTx   func(ctx context.Context, level sql.IsolationLevel)
+	afterBeginTxCounter  uint64
+	beforeBeginTxCounter uint64
+	BeginTxMock          mIPlaceRepositoryMockBeginTx
+
+	funcCommitTx          func(tx *sql.Tx) (err error)
+	inspectFuncCommitTx   func(tx *sql.Tx)
+	afterCommitTxCounter  uint64
+	beforeCommitTxCounter uint64
+	CommitTxMock          mIPlaceRepositoryMockCommitTx
+
+	funcDelete          func(ctx context.Context, placeID int, tx *sql.Tx) (err error)
+	inspectFuncDelete   func(ctx context.Context, placeID int, tx *sql.Tx)
+	afterDeleteCounter  uint64
+	beforeDeleteCounter uint64
+	DeleteMock          mIPlaceRepositoryMockDelete
+
 	funcGet          func(ctx context.Context, placeID int) (pp1 *models.Place, err error)
 	inspectFuncGet   func(ctx context.Context, placeID int)
 	afterGetCounter  uint64
@@ -59,6 +77,15 @@ func NewIPlaceRepositoryMock(t minimock.Tester) *IPlaceRepositoryMock {
 
 	m.AddMock = mIPlaceRepositoryMockAdd{mock: m}
 	m.AddMock.callArgs = []*IPlaceRepositoryMockAddParams{}
+
+	m.BeginTxMock = mIPlaceRepositoryMockBeginTx{mock: m}
+	m.BeginTxMock.callArgs = []*IPlaceRepositoryMockBeginTxParams{}
+
+	m.CommitTxMock = mIPlaceRepositoryMockCommitTx{mock: m}
+	m.CommitTxMock.callArgs = []*IPlaceRepositoryMockCommitTxParams{}
+
+	m.DeleteMock = mIPlaceRepositoryMockDelete{mock: m}
+	m.DeleteMock.callArgs = []*IPlaceRepositoryMockDeleteParams{}
 
 	m.GetMock = mIPlaceRepositoryMockGet{mock: m}
 	m.GetMock.callArgs = []*IPlaceRepositoryMockGetParams{}
@@ -290,6 +317,655 @@ func (m *IPlaceRepositoryMock) MinimockAddInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcAdd != nil && mm_atomic.LoadUint64(&m.afterAddCounter) < 1 {
 		m.t.Error("Expected call to IPlaceRepositoryMock.Add")
+	}
+}
+
+type mIPlaceRepositoryMockBeginTx struct {
+	mock               *IPlaceRepositoryMock
+	defaultExpectation *IPlaceRepositoryMockBeginTxExpectation
+	expectations       []*IPlaceRepositoryMockBeginTxExpectation
+
+	callArgs []*IPlaceRepositoryMockBeginTxParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceRepositoryMockBeginTxExpectation specifies expectation struct of the IPlaceRepository.BeginTx
+type IPlaceRepositoryMockBeginTxExpectation struct {
+	mock    *IPlaceRepositoryMock
+	params  *IPlaceRepositoryMockBeginTxParams
+	results *IPlaceRepositoryMockBeginTxResults
+	Counter uint64
+}
+
+// IPlaceRepositoryMockBeginTxParams contains parameters of the IPlaceRepository.BeginTx
+type IPlaceRepositoryMockBeginTxParams struct {
+	ctx   context.Context
+	level sql.IsolationLevel
+}
+
+// IPlaceRepositoryMockBeginTxResults contains results of the IPlaceRepository.BeginTx
+type IPlaceRepositoryMockBeginTxResults struct {
+	tp1 *sql.Tx
+	err error
+}
+
+// Expect sets up expected params for IPlaceRepository.BeginTx
+func (mmBeginTx *mIPlaceRepositoryMockBeginTx) Expect(ctx context.Context, level sql.IsolationLevel) *mIPlaceRepositoryMockBeginTx {
+	if mmBeginTx.mock.funcBeginTx != nil {
+		mmBeginTx.mock.t.Fatalf("IPlaceRepositoryMock.BeginTx mock is already set by Set")
+	}
+
+	if mmBeginTx.defaultExpectation == nil {
+		mmBeginTx.defaultExpectation = &IPlaceRepositoryMockBeginTxExpectation{}
+	}
+
+	mmBeginTx.defaultExpectation.params = &IPlaceRepositoryMockBeginTxParams{ctx, level}
+	for _, e := range mmBeginTx.expectations {
+		if minimock.Equal(e.params, mmBeginTx.defaultExpectation.params) {
+			mmBeginTx.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmBeginTx.defaultExpectation.params)
+		}
+	}
+
+	return mmBeginTx
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceRepository.BeginTx
+func (mmBeginTx *mIPlaceRepositoryMockBeginTx) Inspect(f func(ctx context.Context, level sql.IsolationLevel)) *mIPlaceRepositoryMockBeginTx {
+	if mmBeginTx.mock.inspectFuncBeginTx != nil {
+		mmBeginTx.mock.t.Fatalf("Inspect function is already set for IPlaceRepositoryMock.BeginTx")
+	}
+
+	mmBeginTx.mock.inspectFuncBeginTx = f
+
+	return mmBeginTx
+}
+
+// Return sets up results that will be returned by IPlaceRepository.BeginTx
+func (mmBeginTx *mIPlaceRepositoryMockBeginTx) Return(tp1 *sql.Tx, err error) *IPlaceRepositoryMock {
+	if mmBeginTx.mock.funcBeginTx != nil {
+		mmBeginTx.mock.t.Fatalf("IPlaceRepositoryMock.BeginTx mock is already set by Set")
+	}
+
+	if mmBeginTx.defaultExpectation == nil {
+		mmBeginTx.defaultExpectation = &IPlaceRepositoryMockBeginTxExpectation{mock: mmBeginTx.mock}
+	}
+	mmBeginTx.defaultExpectation.results = &IPlaceRepositoryMockBeginTxResults{tp1, err}
+	return mmBeginTx.mock
+}
+
+// Set uses given function f to mock the IPlaceRepository.BeginTx method
+func (mmBeginTx *mIPlaceRepositoryMockBeginTx) Set(f func(ctx context.Context, level sql.IsolationLevel) (tp1 *sql.Tx, err error)) *IPlaceRepositoryMock {
+	if mmBeginTx.defaultExpectation != nil {
+		mmBeginTx.mock.t.Fatalf("Default expectation is already set for the IPlaceRepository.BeginTx method")
+	}
+
+	if len(mmBeginTx.expectations) > 0 {
+		mmBeginTx.mock.t.Fatalf("Some expectations are already set for the IPlaceRepository.BeginTx method")
+	}
+
+	mmBeginTx.mock.funcBeginTx = f
+	return mmBeginTx.mock
+}
+
+// When sets expectation for the IPlaceRepository.BeginTx which will trigger the result defined by the following
+// Then helper
+func (mmBeginTx *mIPlaceRepositoryMockBeginTx) When(ctx context.Context, level sql.IsolationLevel) *IPlaceRepositoryMockBeginTxExpectation {
+	if mmBeginTx.mock.funcBeginTx != nil {
+		mmBeginTx.mock.t.Fatalf("IPlaceRepositoryMock.BeginTx mock is already set by Set")
+	}
+
+	expectation := &IPlaceRepositoryMockBeginTxExpectation{
+		mock:   mmBeginTx.mock,
+		params: &IPlaceRepositoryMockBeginTxParams{ctx, level},
+	}
+	mmBeginTx.expectations = append(mmBeginTx.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceRepository.BeginTx return parameters for the expectation previously defined by the When method
+func (e *IPlaceRepositoryMockBeginTxExpectation) Then(tp1 *sql.Tx, err error) *IPlaceRepositoryMock {
+	e.results = &IPlaceRepositoryMockBeginTxResults{tp1, err}
+	return e.mock
+}
+
+// BeginTx implements interfaces.IPlaceRepository
+func (mmBeginTx *IPlaceRepositoryMock) BeginTx(ctx context.Context, level sql.IsolationLevel) (tp1 *sql.Tx, err error) {
+	mm_atomic.AddUint64(&mmBeginTx.beforeBeginTxCounter, 1)
+	defer mm_atomic.AddUint64(&mmBeginTx.afterBeginTxCounter, 1)
+
+	if mmBeginTx.inspectFuncBeginTx != nil {
+		mmBeginTx.inspectFuncBeginTx(ctx, level)
+	}
+
+	mm_params := &IPlaceRepositoryMockBeginTxParams{ctx, level}
+
+	// Record call args
+	mmBeginTx.BeginTxMock.mutex.Lock()
+	mmBeginTx.BeginTxMock.callArgs = append(mmBeginTx.BeginTxMock.callArgs, mm_params)
+	mmBeginTx.BeginTxMock.mutex.Unlock()
+
+	for _, e := range mmBeginTx.BeginTxMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.tp1, e.results.err
+		}
+	}
+
+	if mmBeginTx.BeginTxMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmBeginTx.BeginTxMock.defaultExpectation.Counter, 1)
+		mm_want := mmBeginTx.BeginTxMock.defaultExpectation.params
+		mm_got := IPlaceRepositoryMockBeginTxParams{ctx, level}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmBeginTx.t.Errorf("IPlaceRepositoryMock.BeginTx got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmBeginTx.BeginTxMock.defaultExpectation.results
+		if mm_results == nil {
+			mmBeginTx.t.Fatal("No results are set for the IPlaceRepositoryMock.BeginTx")
+		}
+		return (*mm_results).tp1, (*mm_results).err
+	}
+	if mmBeginTx.funcBeginTx != nil {
+		return mmBeginTx.funcBeginTx(ctx, level)
+	}
+	mmBeginTx.t.Fatalf("Unexpected call to IPlaceRepositoryMock.BeginTx. %v %v", ctx, level)
+	return
+}
+
+// BeginTxAfterCounter returns a count of finished IPlaceRepositoryMock.BeginTx invocations
+func (mmBeginTx *IPlaceRepositoryMock) BeginTxAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmBeginTx.afterBeginTxCounter)
+}
+
+// BeginTxBeforeCounter returns a count of IPlaceRepositoryMock.BeginTx invocations
+func (mmBeginTx *IPlaceRepositoryMock) BeginTxBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmBeginTx.beforeBeginTxCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceRepositoryMock.BeginTx.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmBeginTx *mIPlaceRepositoryMockBeginTx) Calls() []*IPlaceRepositoryMockBeginTxParams {
+	mmBeginTx.mutex.RLock()
+
+	argCopy := make([]*IPlaceRepositoryMockBeginTxParams, len(mmBeginTx.callArgs))
+	copy(argCopy, mmBeginTx.callArgs)
+
+	mmBeginTx.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockBeginTxDone returns true if the count of the BeginTx invocations corresponds
+// the number of defined expectations
+func (m *IPlaceRepositoryMock) MinimockBeginTxDone() bool {
+	for _, e := range m.BeginTxMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.BeginTxMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterBeginTxCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcBeginTx != nil && mm_atomic.LoadUint64(&m.afterBeginTxCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockBeginTxInspect logs each unmet expectation
+func (m *IPlaceRepositoryMock) MinimockBeginTxInspect() {
+	for _, e := range m.BeginTxMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.BeginTx with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.BeginTxMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterBeginTxCounter) < 1 {
+		if m.BeginTxMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceRepositoryMock.BeginTx")
+		} else {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.BeginTx with params: %#v", *m.BeginTxMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcBeginTx != nil && mm_atomic.LoadUint64(&m.afterBeginTxCounter) < 1 {
+		m.t.Error("Expected call to IPlaceRepositoryMock.BeginTx")
+	}
+}
+
+type mIPlaceRepositoryMockCommitTx struct {
+	mock               *IPlaceRepositoryMock
+	defaultExpectation *IPlaceRepositoryMockCommitTxExpectation
+	expectations       []*IPlaceRepositoryMockCommitTxExpectation
+
+	callArgs []*IPlaceRepositoryMockCommitTxParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceRepositoryMockCommitTxExpectation specifies expectation struct of the IPlaceRepository.CommitTx
+type IPlaceRepositoryMockCommitTxExpectation struct {
+	mock    *IPlaceRepositoryMock
+	params  *IPlaceRepositoryMockCommitTxParams
+	results *IPlaceRepositoryMockCommitTxResults
+	Counter uint64
+}
+
+// IPlaceRepositoryMockCommitTxParams contains parameters of the IPlaceRepository.CommitTx
+type IPlaceRepositoryMockCommitTxParams struct {
+	tx *sql.Tx
+}
+
+// IPlaceRepositoryMockCommitTxResults contains results of the IPlaceRepository.CommitTx
+type IPlaceRepositoryMockCommitTxResults struct {
+	err error
+}
+
+// Expect sets up expected params for IPlaceRepository.CommitTx
+func (mmCommitTx *mIPlaceRepositoryMockCommitTx) Expect(tx *sql.Tx) *mIPlaceRepositoryMockCommitTx {
+	if mmCommitTx.mock.funcCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("IPlaceRepositoryMock.CommitTx mock is already set by Set")
+	}
+
+	if mmCommitTx.defaultExpectation == nil {
+		mmCommitTx.defaultExpectation = &IPlaceRepositoryMockCommitTxExpectation{}
+	}
+
+	mmCommitTx.defaultExpectation.params = &IPlaceRepositoryMockCommitTxParams{tx}
+	for _, e := range mmCommitTx.expectations {
+		if minimock.Equal(e.params, mmCommitTx.defaultExpectation.params) {
+			mmCommitTx.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmCommitTx.defaultExpectation.params)
+		}
+	}
+
+	return mmCommitTx
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceRepository.CommitTx
+func (mmCommitTx *mIPlaceRepositoryMockCommitTx) Inspect(f func(tx *sql.Tx)) *mIPlaceRepositoryMockCommitTx {
+	if mmCommitTx.mock.inspectFuncCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("Inspect function is already set for IPlaceRepositoryMock.CommitTx")
+	}
+
+	mmCommitTx.mock.inspectFuncCommitTx = f
+
+	return mmCommitTx
+}
+
+// Return sets up results that will be returned by IPlaceRepository.CommitTx
+func (mmCommitTx *mIPlaceRepositoryMockCommitTx) Return(err error) *IPlaceRepositoryMock {
+	if mmCommitTx.mock.funcCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("IPlaceRepositoryMock.CommitTx mock is already set by Set")
+	}
+
+	if mmCommitTx.defaultExpectation == nil {
+		mmCommitTx.defaultExpectation = &IPlaceRepositoryMockCommitTxExpectation{mock: mmCommitTx.mock}
+	}
+	mmCommitTx.defaultExpectation.results = &IPlaceRepositoryMockCommitTxResults{err}
+	return mmCommitTx.mock
+}
+
+// Set uses given function f to mock the IPlaceRepository.CommitTx method
+func (mmCommitTx *mIPlaceRepositoryMockCommitTx) Set(f func(tx *sql.Tx) (err error)) *IPlaceRepositoryMock {
+	if mmCommitTx.defaultExpectation != nil {
+		mmCommitTx.mock.t.Fatalf("Default expectation is already set for the IPlaceRepository.CommitTx method")
+	}
+
+	if len(mmCommitTx.expectations) > 0 {
+		mmCommitTx.mock.t.Fatalf("Some expectations are already set for the IPlaceRepository.CommitTx method")
+	}
+
+	mmCommitTx.mock.funcCommitTx = f
+	return mmCommitTx.mock
+}
+
+// When sets expectation for the IPlaceRepository.CommitTx which will trigger the result defined by the following
+// Then helper
+func (mmCommitTx *mIPlaceRepositoryMockCommitTx) When(tx *sql.Tx) *IPlaceRepositoryMockCommitTxExpectation {
+	if mmCommitTx.mock.funcCommitTx != nil {
+		mmCommitTx.mock.t.Fatalf("IPlaceRepositoryMock.CommitTx mock is already set by Set")
+	}
+
+	expectation := &IPlaceRepositoryMockCommitTxExpectation{
+		mock:   mmCommitTx.mock,
+		params: &IPlaceRepositoryMockCommitTxParams{tx},
+	}
+	mmCommitTx.expectations = append(mmCommitTx.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceRepository.CommitTx return parameters for the expectation previously defined by the When method
+func (e *IPlaceRepositoryMockCommitTxExpectation) Then(err error) *IPlaceRepositoryMock {
+	e.results = &IPlaceRepositoryMockCommitTxResults{err}
+	return e.mock
+}
+
+// CommitTx implements interfaces.IPlaceRepository
+func (mmCommitTx *IPlaceRepositoryMock) CommitTx(tx *sql.Tx) (err error) {
+	mm_atomic.AddUint64(&mmCommitTx.beforeCommitTxCounter, 1)
+	defer mm_atomic.AddUint64(&mmCommitTx.afterCommitTxCounter, 1)
+
+	if mmCommitTx.inspectFuncCommitTx != nil {
+		mmCommitTx.inspectFuncCommitTx(tx)
+	}
+
+	mm_params := &IPlaceRepositoryMockCommitTxParams{tx}
+
+	// Record call args
+	mmCommitTx.CommitTxMock.mutex.Lock()
+	mmCommitTx.CommitTxMock.callArgs = append(mmCommitTx.CommitTxMock.callArgs, mm_params)
+	mmCommitTx.CommitTxMock.mutex.Unlock()
+
+	for _, e := range mmCommitTx.CommitTxMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmCommitTx.CommitTxMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmCommitTx.CommitTxMock.defaultExpectation.Counter, 1)
+		mm_want := mmCommitTx.CommitTxMock.defaultExpectation.params
+		mm_got := IPlaceRepositoryMockCommitTxParams{tx}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmCommitTx.t.Errorf("IPlaceRepositoryMock.CommitTx got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmCommitTx.CommitTxMock.defaultExpectation.results
+		if mm_results == nil {
+			mmCommitTx.t.Fatal("No results are set for the IPlaceRepositoryMock.CommitTx")
+		}
+		return (*mm_results).err
+	}
+	if mmCommitTx.funcCommitTx != nil {
+		return mmCommitTx.funcCommitTx(tx)
+	}
+	mmCommitTx.t.Fatalf("Unexpected call to IPlaceRepositoryMock.CommitTx. %v", tx)
+	return
+}
+
+// CommitTxAfterCounter returns a count of finished IPlaceRepositoryMock.CommitTx invocations
+func (mmCommitTx *IPlaceRepositoryMock) CommitTxAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmCommitTx.afterCommitTxCounter)
+}
+
+// CommitTxBeforeCounter returns a count of IPlaceRepositoryMock.CommitTx invocations
+func (mmCommitTx *IPlaceRepositoryMock) CommitTxBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmCommitTx.beforeCommitTxCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceRepositoryMock.CommitTx.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmCommitTx *mIPlaceRepositoryMockCommitTx) Calls() []*IPlaceRepositoryMockCommitTxParams {
+	mmCommitTx.mutex.RLock()
+
+	argCopy := make([]*IPlaceRepositoryMockCommitTxParams, len(mmCommitTx.callArgs))
+	copy(argCopy, mmCommitTx.callArgs)
+
+	mmCommitTx.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockCommitTxDone returns true if the count of the CommitTx invocations corresponds
+// the number of defined expectations
+func (m *IPlaceRepositoryMock) MinimockCommitTxDone() bool {
+	for _, e := range m.CommitTxMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.CommitTxMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcCommitTx != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockCommitTxInspect logs each unmet expectation
+func (m *IPlaceRepositoryMock) MinimockCommitTxInspect() {
+	for _, e := range m.CommitTxMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.CommitTx with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.CommitTxMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		if m.CommitTxMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceRepositoryMock.CommitTx")
+		} else {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.CommitTx with params: %#v", *m.CommitTxMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcCommitTx != nil && mm_atomic.LoadUint64(&m.afterCommitTxCounter) < 1 {
+		m.t.Error("Expected call to IPlaceRepositoryMock.CommitTx")
+	}
+}
+
+type mIPlaceRepositoryMockDelete struct {
+	mock               *IPlaceRepositoryMock
+	defaultExpectation *IPlaceRepositoryMockDeleteExpectation
+	expectations       []*IPlaceRepositoryMockDeleteExpectation
+
+	callArgs []*IPlaceRepositoryMockDeleteParams
+	mutex    sync.RWMutex
+}
+
+// IPlaceRepositoryMockDeleteExpectation specifies expectation struct of the IPlaceRepository.Delete
+type IPlaceRepositoryMockDeleteExpectation struct {
+	mock    *IPlaceRepositoryMock
+	params  *IPlaceRepositoryMockDeleteParams
+	results *IPlaceRepositoryMockDeleteResults
+	Counter uint64
+}
+
+// IPlaceRepositoryMockDeleteParams contains parameters of the IPlaceRepository.Delete
+type IPlaceRepositoryMockDeleteParams struct {
+	ctx     context.Context
+	placeID int
+	tx      *sql.Tx
+}
+
+// IPlaceRepositoryMockDeleteResults contains results of the IPlaceRepository.Delete
+type IPlaceRepositoryMockDeleteResults struct {
+	err error
+}
+
+// Expect sets up expected params for IPlaceRepository.Delete
+func (mmDelete *mIPlaceRepositoryMockDelete) Expect(ctx context.Context, placeID int, tx *sql.Tx) *mIPlaceRepositoryMockDelete {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IPlaceRepositoryMock.Delete mock is already set by Set")
+	}
+
+	if mmDelete.defaultExpectation == nil {
+		mmDelete.defaultExpectation = &IPlaceRepositoryMockDeleteExpectation{}
+	}
+
+	mmDelete.defaultExpectation.params = &IPlaceRepositoryMockDeleteParams{ctx, placeID, tx}
+	for _, e := range mmDelete.expectations {
+		if minimock.Equal(e.params, mmDelete.defaultExpectation.params) {
+			mmDelete.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmDelete.defaultExpectation.params)
+		}
+	}
+
+	return mmDelete
+}
+
+// Inspect accepts an inspector function that has same arguments as the IPlaceRepository.Delete
+func (mmDelete *mIPlaceRepositoryMockDelete) Inspect(f func(ctx context.Context, placeID int, tx *sql.Tx)) *mIPlaceRepositoryMockDelete {
+	if mmDelete.mock.inspectFuncDelete != nil {
+		mmDelete.mock.t.Fatalf("Inspect function is already set for IPlaceRepositoryMock.Delete")
+	}
+
+	mmDelete.mock.inspectFuncDelete = f
+
+	return mmDelete
+}
+
+// Return sets up results that will be returned by IPlaceRepository.Delete
+func (mmDelete *mIPlaceRepositoryMockDelete) Return(err error) *IPlaceRepositoryMock {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IPlaceRepositoryMock.Delete mock is already set by Set")
+	}
+
+	if mmDelete.defaultExpectation == nil {
+		mmDelete.defaultExpectation = &IPlaceRepositoryMockDeleteExpectation{mock: mmDelete.mock}
+	}
+	mmDelete.defaultExpectation.results = &IPlaceRepositoryMockDeleteResults{err}
+	return mmDelete.mock
+}
+
+// Set uses given function f to mock the IPlaceRepository.Delete method
+func (mmDelete *mIPlaceRepositoryMockDelete) Set(f func(ctx context.Context, placeID int, tx *sql.Tx) (err error)) *IPlaceRepositoryMock {
+	if mmDelete.defaultExpectation != nil {
+		mmDelete.mock.t.Fatalf("Default expectation is already set for the IPlaceRepository.Delete method")
+	}
+
+	if len(mmDelete.expectations) > 0 {
+		mmDelete.mock.t.Fatalf("Some expectations are already set for the IPlaceRepository.Delete method")
+	}
+
+	mmDelete.mock.funcDelete = f
+	return mmDelete.mock
+}
+
+// When sets expectation for the IPlaceRepository.Delete which will trigger the result defined by the following
+// Then helper
+func (mmDelete *mIPlaceRepositoryMockDelete) When(ctx context.Context, placeID int, tx *sql.Tx) *IPlaceRepositoryMockDeleteExpectation {
+	if mmDelete.mock.funcDelete != nil {
+		mmDelete.mock.t.Fatalf("IPlaceRepositoryMock.Delete mock is already set by Set")
+	}
+
+	expectation := &IPlaceRepositoryMockDeleteExpectation{
+		mock:   mmDelete.mock,
+		params: &IPlaceRepositoryMockDeleteParams{ctx, placeID, tx},
+	}
+	mmDelete.expectations = append(mmDelete.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IPlaceRepository.Delete return parameters for the expectation previously defined by the When method
+func (e *IPlaceRepositoryMockDeleteExpectation) Then(err error) *IPlaceRepositoryMock {
+	e.results = &IPlaceRepositoryMockDeleteResults{err}
+	return e.mock
+}
+
+// Delete implements interfaces.IPlaceRepository
+func (mmDelete *IPlaceRepositoryMock) Delete(ctx context.Context, placeID int, tx *sql.Tx) (err error) {
+	mm_atomic.AddUint64(&mmDelete.beforeDeleteCounter, 1)
+	defer mm_atomic.AddUint64(&mmDelete.afterDeleteCounter, 1)
+
+	if mmDelete.inspectFuncDelete != nil {
+		mmDelete.inspectFuncDelete(ctx, placeID, tx)
+	}
+
+	mm_params := &IPlaceRepositoryMockDeleteParams{ctx, placeID, tx}
+
+	// Record call args
+	mmDelete.DeleteMock.mutex.Lock()
+	mmDelete.DeleteMock.callArgs = append(mmDelete.DeleteMock.callArgs, mm_params)
+	mmDelete.DeleteMock.mutex.Unlock()
+
+	for _, e := range mmDelete.DeleteMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.err
+		}
+	}
+
+	if mmDelete.DeleteMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmDelete.DeleteMock.defaultExpectation.Counter, 1)
+		mm_want := mmDelete.DeleteMock.defaultExpectation.params
+		mm_got := IPlaceRepositoryMockDeleteParams{ctx, placeID, tx}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmDelete.t.Errorf("IPlaceRepositoryMock.Delete got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmDelete.DeleteMock.defaultExpectation.results
+		if mm_results == nil {
+			mmDelete.t.Fatal("No results are set for the IPlaceRepositoryMock.Delete")
+		}
+		return (*mm_results).err
+	}
+	if mmDelete.funcDelete != nil {
+		return mmDelete.funcDelete(ctx, placeID, tx)
+	}
+	mmDelete.t.Fatalf("Unexpected call to IPlaceRepositoryMock.Delete. %v %v %v", ctx, placeID, tx)
+	return
+}
+
+// DeleteAfterCounter returns a count of finished IPlaceRepositoryMock.Delete invocations
+func (mmDelete *IPlaceRepositoryMock) DeleteAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDelete.afterDeleteCounter)
+}
+
+// DeleteBeforeCounter returns a count of IPlaceRepositoryMock.Delete invocations
+func (mmDelete *IPlaceRepositoryMock) DeleteBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDelete.beforeDeleteCounter)
+}
+
+// Calls returns a list of arguments used in each call to IPlaceRepositoryMock.Delete.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmDelete *mIPlaceRepositoryMockDelete) Calls() []*IPlaceRepositoryMockDeleteParams {
+	mmDelete.mutex.RLock()
+
+	argCopy := make([]*IPlaceRepositoryMockDeleteParams, len(mmDelete.callArgs))
+	copy(argCopy, mmDelete.callArgs)
+
+	mmDelete.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockDeleteDone returns true if the count of the Delete invocations corresponds
+// the number of defined expectations
+func (m *IPlaceRepositoryMock) MinimockDeleteDone() bool {
+	for _, e := range m.DeleteMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.DeleteMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcDelete != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockDeleteInspect logs each unmet expectation
+func (m *IPlaceRepositoryMock) MinimockDeleteInspect() {
+	for _, e := range m.DeleteMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.Delete with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.DeleteMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		if m.DeleteMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IPlaceRepositoryMock.Delete")
+		} else {
+			m.t.Errorf("Expected call to IPlaceRepositoryMock.Delete with params: %#v", *m.DeleteMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcDelete != nil && mm_atomic.LoadUint64(&m.afterDeleteCounter) < 1 {
+		m.t.Error("Expected call to IPlaceRepositoryMock.Delete")
 	}
 }
 
@@ -1165,6 +1841,12 @@ func (m *IPlaceRepositoryMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockAddInspect()
 
+		m.MinimockBeginTxInspect()
+
+		m.MinimockCommitTxInspect()
+
+		m.MinimockDeleteInspect()
+
 		m.MinimockGetInspect()
 
 		m.MinimockGetAllInspect()
@@ -1196,6 +1878,9 @@ func (m *IPlaceRepositoryMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockAddDone() &&
+		m.MinimockBeginTxDone() &&
+		m.MinimockCommitTxDone() &&
+		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
 		m.MinimockGetAllDone() &&
 		m.MinimockGetNestedPlacesDone() &&
