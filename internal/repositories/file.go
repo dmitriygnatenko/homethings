@@ -12,6 +12,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+const uploadPath = "../../web"
+
 type fileRepository struct{}
 
 func InitFileRepository() interfaces.IFileRepository {
@@ -19,9 +21,9 @@ func InitFileRepository() interfaces.IFileRepository {
 }
 
 func (r fileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error {
-	return fctx.SaveFile(header, path)
+	return fctx.SaveFile(header, uploadPath+path)
 }
 
 func (r fileRepository) Delete(path string) error {
-	return os.RemoveAll(path)
+	return os.RemoveAll(uploadPath + path)
 }

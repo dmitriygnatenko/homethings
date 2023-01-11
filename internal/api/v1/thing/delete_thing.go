@@ -46,16 +46,35 @@ func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
+		images, err := sp.GetThingImageRepository().GetByThingID(ctx, id)
+		if err != nil {
+			return factory.CreateInternalErrorResponse(fctx, err)
+		}
+
+		imageURLs := make([]string, 0, len(images))
+		for i := range images {
+			imageURLs = append(imageURLs, images[i].Image)
+
+			if err = sp.GetThingImageRepository().Delete(ctx, images[i].ID, tx); err != nil {
+				return factory.CreateInternalErrorResponse(fctx, err)
+			}
+		}
+
 		err = sp.GetThingRepository().Delete(ctx, id, tx)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		// TODO delete images
-		// TODO delete tags
-
 		if err = sp.GetThingRepository().CommitTx(tx); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
+		}
+
+		if len(imageURLs) > 0 {
+			for i := range imageURLs {
+				if err = sp.GetFileRepository().Delete(imageURLs[i]); err != nil {
+					return factory.CreateInternalErrorResponse(fctx, err)
+				}
+			}
 		}
 
 		return fctx.JSON(dto.EmptyResponse{})

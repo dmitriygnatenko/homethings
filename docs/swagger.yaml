@@ -383,7 +383,7 @@ paths:
             $ref: '#/definitions/dto.EmptyResponse'
       security:
       - BasicAuth: []
-      summary: Delete place TODO
+      summary: Delete place
       tags:
       - Places
     get:

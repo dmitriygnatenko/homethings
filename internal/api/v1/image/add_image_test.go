@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// nolint:errcheck
 func Test_AddImageHandler(t *testing.T) {
 	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceImageRepository
 	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.IThingImageRepository

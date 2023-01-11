@@ -543,7 +543,7 @@ const docTemplate = `{
                 "tags": [
                     "Places"
                 ],
-                "summary": "Delete place TODO",
+                "summary": "Delete place",
                 "parameters": [
                     {
                         "type": "integer",

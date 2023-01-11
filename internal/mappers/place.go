@@ -50,7 +50,7 @@ func ConvertToUpdatePlaceRequestModel(id int, req dto.UpdatePlaceRequest) models
 }
 
 func ConvertToPlacesResponseDTO(req []models.Place) dto.PlacesResponse {
-	var res []dto.PlaceResponse
+	res := make([]dto.PlaceResponse, 0, len(req))
 
 	for _, p := range req {
 		res = append(res, ConvertToPlaceResponseDTO(p))

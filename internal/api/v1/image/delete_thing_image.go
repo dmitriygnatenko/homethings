@@ -40,7 +40,7 @@ func DeleteThingImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		if err = sp.GetFileRepository().Delete(uploadPath + image.Image); err != nil {
+		if err = sp.GetFileRepository().Delete(image.Image); err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 

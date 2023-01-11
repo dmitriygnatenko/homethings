@@ -16,10 +16,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const (
-	uploadPath     = "../../web"
-	fileDateLayout = "2006-01-02-15-04-05"
-)
+const fileDateLayout = "2006-01-02-15-04-05"
 
 // @Router 		/v1/images [post]
 // @Param       place_id formData int false "Place ID"
@@ -64,7 +61,7 @@ func AddImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		for _, file := range form.File["files"] {
 			filename := "/files/" + date + "_" + helpers.GenerateRandomString(10) + filepath.Ext(file.Filename)
 
-			if err = sp.GetFileRepository().Save(fctx, file, uploadPath+filename); err != nil {
+			if err = sp.GetFileRepository().Save(fctx, file, filename); err != nil {
 				return factory.CreateInternalErrorResponse(fctx, err)
 			}
 

@@ -9,7 +9,7 @@ import (
 // @Router 		/v1/places/{id} [delete]
 // @Param       id path int true "Place ID"
 // @Success     200 {object} dto.EmptyResponse
-// @Summary     Delete place TODO
+// @Summary     Delete place
 // @Tags  		Places
 // @security 	BasicAuth
 // @Accept      json
@@ -21,6 +21,7 @@ func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return err
 		}
 
+		// TODO
 		_ = id
 
 		return ctx.JSON(dto.EmptyResponse{})
