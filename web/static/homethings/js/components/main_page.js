@@ -8,6 +8,7 @@ import {modalAddThingComponent} from "./modal_add_thing.js";
 import {modalUpdateThingComponent} from "./modal_update_thing.js";
 import {modalDeleteThingComponent} from "./modal_delete_thing.js";
 import {modalAddImageComponent, typePlace} from "./modal_add_image.js";
+import {modalShowImagesComponent} from "./modal_show_image.js"
 
 import * as client from "../client/client.js";
 import * as auth from "../auth/auth.js"
@@ -23,6 +24,7 @@ export const mainPageComponent = {
         "modal-update-thing": modalUpdateThingComponent,
         "modal-delete-thing": modalDeleteThingComponent,
         "modal-add-image": modalAddImageComponent,
+        "modal-show-images": modalShowImagesComponent,
     },
     emits: ["set-auth"],
     props: {
@@ -120,7 +122,7 @@ export const mainPageComponent = {
                 });
             }
         },
-        resetThings(){
+        resetThings() {
             this.selectedThing = 0
             this.thingsList = []
             this.resetImages()
@@ -230,6 +232,10 @@ export const mainPageComponent = {
                 }
             }
         },
+        showImage(imageID, placeID, thingID) {
+            this.$refs.modalShowImages.init(imageID, placeID, thingID)
+        },
+        // Auth
         logout() {
             auth.clearToken()
             this.$emit("set-auth", false)
@@ -354,6 +360,7 @@ export const mainPageComponent = {
                             <button 
                                 class="btn"
                                 v-for="image in imagesList"
+                                v-on:dblclick="showImage(image.id, image.place_id, image.thing_id)"
                                 @click="setSelectedImage(image.id, image.place_id, image.thing_id)"
                                 :class="{ selected : selectedImage == image.id }">
                                 <img class="img-fluid" :src="image.image">
@@ -373,6 +380,7 @@ export const mainPageComponent = {
         <modal-update-thing ref="modalUpdateThing" :selected-thing="selectedThing" @after-update-thing="afterUpdateThing"></modal-update-thing>
         <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @after-delete-thing="afterDeleteThing"></modal-delete-thing>
         <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @after-add-image="afterAddImage"></modal-add-image>
+        <modal-show-images ref="modalShowImages" :images="imagesList"></modal-show-images>
     </template>
     `
 }
