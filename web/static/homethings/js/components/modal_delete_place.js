@@ -11,6 +11,7 @@ export const modalDeletePlaceComponent = {
             modal: Object,
             form: {
                 title: "",
+                error: "",
             },
         }
     },
@@ -20,10 +21,18 @@ export const modalDeletePlaceComponent = {
                 return
             }
             this.form.title = ""
+            this.form.error = ""
 
             let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
+            }
+
+            let nestedRes = client.jsonRequest(client.methodGet, client.routeGetNestedPlaces.replace("{id}", this.selectedPlace))
+            if (nestedRes.status === client.statusOK) {
+                if (Array.isArray(nestedRes.data.places) && nestedRes.data.places.length) {
+                    this.form.error = "Необходимо вначале удалить вложенные места."
+                }
             }
 
             this.modal = new bootstrap.Modal(document.getElementById("delete-place-modal"), {})
@@ -43,13 +52,18 @@ export const modalDeletePlaceComponent = {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    Подтвердите удаление <b>{{ form.title }}</b>
-                    <br><br>
-                    <small>Будут удалены все вещи и фото, прикрепленные к данному месту</small>
+                    <div v-if="form.error" class="text-danger text-sm-center">
+                        {{ form.error }}
+                    </div>
+                    <div v-else>
+                        Подтвердите удаление <b>{{ form.title }}</b>
+                        <br><br>
+                        <small>Будут удалены все вещи и фото, прикрепленные к данному месту</small>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-danger btn-sm" @click="submitForm">Удалить</button>
+                    <button v-if="!form.error" type="button" class="btn btn-danger btn-sm" @click="submitForm">Удалить</button>
                 </div>
             </div>
         </div>
