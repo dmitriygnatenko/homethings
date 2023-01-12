@@ -63,9 +63,9 @@ func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		for _, thing := range things {
 			thingIDs = append(thingIDs, thing.ID)
 
-			thingImagesRes, err := sp.GetThingImageRepository().GetByThingID(ctx, thing.ID)
-			if err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+			thingImagesRes, thingImagesErr := sp.GetThingImageRepository().GetByThingID(ctx, thing.ID)
+			if thingImagesErr != nil {
+				return factory.CreateInternalErrorResponse(fctx, thingImagesErr)
 			}
 
 			for i := range thingImagesRes {
