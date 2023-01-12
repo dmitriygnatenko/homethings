@@ -61,6 +61,12 @@ type IThingRepositoryMock struct {
 	beforeGetByPlaceIDCounter uint64
 	GetByPlaceIDMock          mIThingRepositoryMockGetByPlaceID
 
+	funcSearch          func(ctx context.Context, search string) (ta1 []models.Thing, err error)
+	inspectFuncSearch   func(ctx context.Context, search string)
+	afterSearchCounter  uint64
+	beforeSearchCounter uint64
+	SearchMock          mIThingRepositoryMockSearch
+
 	funcUpdate          func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) (err error)
 	inspectFuncUpdate   func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx)
 	afterUpdateCounter  uint64
@@ -95,6 +101,9 @@ func NewIThingRepositoryMock(t minimock.Tester) *IThingRepositoryMock {
 
 	m.GetByPlaceIDMock = mIThingRepositoryMockGetByPlaceID{mock: m}
 	m.GetByPlaceIDMock.callArgs = []*IThingRepositoryMockGetByPlaceIDParams{}
+
+	m.SearchMock = mIThingRepositoryMockSearch{mock: m}
+	m.SearchMock.callArgs = []*IThingRepositoryMockSearchParams{}
 
 	m.UpdateMock = mIThingRepositoryMockUpdate{mock: m}
 	m.UpdateMock.callArgs = []*IThingRepositoryMockUpdateParams{}
@@ -1620,6 +1629,223 @@ func (m *IThingRepositoryMock) MinimockGetByPlaceIDInspect() {
 	}
 }
 
+type mIThingRepositoryMockSearch struct {
+	mock               *IThingRepositoryMock
+	defaultExpectation *IThingRepositoryMockSearchExpectation
+	expectations       []*IThingRepositoryMockSearchExpectation
+
+	callArgs []*IThingRepositoryMockSearchParams
+	mutex    sync.RWMutex
+}
+
+// IThingRepositoryMockSearchExpectation specifies expectation struct of the IThingRepository.Search
+type IThingRepositoryMockSearchExpectation struct {
+	mock    *IThingRepositoryMock
+	params  *IThingRepositoryMockSearchParams
+	results *IThingRepositoryMockSearchResults
+	Counter uint64
+}
+
+// IThingRepositoryMockSearchParams contains parameters of the IThingRepository.Search
+type IThingRepositoryMockSearchParams struct {
+	ctx    context.Context
+	search string
+}
+
+// IThingRepositoryMockSearchResults contains results of the IThingRepository.Search
+type IThingRepositoryMockSearchResults struct {
+	ta1 []models.Thing
+	err error
+}
+
+// Expect sets up expected params for IThingRepository.Search
+func (mmSearch *mIThingRepositoryMockSearch) Expect(ctx context.Context, search string) *mIThingRepositoryMockSearch {
+	if mmSearch.mock.funcSearch != nil {
+		mmSearch.mock.t.Fatalf("IThingRepositoryMock.Search mock is already set by Set")
+	}
+
+	if mmSearch.defaultExpectation == nil {
+		mmSearch.defaultExpectation = &IThingRepositoryMockSearchExpectation{}
+	}
+
+	mmSearch.defaultExpectation.params = &IThingRepositoryMockSearchParams{ctx, search}
+	for _, e := range mmSearch.expectations {
+		if minimock.Equal(e.params, mmSearch.defaultExpectation.params) {
+			mmSearch.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmSearch.defaultExpectation.params)
+		}
+	}
+
+	return mmSearch
+}
+
+// Inspect accepts an inspector function that has same arguments as the IThingRepository.Search
+func (mmSearch *mIThingRepositoryMockSearch) Inspect(f func(ctx context.Context, search string)) *mIThingRepositoryMockSearch {
+	if mmSearch.mock.inspectFuncSearch != nil {
+		mmSearch.mock.t.Fatalf("Inspect function is already set for IThingRepositoryMock.Search")
+	}
+
+	mmSearch.mock.inspectFuncSearch = f
+
+	return mmSearch
+}
+
+// Return sets up results that will be returned by IThingRepository.Search
+func (mmSearch *mIThingRepositoryMockSearch) Return(ta1 []models.Thing, err error) *IThingRepositoryMock {
+	if mmSearch.mock.funcSearch != nil {
+		mmSearch.mock.t.Fatalf("IThingRepositoryMock.Search mock is already set by Set")
+	}
+
+	if mmSearch.defaultExpectation == nil {
+		mmSearch.defaultExpectation = &IThingRepositoryMockSearchExpectation{mock: mmSearch.mock}
+	}
+	mmSearch.defaultExpectation.results = &IThingRepositoryMockSearchResults{ta1, err}
+	return mmSearch.mock
+}
+
+// Set uses given function f to mock the IThingRepository.Search method
+func (mmSearch *mIThingRepositoryMockSearch) Set(f func(ctx context.Context, search string) (ta1 []models.Thing, err error)) *IThingRepositoryMock {
+	if mmSearch.defaultExpectation != nil {
+		mmSearch.mock.t.Fatalf("Default expectation is already set for the IThingRepository.Search method")
+	}
+
+	if len(mmSearch.expectations) > 0 {
+		mmSearch.mock.t.Fatalf("Some expectations are already set for the IThingRepository.Search method")
+	}
+
+	mmSearch.mock.funcSearch = f
+	return mmSearch.mock
+}
+
+// When sets expectation for the IThingRepository.Search which will trigger the result defined by the following
+// Then helper
+func (mmSearch *mIThingRepositoryMockSearch) When(ctx context.Context, search string) *IThingRepositoryMockSearchExpectation {
+	if mmSearch.mock.funcSearch != nil {
+		mmSearch.mock.t.Fatalf("IThingRepositoryMock.Search mock is already set by Set")
+	}
+
+	expectation := &IThingRepositoryMockSearchExpectation{
+		mock:   mmSearch.mock,
+		params: &IThingRepositoryMockSearchParams{ctx, search},
+	}
+	mmSearch.expectations = append(mmSearch.expectations, expectation)
+	return expectation
+}
+
+// Then sets up IThingRepository.Search return parameters for the expectation previously defined by the When method
+func (e *IThingRepositoryMockSearchExpectation) Then(ta1 []models.Thing, err error) *IThingRepositoryMock {
+	e.results = &IThingRepositoryMockSearchResults{ta1, err}
+	return e.mock
+}
+
+// Search implements interfaces.IThingRepository
+func (mmSearch *IThingRepositoryMock) Search(ctx context.Context, search string) (ta1 []models.Thing, err error) {
+	mm_atomic.AddUint64(&mmSearch.beforeSearchCounter, 1)
+	defer mm_atomic.AddUint64(&mmSearch.afterSearchCounter, 1)
+
+	if mmSearch.inspectFuncSearch != nil {
+		mmSearch.inspectFuncSearch(ctx, search)
+	}
+
+	mm_params := &IThingRepositoryMockSearchParams{ctx, search}
+
+	// Record call args
+	mmSearch.SearchMock.mutex.Lock()
+	mmSearch.SearchMock.callArgs = append(mmSearch.SearchMock.callArgs, mm_params)
+	mmSearch.SearchMock.mutex.Unlock()
+
+	for _, e := range mmSearch.SearchMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ta1, e.results.err
+		}
+	}
+
+	if mmSearch.SearchMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmSearch.SearchMock.defaultExpectation.Counter, 1)
+		mm_want := mmSearch.SearchMock.defaultExpectation.params
+		mm_got := IThingRepositoryMockSearchParams{ctx, search}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmSearch.t.Errorf("IThingRepositoryMock.Search got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmSearch.SearchMock.defaultExpectation.results
+		if mm_results == nil {
+			mmSearch.t.Fatal("No results are set for the IThingRepositoryMock.Search")
+		}
+		return (*mm_results).ta1, (*mm_results).err
+	}
+	if mmSearch.funcSearch != nil {
+		return mmSearch.funcSearch(ctx, search)
+	}
+	mmSearch.t.Fatalf("Unexpected call to IThingRepositoryMock.Search. %v %v", ctx, search)
+	return
+}
+
+// SearchAfterCounter returns a count of finished IThingRepositoryMock.Search invocations
+func (mmSearch *IThingRepositoryMock) SearchAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmSearch.afterSearchCounter)
+}
+
+// SearchBeforeCounter returns a count of IThingRepositoryMock.Search invocations
+func (mmSearch *IThingRepositoryMock) SearchBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmSearch.beforeSearchCounter)
+}
+
+// Calls returns a list of arguments used in each call to IThingRepositoryMock.Search.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmSearch *mIThingRepositoryMockSearch) Calls() []*IThingRepositoryMockSearchParams {
+	mmSearch.mutex.RLock()
+
+	argCopy := make([]*IThingRepositoryMockSearchParams, len(mmSearch.callArgs))
+	copy(argCopy, mmSearch.callArgs)
+
+	mmSearch.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockSearchDone returns true if the count of the Search invocations corresponds
+// the number of defined expectations
+func (m *IThingRepositoryMock) MinimockSearchDone() bool {
+	for _, e := range m.SearchMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.SearchMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterSearchCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcSearch != nil && mm_atomic.LoadUint64(&m.afterSearchCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockSearchInspect logs each unmet expectation
+func (m *IThingRepositoryMock) MinimockSearchInspect() {
+	for _, e := range m.SearchMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to IThingRepositoryMock.Search with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.SearchMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterSearchCounter) < 1 {
+		if m.SearchMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to IThingRepositoryMock.Search")
+		} else {
+			m.t.Errorf("Expected call to IThingRepositoryMock.Search with params: %#v", *m.SearchMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcSearch != nil && mm_atomic.LoadUint64(&m.afterSearchCounter) < 1 {
+		m.t.Error("Expected call to IThingRepositoryMock.Search")
+	}
+}
+
 type mIThingRepositoryMockUpdate struct {
 	mock               *IThingRepositoryMock
 	defaultExpectation *IThingRepositoryMockUpdateExpectation
@@ -1854,6 +2080,8 @@ func (m *IThingRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetByPlaceIDInspect()
 
+		m.MinimockSearchInspect()
+
 		m.MinimockUpdateInspect()
 		m.t.FailNow()
 	}
@@ -1885,5 +2113,6 @@ func (m *IThingRepositoryMock) minimockDone() bool {
 		m.MinimockGetDone() &&
 		m.MinimockGetAllByPlaceIDDone() &&
 		m.MinimockGetByPlaceIDDone() &&
+		m.MinimockSearchDone() &&
 		m.MinimockUpdateDone()
 }

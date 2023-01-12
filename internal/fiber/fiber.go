@@ -82,6 +82,7 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Delete("/v1/places/:id<int>", placeAPI.DeletePlaceHandler(sp))
 
 	r.Get("/v1/things/:id<int>", thingAPI.GetThingHandler(sp))
+	r.Get("/v1/things/search/:search", thingAPI.SearchThingHandler(sp))
 	r.Post("/v1/things", thingAPI.AddThingHandler(sp))
 	r.Put("/v1/things/:id<int>", thingAPI.UpdateThingHandler(sp))
 	r.Delete("/v1/things/:id<int>", thingAPI.DeleteThingHandler(sp))

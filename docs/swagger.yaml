@@ -671,6 +671,36 @@ paths:
       summary: Update thing
       tags:
       - Things
+  /v1/things/search/{search}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Search string
+        in: path
+        name: search
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ThingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BasicAuth: []
+      summary: Search things
+      tags:
+      - Things
 securityDefinitions:
   BasicAuth:
     type: basic

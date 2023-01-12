@@ -11,6 +11,7 @@ import (
 
 type IThingRepository interface {
 	Get(ctx context.Context, thingID int) (*models.Thing, error)
+	Search(ctx context.Context, search string) ([]models.Thing, error)
 	GetByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error)
 	GetAllByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error)
 	Add(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) (int, error)

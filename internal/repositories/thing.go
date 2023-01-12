@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
@@ -59,6 +60,51 @@ func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, e
 	}
 
 	return &res, nil
+}
+
+func (r thingRepository) Search(ctx context.Context, search string) ([]models.Thing, error) {
+	var res []models.Thing
+
+	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
+		From(thingTableName+" t").
+		Join(placeThingTableName+" p ON p.thing_id = t.id").
+		Where("t.title LIKE ?", fmt.Sprint("%", search, "%")).
+		OrderBy("t.updated_at DESC").
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.Thing{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.Title,
+			&resRow.Description,
+			&resRow.CreatedAt,
+			&resRow.UpdatedAt,
+			&resRow.PlaceID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error) {
