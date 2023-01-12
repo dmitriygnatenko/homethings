@@ -9,6 +9,7 @@ import {modalUpdateThingComponent} from "./modal_update_thing.js";
 import {modalDeleteThingComponent} from "./modal_delete_thing.js";
 import {modalAddImageComponent, typePlace} from "./modal_add_image.js";
 import {modalShowImagesComponent} from "./modal_show_image.js"
+import {modalSearchThingComponent} from "./modal_search_thing.js"
 
 import * as client from "../client/client.js";
 import * as auth from "../auth/auth.js"
@@ -25,6 +26,7 @@ export const mainPageComponent = {
         "modal-delete-thing": modalDeleteThingComponent,
         "modal-add-image": modalAddImageComponent,
         "modal-show-images": modalShowImagesComponent,
+        "modal-search-thing": modalSearchThingComponent,
     },
     emits: ["set-auth"],
     props: {
@@ -203,6 +205,14 @@ export const mainPageComponent = {
         afterDeleteThing() {
             this.refreshThings(this.selectedPlace)
         },
+        searchThing() {
+            this.$refs.modalSearchThing.init()
+        },
+        afterSearchThing(placeID, thingID) {
+            this.refreshPlaces(placeID)
+            this.refreshThings(placeID)
+            this.setSelectedThing(thingID)
+        },
         addImage() {
             this.$refs.modalAddImage.init()
         },
@@ -299,6 +309,12 @@ export const mainPageComponent = {
                             Вещи
                             <div class="buttons float-end">
                                 <button
+                                    class="btn search"
+                                    title="Поиск вещи"
+                                    @click="searchThing">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button
                                     class="btn add"
                                     title="Добавить вещь"
                                     v-if="selectedPlace > 0"
@@ -381,6 +397,7 @@ export const mainPageComponent = {
         <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @after-delete-thing="afterDeleteThing"></modal-delete-thing>
         <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @after-add-image="afterAddImage"></modal-add-image>
         <modal-show-images ref="modalShowImages" :images="imagesList"></modal-show-images>
+        <modal-search-thing ref="modalSearchThing" @after-search-thing="afterSearchThing"></modal-search-thing>
     </template>
     `
 }
