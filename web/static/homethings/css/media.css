@@ -1,0 +1,31 @@
+@media (max-width: 411px) {
+    .container-fluid .d-flex {
+        display: block !important;
+    }
+    .col-l, .col-c, .col-r {
+        width: 100%;
+        padding-bottom: 0;
+    }
+    .places {
+        margin-right: 15px;
+        height: 250px;
+    }
+    .places .list {
+        height: 200px;
+    }
+    .things {
+        margin-right: 15px;
+        margin-left: 15px;
+        height: 250px;
+    }
+    .things .list {
+        height: 200px;
+    }
+    .info {
+        margin-left: 15px;
+        height: 350px;
+    }
+    .info .list {
+        height: 300px;
+    }
+}
