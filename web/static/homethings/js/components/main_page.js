@@ -189,8 +189,10 @@ export const mainPageComponent = {
         addThing() {
             this.$refs.modalAddThing.init()
         },
-        afterAddThing() {
-            this.refreshThings(this.selectedPlace)
+        afterAddThing(placeID, thingID) {
+            this.refreshPlaces(placeID)
+            this.refreshThings(placeID)
+            this.setSelectedThing(thingID)
         },
         updateThing() {
             this.$refs.modalUpdateThing.init()

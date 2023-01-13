@@ -63,7 +63,7 @@ export const modalAddThingComponent = {
 
             let res = client.jsonRequest(client.methodPost, client.routeAddThing, data)
             if (res.status === client.statusOK) {
-                this.$emit("after-add-thing");
+                this.$emit("after-add-thing", this.form.placeID, res.data.id);
             }
             this.modal.hide()
         },
@@ -73,9 +73,9 @@ export const modalAddThingComponent = {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <div class="row" mb-3>
+                    <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
-                            Родительское место
+                            <b>Родительское место</b>
                         </label>
                         <div class="col-sm-9">
                             <select v-model="form.placeID" class="form-select form-select-sm">
@@ -87,7 +87,7 @@ export const modalAddThingComponent = {
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
-                            Название
+                            <b>Название</b>
                         </label>
                         <div class="col-sm-9">
                             <input
@@ -96,13 +96,13 @@ export const modalAddThingComponent = {
                                 v-model.trim="form.title"
                                 :class="{'is-invalid': errors.title}">
                             <div v-if="errors.title" class="invalid-feedback">
-                                {{ errors.title }}
+                                <small>{{ errors.title }}<small>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
-                            Описание
+                            <b>Описание</b>
                         </label>
                         <div class="col-sm-9">
                             <textarea 
