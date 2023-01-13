@@ -52,13 +52,13 @@ export const modalDeletePlaceComponent = {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
-                    <div v-if="form.error" class="text-danger text-sm-center">
-                        {{ form.error }}
+                    <div v-if="form.error" class="text-danger text-center">
+                        <small>{{ form.error }}</small>
                     </div>
                     <div v-else>
                         Подтвердите удаление <b>{{ form.title }}</b>
                         <br><br>
-                        <small>Будут удалены все вещи и фото, прикрепленные к данному месту</small>
+                        <small class="text-secondary">Будут удалены все вещи и фото, прикрепленные к данному месту</small>
                     </div>
                 </div>
                 <div class="modal-footer">
