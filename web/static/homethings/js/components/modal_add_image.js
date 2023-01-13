@@ -113,7 +113,7 @@ export const modalAddImageComponent = {
                         class="row mt-3"
                         v-for="(file, index) in form.files"
                         :key="index">
-                        <div class="col-sm-9">
+                        <div class="col-9">
                             <input 
                             class="form-control form-control-sm" 
                             accept="image/*"
@@ -121,7 +121,7 @@ export const modalAddImageComponent = {
                             :data-index="index"
                             @change="onFileChange">
                         </div>       
-                        <div class="col-sm-3">
+                        <div class="col-3">
                             <button
                                 class="btn add"
                                 title="Добавить"

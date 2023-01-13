@@ -212,9 +212,11 @@ body {
 }
 #add-image-modal .btn.add {
     color: green;
+    padding-top: 2px;
 }
 #add-image-modal .btn.delete {
     color: #cf0000;
+    padding-top: 2px;
 }
 .search-results {
     font-size: 14px;

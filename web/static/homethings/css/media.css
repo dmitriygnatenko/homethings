@@ -31,4 +31,8 @@
     #search-thing-modal button.search {
         margin-top: 15px;
     }
+    #add-image-modal .btn.add, #add-image-modal .btn.delete {
+        padding-top: 1px;
+        padding-left: 0;
+    }
 }
