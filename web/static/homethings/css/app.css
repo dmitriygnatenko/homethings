@@ -67,8 +67,7 @@ body {
     font-size: 18px;
     font-weight: bold;
     text-transform: uppercase;
-    padding: 8px 0 0 14px;
-    height: 43px;
+    padding: 8px 0 5px 14px;
 }
 .header .buttons {
     margin: 0;
