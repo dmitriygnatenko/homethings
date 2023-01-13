@@ -48,7 +48,7 @@ export const modalDeleteThingComponent = {
                 <div class="modal-body">
                     Подтвердите удаление <b>{{ form.title }}</b>
                     <br><br>
-                    <small>Будут удалены все фото, прикрепленные к данной вещи</small>
+                    <small class="text-secondary">Будут удалены все фото, прикрепленные к данной вещи</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
