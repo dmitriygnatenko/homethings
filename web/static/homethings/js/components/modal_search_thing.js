@@ -30,6 +30,7 @@ export const modalSearchThingComponent = {
         },
         submitForm() {
             this.empty = false
+            this.thingsList = []
 
             if (this.form.search === "") {
                 this.errors.search = "Заполните поле для поиска"
