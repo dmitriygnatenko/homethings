@@ -85,7 +85,7 @@ export const modalUpdatePlaceComponent = {
                 <div class="modal-body">
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
-                            Родительское место
+                            <b>Родительское место<b>
                         </label>
                         <div class="col-sm-9">
                             <select v-model="form.parentID" class="form-select form-select-sm">
@@ -97,7 +97,7 @@ export const modalUpdatePlaceComponent = {
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
-                            Название
+                            <b>Название</b>
                         </label>
                         <div class="col-sm-9">
                             <input
@@ -106,7 +106,7 @@ export const modalUpdatePlaceComponent = {
                                 v-model.trim="form.title"
                                 :class="{'is-invalid': errors.title}">
                             <div v-if="errors.title" class="invalid-feedback">
-                                {{ errors.title }}
+                                <small>{{ errors.title }}</small>
                             </div>
                         </div>
                     </div>

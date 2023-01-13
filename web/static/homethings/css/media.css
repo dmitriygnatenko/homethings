@@ -1,4 +1,4 @@
-@media (max-width: 411px) {
+@media (max-width: 767px) {
     .container-fluid .d-flex {
         display: block !important;
     }
