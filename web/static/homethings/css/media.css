@@ -28,4 +28,7 @@
     .info .list {
         height: 300px;
     }
+    #search-thing-modal button.search {
+        margin-top: 15px;
+    }
 }

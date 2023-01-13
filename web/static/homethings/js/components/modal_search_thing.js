@@ -81,11 +81,11 @@ export const modalSearchThingComponent = {
                                 v-model.trim="form.search"
                                 :class="{ 'is-invalid': errors.search }">
                                 <div class="invalid-feedback">
-                                    {{ errors.search }}
+                                    <small>{{ errors.search }}</small>
                                 </div>
                         </div>
                         <div class="col-sm-3">
-                            <button type="button" class="btn btn-primary btn-sm w-100" @click="submitForm">Поиск</button>
+                            <button type="button" class="search btn btn-primary btn-sm w-100" @click="submitForm">Поиск</button>
                         </div>
                     </div>  
                     
@@ -93,8 +93,8 @@ export const modalSearchThingComponent = {
                         <div class="text-center" v-if="loading">
                             <div class="spinner-border" role="status"></div>
                         </div>
-                        <div class="text-center text-body-secondary" v-if="empty">
-                            Ничего не найдено
+                        <div class="text-center text-secondary" v-if="empty">
+                            <small>Ничего не найдено</small>
                         </div>
                         <a 
                             href="#"
