@@ -23,6 +23,7 @@ export const modalAddPlaceComponent = {
         init() {
             this.errors.title = ""
             this.form.title = ""
+            this.form.parentTitle = ""
             this.form.parentID = this.selectedPlace
 
             if (this.selectedPlace > 0) {
