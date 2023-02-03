@@ -1,21 +1,29 @@
-### Формат файла конфигурации приложения
+### Формат файла конфигурации
 
-config/.env
+.env
 
 ```
 APP_PORT=8080
 
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
+DB_NAME=homethings
+DB_USER=user
+DB_PASSWORD=pass
+DB_MAX_OPEN_CONNS=0
+DB_MAX_IDLE_CONNS=5
+DB_MAX_CONN_LIFETIME=0
+DB_MAX_IDLE_CONN_LIFETIME=60
 
 CORS_ALLOW_ORIGING=*
 CORS_ALLOW_METHODS=GET,POST,PUT,DELETE
 
-AUTH_USER=
-AUTH_PASSWORD=
+JWT_SECRET_KEY=secret
+
+SMTP_HOST=smtp.example.ru
+SMTP_PORT=2525
+SMTP_USER=user@example.ru
+SMTP_PASSWORD=pass
 ```
 
 ### Команды
