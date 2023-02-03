@@ -24,6 +24,8 @@ SMTP_HOST=smtp.example.ru
 SMTP_PORT=2525
 SMTP_USER=user@example.ru
 SMTP_PASSWORD=pass
+
+ERRORS_EMAIL=user@example.ru
 ```
 
 ### Команды

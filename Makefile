@@ -1,6 +1,6 @@
-include config/.env
+include .env
 
-GOOSE_DB_STRING = ${DB_USER}:${DB_PASSWORD}@/${DB_NAME}?parseTime=true
+GOOSE_DB_STRING = "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} port=${DB_PORT} host=${DB_HOST} sslmode=disable"
 
 usage:
 	@echo "make run"
@@ -19,12 +19,15 @@ usage:
 run:
 	cd cmd/app && go run main.go
 
+app-build:
+	env GOOS=linux GOARCH=amd64 go build -o build/app/app cmd/app/main.go
+
 test:
 	go test ./...
 
 test-cover:
-	go test ./... -coverprofile=build/coverage.out
-	go tool cover -html=build/coverage.out
+	go test ./... -coverprofile=./coverage.out
+	go tool cover -html=./coverage.out
 
 lint:
 	golangci-lint run --timeout=3m
@@ -33,25 +36,22 @@ swag:
 	swag init -o "docs" -d "cmd/app,internal/api/v1,internal/dto"
 
 migration-status:
-	goose -dir migrations mysql ${GOOSE_DB_STRING} status
+	goose -dir migrations postgres ${GOOSE_DB_STRING} status
 
 migration-up:
-	goose -dir migrations mysql ${GOOSE_DB_STRING} up
+	goose -dir migrations postgres ${GOOSE_DB_STRING} up
 
 migration-down:
-	goose -dir migrations mysql ${GOOSE_DB_STRING} down
+	goose -dir migrations postgres ${GOOSE_DB_STRING} down
 
 docker-build:
-	docker compose --file build/docker/docker-compose.yml --env-file config/.env --project-name homethings up --build --detach
+	docker compose up --build --detach
 
 docker-up:
-	docker compose --file build/docker/docker-compose.yml --env-file config/.env --project-name homethings up --detach
+	docker compose up --detach
 
 docker-down:
-	docker compose --file build/docker/docker-compose.yml --env-file config/.env --project-name homethings down
-
-app-build:
-	env GOOS=linux GOARCH=amd64 go build -o build/app/app cmd/app/main.go
+	docker compose down
 
 install-deps: install-lint install-goose install-swagger
 

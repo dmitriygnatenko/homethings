@@ -1,16 +1,17 @@
 -- +goose Up
 CREATE TABLE place_thing
 (
-    `place_id`   INT      NOT NULL,
-    `thing_id`   INT      NOT NULL,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE INDEX (`place_id`, `thing_id`),
-    FOREIGN KEY (`place_id`) REFERENCES place (`id`) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (`thing_id`) REFERENCES thing (`id`) ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+    place_id   INT       NOT NULL,
+    thing_id   INT       NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_place_thing_place_id FOREIGN KEY (place_id) REFERENCES place (id),
+    CONSTRAINT fk_place_thing_thing_id FOREIGN KEY (thing_id) REFERENCES thing (id)
+);
+
+CREATE UNIQUE INDEX idx_unique_place_thing ON place_thing (place_id, thing_id);
+
+CREATE INDEX idx_place_thing_thing ON place_thing (thing_id);
 
 -- +goose Down
 DROP TABLE place_thing;

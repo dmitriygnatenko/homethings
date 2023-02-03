@@ -1,6 +1,5 @@
 /go.sum
 /.idea/
-/config/.env
-/build/docker/mysql/
-/build/coverage.out
+/.env
 /web/files/
+/coverage.out
