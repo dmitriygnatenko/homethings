@@ -2,13 +2,26 @@ package interfaces
 
 type IEnv interface {
 	GetAppPort() string
-	GetDBPort() string
 	GetDBHost() string
+	GetDBPort() string
 	GetDBName() string
 	GetDBUser() string
 	GetDBPassword() string
+
+	GetDBMaxOpenConns() int
+	GetDBMaxIdleConns() int
+	GetDBMaxConnLifetime() int
+	GetDBMaxIdleConnLifetime() int
+
 	GetCORSAllowOrigins() string
 	GetCORSAllowMethods() string
-	GetAuthUser() string
-	GetAuthPassword() string
+
+	GetSMTPHost() string
+	GetSMTPPort() string
+	GetSMTPUser() string
+	GetSMTPPassword() string
+
+	GetJWTSecretKey() string
+
+	GetErrorsEmail() string
 }
