@@ -5,9 +5,11 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
 	dbService "git.dmitriygnatenko.ru/dima/homethings/internal/services/db"
 	envService "git.dmitriygnatenko.ru/dima/homethings/internal/services/env"
+	flagService "git.dmitriygnatenko.ru/dima/homethings/internal/services/flag"
 )
 
 type ServiceProvider struct {
+	flags                interfaces.IFlag
 	env                  interfaces.IEnv
 	placeRepository      interfaces.IPlaceRepository
 	thingRepository      interfaces.IThingRepository
@@ -21,7 +23,13 @@ func Init() (interfaces.IServiceProvider, error) {
 	sp := &ServiceProvider{}
 
 	// Init services
-	env, err := envService.Init()
+	flags, err := flagService.Init()
+	if err != nil {
+		return nil, err
+	}
+	sp.flags = flags
+
+	env, err := envService.Init(flags.GetConfig())
 	if err != nil {
 		return nil, err
 	}
