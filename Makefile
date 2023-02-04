@@ -15,12 +15,10 @@ usage:
 	@echo "make docker-up"
 	@echo "make docker-down"
 	@echo "make install-deps"
+	@echo "make app-build"
 
 run:
-	cd cmd/app && go run main.go
-
-app-build:
-	env GOOS=linux GOARCH=amd64 go build -o build/app/app cmd/app/main.go
+	cd cmd/app && go run main.go --config=../../.env
 
 test:
 	go test ./...
@@ -63,3 +61,6 @@ install-goose:
 
 install-swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
+
+app-build:
+	env GOOS=linux GOARCH=amd64 go build -o build/app/app cmd/app/main.go
