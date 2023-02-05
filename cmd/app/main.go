@@ -6,6 +6,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/fiber"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 // @title 						Homethings API
@@ -16,6 +17,11 @@ func main() {
 	serviceProvider, err := sp.Init()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if serviceProvider.GetFlagService().IsCommand() {
+		serviceProvider.GetCommandService().Run(serviceProvider.GetFlagService())
+		return
 	}
 
 	fiberApp, err := fiber.Init(serviceProvider)

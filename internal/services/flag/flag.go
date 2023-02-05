@@ -1,7 +1,6 @@
 package flag
 
 import (
-	"errors"
 	"flag"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -37,33 +36,11 @@ func Init() (interfaces.IFlag, error) {
 	flag.StringVar(&res.password, CommandFlagPassword, "", "Password")
 	flag.Parse()
 
-	return res, res.validate()
+	return res, nil
 }
 
-func (f *flags) validate() error {
-	var err error
-
-	if f.config == "" {
-		return errors.New("parameter *config* must be filled")
-	}
-
-	switch f.action {
-	case ActionTypeAddUser, ActionTypeUpdateUser:
-		if f.username == "" {
-			return errors.New("parameter *username* must be filled for the add/update user action")
-		}
-		if f.password == "" {
-			return errors.New("parameter *password* must be filled for the add/update user action")
-		}
-	case ActionTypeDeleteUser:
-		if f.username == "" {
-			return errors.New("parameter *username* must be filled for the delete user action")
-		}
-	default:
-		f.action = ""
-	}
-
-	return err
+func (f *flags) IsCommand() bool {
+	return f.help || f.action != "" || f.config == ""
 }
 
 func (f *flags) GetConfig() string {

@@ -3,6 +3,7 @@ package sp
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
+	commandService "git.dmitriygnatenko.ru/dima/homethings/internal/services/command"
 	dbService "git.dmitriygnatenko.ru/dima/homethings/internal/services/db"
 	envService "git.dmitriygnatenko.ru/dima/homethings/internal/services/env"
 	flagService "git.dmitriygnatenko.ru/dima/homethings/internal/services/flag"
@@ -11,6 +12,7 @@ import (
 type ServiceProvider struct {
 	flags                interfaces.IFlag
 	env                  interfaces.IEnv
+	command              interfaces.ICommand
 	placeRepository      interfaces.IPlaceRepository
 	thingRepository      interfaces.IThingRepository
 	placeThingRepository interfaces.IPlaceThingRepository
@@ -48,11 +50,26 @@ func Init() (interfaces.IServiceProvider, error) {
 	sp.thingImageRepository = repositories.InitThingImageRepository(db)
 	sp.fileRepository = repositories.InitFileRepository()
 
+	// Init commands
+	command, err := commandService.Init()
+	if err != nil {
+		return nil, err
+	}
+	sp.command = command
+
 	return sp, nil
+}
+
+func (sp *ServiceProvider) GetFlagService() interfaces.IFlag {
+	return sp.flags
 }
 
 func (sp *ServiceProvider) GetEnvService() interfaces.IEnv {
 	return sp.env
+}
+
+func (sp *ServiceProvider) GetCommandService() interfaces.ICommand {
+	return sp.command
 }
 
 func (sp *ServiceProvider) GetPlaceRepository() interfaces.IPlaceRepository {
@@ -84,8 +101,12 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 
 	for _, d := range deps {
 		switch s := d.(type) {
+		case interfaces.IFlag:
+			sp.flags = s
 		case interfaces.IEnv:
 			sp.env = s
+		case interfaces.ICommand:
+			sp.command = s
 		case interfaces.IPlaceThingRepository:
 			sp.placeThingRepository = s
 		case interfaces.IThingRepository:
