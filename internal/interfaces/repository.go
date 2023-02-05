@@ -58,6 +58,12 @@ type IThingImageRepository interface {
 	CommitTx(tx *sql.Tx) error
 }
 
+type IUserRepository interface {
+	Add(ctx context.Context, req models.AddUserRequest) (int, error)
+	Update(ctx context.Context, req models.UpdateUserRequest) error
+	Delete(ctx context.Context, username string) error
+}
+
 type IFileRepository interface {
 	Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error
 	Delete(path string) error

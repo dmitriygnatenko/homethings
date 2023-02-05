@@ -18,6 +18,7 @@ type ServiceProvider struct {
 	placeThingRepository interfaces.IPlaceThingRepository
 	placeImageRepository interfaces.IPlaceImageRepository
 	thingImageRepository interfaces.IThingImageRepository
+	userRepository       interfaces.IUserRepository
 	fileRepository       interfaces.IFileRepository
 }
 
@@ -47,10 +48,11 @@ func Init() (interfaces.IServiceProvider, error) {
 	sp.placeThingRepository = repositories.InitPlaceThingRepository(db)
 	sp.placeImageRepository = repositories.InitPlaceImageRepository(db)
 	sp.thingImageRepository = repositories.InitThingImageRepository(db)
+	sp.userRepository = repositories.InitUserRepository(db)
 	sp.fileRepository = repositories.InitFileRepository()
 
 	// Init commands
-	command, err := commandService.Init(flags)
+	command, err := commandService.Init(flags, sp.userRepository)
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +93,10 @@ func (sp *ServiceProvider) GetThingImageRepository() interfaces.IThingImageRepos
 	return sp.thingImageRepository
 }
 
+func (sp *ServiceProvider) GetUserRepository() interfaces.IUserRepository {
+	return sp.userRepository
+}
+
 func (sp *ServiceProvider) GetFileRepository() interfaces.IFileRepository {
 	return sp.fileRepository
 }
@@ -116,6 +122,8 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 			sp.placeImageRepository = s
 		case interfaces.IThingImageRepository:
 			sp.thingImageRepository = s
+		case interfaces.IUserRepository:
+			sp.userRepository = s
 		case interfaces.IFileRepository:
 			sp.fileRepository = s
 		}

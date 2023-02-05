@@ -9,5 +9,6 @@ type IServiceProvider interface {
 	GetPlaceThingRepository() IPlaceThingRepository
 	GetPlaceImageRepository() IPlaceImageRepository
 	GetThingImageRepository() IThingImageRepository
+	GetUserRepository() IUserRepository
 	GetFileRepository() IFileRepository
 }
