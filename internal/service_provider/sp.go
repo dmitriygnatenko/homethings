@@ -24,7 +24,6 @@ type ServiceProvider struct {
 func Init() (interfaces.IServiceProvider, error) {
 	sp := &ServiceProvider{}
 
-	// Init services
 	flags, err := flagService.Init()
 	if err != nil {
 		return nil, err
@@ -51,7 +50,7 @@ func Init() (interfaces.IServiceProvider, error) {
 	sp.fileRepository = repositories.InitFileRepository()
 
 	// Init commands
-	command, err := commandService.Init()
+	command, err := commandService.Init(flags)
 	if err != nil {
 		return nil, err
 	}
