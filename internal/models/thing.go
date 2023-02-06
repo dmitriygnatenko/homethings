@@ -1,12 +1,14 @@
 package models
 
+import "time"
+
 type Thing struct {
 	ID          int
 	PlaceID     int
 	Title       string
 	Description string
-	CreatedAt   string
-	UpdatedAt   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type AddThingRequest struct {

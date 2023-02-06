@@ -1,8 +1,10 @@
 package models
 
+import "time"
+
 type PlaceThing struct {
 	PlaceID   int
 	ThingID   int
-	CreatedAt string
-	UpdatedAt string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

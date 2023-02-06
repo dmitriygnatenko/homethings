@@ -23,7 +23,7 @@ func ConvertToImageResponseDTO(req models.Image) dto.ImageResponse {
 		Image:     req.Image,
 		PlaceID:   placeIDPtr,
 		ThingID:   thingIDPtr,
-		CreatedAt: req.CreatedAt,
+		CreatedAt: req.CreatedAt.Format(defaultDateTimeLayout),
 	}
 }
 

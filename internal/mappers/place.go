@@ -12,8 +12,8 @@ func ConvertToPlaceResponseDTO(req models.Place) dto.PlaceResponse {
 	res := dto.PlaceResponse{
 		ID:        req.ID,
 		Title:     req.Title,
-		CreatedAt: req.CreatedAt,
-		UpdatedAt: req.UpdatedAt,
+		CreatedAt: req.CreatedAt.Format(defaultDateTimeLayout),
+		UpdatedAt: req.UpdatedAt.Format(defaultDateTimeLayout),
 	}
 
 	if req.ParentID.Valid {

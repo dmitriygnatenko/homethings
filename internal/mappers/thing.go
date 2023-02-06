@@ -40,8 +40,8 @@ func ConvertToThingResponseDTO(req models.Thing) dto.ThingResponse {
 		PlaceID:     req.PlaceID,
 		Title:       req.Title,
 		Description: req.Description,
-		CreatedAt:   req.CreatedAt,
-		UpdatedAt:   req.UpdatedAt,
+		CreatedAt:   req.CreatedAt.Format(defaultDateTimeLayout),
+		UpdatedAt:   req.UpdatedAt.Format(defaultDateTimeLayout),
 	}
 }
 

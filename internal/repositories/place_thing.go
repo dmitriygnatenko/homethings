@@ -28,6 +28,7 @@ func InitPlaceThingRepository(db *sql.DB) interfaces.IPlaceThingRepository {
 func (r placeThingRepository) GetByThingID(ctx context.Context, thingID int) (*models.PlaceThing, error) {
 	query, args, err := sq.Select("place_id", "thing_id", "created_at", "updated_at").
 		From(placeThingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"thing_id": thingID}).
 		ToSql()
 
@@ -49,6 +50,7 @@ func (r placeThingRepository) GetByThingID(ctx context.Context, thingID int) (*m
 
 func (r placeThingRepository) Add(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) error {
 	query, args, err := sq.Insert(placeThingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Columns("place_id", "thing_id").
 		Values(req.PlaceID, req.ThingID).
 		ToSql()
@@ -68,6 +70,7 @@ func (r placeThingRepository) Add(ctx context.Context, req models.AddPlaceThingR
 
 func (r placeThingRepository) UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) error {
 	query, args, err := sq.Update(placeThingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Set("place_id", req.PlaceID).
 		Where(sq.Eq{"thing_id": req.ThingID}).
 		ToSql()
@@ -87,8 +90,8 @@ func (r placeThingRepository) UpdatePlace(ctx context.Context, req models.Update
 
 func (r placeThingRepository) DeleteThing(ctx context.Context, id int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(placeThingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"thing_id": id}).
-		Limit(1).
 		ToSql()
 
 	if err != nil {

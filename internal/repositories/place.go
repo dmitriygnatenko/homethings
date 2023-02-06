@@ -84,6 +84,7 @@ func (r placeRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]mo
 
 	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
 		From(placeTableName).
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"parent_id": placeID}).
 		ToSql()
 
@@ -124,6 +125,7 @@ func (r placeRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]mo
 func (r placeRepository) Get(ctx context.Context, placeID int) (*models.Place, error) {
 	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
 		From(placeTableName).
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": placeID}).
 		ToSql()
 
@@ -145,39 +147,37 @@ func (r placeRepository) Get(ctx context.Context, placeID int) (*models.Place, e
 
 func (r placeRepository) Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error) {
 	query, args, err := sq.Insert(placeTableName).
+		PlaceholderFormat(sq.Dollar).
 		Columns("title", "parent_id").
 		Values(req.Title, req.ParentID).
+		Suffix("RETURNING id").
 		ToSql()
 
 	if err != nil {
 		return 0, err
 	}
 
-	var res sql.Result
-
+	var id int
 	if tx == nil {
-		res, err = r.db.ExecContext(ctx, query, args...)
+		err = r.db.QueryRowContext(ctx, query, args...).Scan(&id)
 	} else {
-		res, err = tx.ExecContext(ctx, query, args...)
+		err = tx.QueryRowContext(ctx, query, args...).Scan(&id)
 	}
 
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return id, nil
 }
 
 func (r placeRepository) Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error {
 	query, args, err := sq.Update(placeTableName).
+		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("parent_id", req.ParentID).
-		Where(sq.Eq{"id": req.ID}).ToSql()
+		Where(sq.Eq{"id": req.ID}).
+		ToSql()
 
 	if err != nil {
 		return err
@@ -194,8 +194,8 @@ func (r placeRepository) Update(ctx context.Context, req models.UpdatePlaceReque
 
 func (r placeRepository) Delete(ctx context.Context, placeID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(placeTableName).
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": placeID}).
-		Limit(1).
 		ToSql()
 
 	if err != nil {

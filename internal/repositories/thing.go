@@ -43,6 +43,7 @@ func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, e
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
 		From(thingTableName + " t").
 		Join(placeThingTableName + " p ON p.thing_id = t.id").
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": thingID}).
 		ToSql()
 
@@ -68,7 +69,8 @@ func (r thingRepository) Search(ctx context.Context, search string) ([]models.Th
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
 		From(thingTableName+" t").
 		Join(placeThingTableName+" p ON p.thing_id = t.id").
-		Where("t.title LIKE ?", fmt.Sprint("%", search, "%")).
+		PlaceholderFormat(sq.Dollar).
+		Where("t.title ILIKE ?", fmt.Sprint("%", search, "%")).
 		OrderBy("t.updated_at DESC").
 		ToSql()
 
@@ -113,6 +115,7 @@ func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]model
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
 		From(thingTableName + " t").
 		Join(placeThingTableName + " p ON p.thing_id = t.id").
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"p.place_id": placeID}).
 		OrderBy("t.updated_at DESC").
 		ToSql()
@@ -159,7 +162,7 @@ func (r thingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]mo
 	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
 		"SELECT id, parent_id " +
 		"FROM " + placeTableName + " " +
-		"WHERE id = ? " +
+		"WHERE id = $1 " +
 		"UNION ALL " +
 		"SELECT p.id, p.parent_id " +
 		"FROM " + placeTableName + " p " +
@@ -203,36 +206,33 @@ func (r thingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]mo
 
 func (r thingRepository) Add(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) (int, error) {
 	query, args, err := sq.Insert(thingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Columns("title", "description").
 		Values(req.Title, req.Description).
+		Suffix("RETURNING id").
 		ToSql()
 
 	if err != nil {
 		return 0, err
 	}
 
-	var res sql.Result
-
+	var id int
 	if tx == nil {
-		res, err = r.db.ExecContext(ctx, query, args...)
+		err = r.db.QueryRowContext(ctx, query, args...).Scan(&id)
 	} else {
-		res, err = tx.ExecContext(ctx, query, args...)
+		err = tx.QueryRowContext(ctx, query, args...).Scan(&id)
 	}
 
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return id, nil
 }
 
 func (r thingRepository) Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error {
 	query, args, err := sq.Update(thingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("description", req.Description).
 		Where(sq.Eq{"id": req.ID}).
@@ -253,8 +253,8 @@ func (r thingRepository) Update(ctx context.Context, req models.UpdateThingReque
 
 func (r thingRepository) Delete(ctx context.Context, thingID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(thingTableName).
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": thingID}).
-		Limit(1).
 		ToSql()
 
 	if err != nil {
