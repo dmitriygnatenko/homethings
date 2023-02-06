@@ -34,6 +34,7 @@ func Test_GetPlaceHandler(t *testing.T) {
 		placeID   = gofakeit.Number(1, 1000)
 		parentID  = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -44,16 +45,16 @@ func Test_GetPlaceHandler(t *testing.T) {
 			ID:        placeID,
 			ParentID:  sql.NullInt64{Int64: int64(parentID), Valid: true},
 			Title:     gofakeit.Phrase(),
-			CreatedAt: gofakeit.Date().String(),
-			UpdatedAt: gofakeit.Date().String(),
+			CreatedAt: gofakeit.Date(),
+			UpdatedAt: gofakeit.Date(),
 		}
 
 		expectedRes = dto.PlaceResponse{
 			ID:        placeID,
 			Title:     repoRes.Title,
 			ParentID:  &parentID,
-			CreatedAt: repoRes.CreatedAt,
-			UpdatedAt: repoRes.UpdatedAt,
+			CreatedAt: repoRes.CreatedAt.Format(layout),
+			UpdatedAt: repoRes.UpdatedAt.Format(layout),
 		}
 	)
 

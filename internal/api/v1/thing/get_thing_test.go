@@ -34,6 +34,7 @@ func Test_GetThingHandler(t *testing.T) {
 		thingID   = gofakeit.Number(1, 1000)
 		placeID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -45,8 +46,8 @@ func Test_GetThingHandler(t *testing.T) {
 			PlaceID:     placeID,
 			Title:       gofakeit.Phrase(),
 			Description: gofakeit.Phrase(),
-			CreatedAt:   gofakeit.Date().String(),
-			UpdatedAt:   gofakeit.Date().String(),
+			CreatedAt:   gofakeit.Date(),
+			UpdatedAt:   gofakeit.Date(),
 		}
 
 		expectedRes = dto.ThingResponse{
@@ -54,8 +55,8 @@ func Test_GetThingHandler(t *testing.T) {
 			PlaceID:     placeID,
 			Title:       thingRepoRes.Title,
 			Description: thingRepoRes.Description,
-			CreatedAt:   thingRepoRes.CreatedAt,
-			UpdatedAt:   thingRepoRes.UpdatedAt,
+			CreatedAt:   thingRepoRes.CreatedAt.Format(layout),
+			UpdatedAt:   thingRepoRes.UpdatedAt.Format(layout),
 		}
 	)
 

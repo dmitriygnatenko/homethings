@@ -33,6 +33,7 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 		mc        = minimock.NewController(t)
 		placeID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -44,8 +45,8 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 				ID:        placeID,
 				ParentID:  sql.NullInt64{Int64: int64(placeID), Valid: true},
 				Title:     gofakeit.Phrase(),
-				CreatedAt: gofakeit.Date().String(),
-				UpdatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
+				UpdatedAt: gofakeit.Date(),
 			},
 		}
 
@@ -55,8 +56,8 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 					ID:        repoRes[0].ID,
 					ParentID:  &placeID,
 					Title:     repoRes[0].Title,
-					CreatedAt: repoRes[0].CreatedAt,
-					UpdatedAt: repoRes[0].UpdatedAt,
+					CreatedAt: repoRes[0].CreatedAt.Format(layout),
+					UpdatedAt: repoRes[0].UpdatedAt.Format(layout),
 				},
 			},
 		}

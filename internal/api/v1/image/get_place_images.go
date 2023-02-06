@@ -42,7 +42,7 @@ func GetPlaceImagesHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		res = append(res, thingsRes...)
 
 		sort.Slice(res, func(i, j int) bool {
-			return res[i].CreatedAt.Second() > res[j].CreatedAt.Second()
+			return res[i].CreatedAt.After(res[j].CreatedAt)
 		})
 
 		return fctx.JSON(mappers.ConvertToImagesResponseDTO(res))

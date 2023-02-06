@@ -38,6 +38,7 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 		date2     = date1.Add(time.Hour)
 		date3     = date2.Add(time.Hour)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -49,13 +50,13 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 				ID:        gofakeit.Number(1, 1000),
 				Image:     gofakeit.URL(),
 				PlaceID:   sql.NullInt64{Valid: true, Int64: int64(placeID)},
-				CreatedAt: date1.String(),
+				CreatedAt: date1,
 			},
 			{
 				ID:        gofakeit.Number(1, 1000),
 				Image:     gofakeit.URL(),
 				PlaceID:   sql.NullInt64{Valid: true, Int64: int64(placeID)},
-				CreatedAt: date2.String(),
+				CreatedAt: date2,
 			},
 		}
 
@@ -64,7 +65,7 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 				ID:        gofakeit.Number(1, 1000),
 				Image:     gofakeit.URL(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
-				CreatedAt: date3.String(),
+				CreatedAt: date3,
 			},
 		}
 
@@ -73,19 +74,19 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 				{
 					ID:        thingImageRepoRes[0].ID,
 					Image:     thingImageRepoRes[0].Image,
-					CreatedAt: thingImageRepoRes[0].CreatedAt,
+					CreatedAt: thingImageRepoRes[0].CreatedAt.Format(layout),
 					ThingID:   &thingID,
 				},
 				{
 					ID:        placeImageRepoRes[1].ID,
 					Image:     placeImageRepoRes[1].Image,
-					CreatedAt: placeImageRepoRes[1].CreatedAt,
+					CreatedAt: placeImageRepoRes[1].CreatedAt.Format(layout),
 					PlaceID:   &placeID,
 				},
 				{
 					ID:        placeImageRepoRes[0].ID,
 					Image:     placeImageRepoRes[0].Image,
-					CreatedAt: placeImageRepoRes[0].CreatedAt,
+					CreatedAt: placeImageRepoRes[0].CreatedAt.Format(layout),
 					PlaceID:   &placeID,
 				},
 			},

@@ -37,6 +37,7 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 		parentID  = gofakeit.Number(1, 1000)
 		title     = gofakeit.Phrase()
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodPut,
@@ -52,16 +53,16 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			ID:        placeID,
 			Title:     title,
 			ParentID:  sql.NullInt64{Int64: int64(parentID), Valid: true},
-			CreatedAt: gofakeit.Date().String(),
-			UpdatedAt: gofakeit.Date().String(),
+			CreatedAt: gofakeit.Date(),
+			UpdatedAt: gofakeit.Date(),
 		}
 
 		expectedRes = dto.PlaceResponse{
 			ID:        placeID,
 			ParentID:  &parentID,
 			Title:     repoRes.Title,
-			CreatedAt: repoRes.CreatedAt,
-			UpdatedAt: repoRes.UpdatedAt,
+			CreatedAt: repoRes.CreatedAt.Format(layout),
+			UpdatedAt: repoRes.UpdatedAt.Format(layout),
 		}
 	)
 

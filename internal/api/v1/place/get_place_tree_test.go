@@ -30,6 +30,7 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 	var (
 		mc        = minimock.NewController(t)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		id1 = gofakeit.Number(1, 1000)
 		id2 = gofakeit.Number(1, 1000)
@@ -44,22 +45,22 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 			{
 				ID:        id1,
 				Title:     gofakeit.Phrase(),
-				CreatedAt: gofakeit.Date().String(),
-				UpdatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
+				UpdatedAt: gofakeit.Date(),
 			},
 			{
 				ID:        id2,
 				ParentID:  sql.NullInt64{Valid: true, Int64: int64(id1)},
 				Title:     gofakeit.Phrase(),
-				CreatedAt: gofakeit.Date().String(),
-				UpdatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
+				UpdatedAt: gofakeit.Date(),
 			},
 			{
 				ID:        id3,
 				ParentID:  sql.NullInt64{Valid: true, Int64: int64(id2)},
 				Title:     gofakeit.Phrase(),
-				CreatedAt: gofakeit.Date().String(),
-				UpdatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
+				UpdatedAt: gofakeit.Date(),
 			},
 		}
 
@@ -70,8 +71,8 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 						ID:        id1,
 						ParentID:  nil,
 						Title:     placeRepoRes[0].Title,
-						CreatedAt: placeRepoRes[0].CreatedAt,
-						UpdatedAt: placeRepoRes[0].UpdatedAt,
+						CreatedAt: placeRepoRes[0].CreatedAt.Format(layout),
+						UpdatedAt: placeRepoRes[0].UpdatedAt.Format(layout),
 					},
 					NestedPlaces: []dto.PlaceTree{
 						{
@@ -79,8 +80,8 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 								ID:        id2,
 								ParentID:  &id1,
 								Title:     placeRepoRes[1].Title,
-								CreatedAt: placeRepoRes[1].CreatedAt,
-								UpdatedAt: placeRepoRes[1].UpdatedAt,
+								CreatedAt: placeRepoRes[1].CreatedAt.Format(layout),
+								UpdatedAt: placeRepoRes[1].UpdatedAt.Format(layout),
 							},
 							NestedPlaces: []dto.PlaceTree{
 								{
@@ -88,8 +89,8 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 										ID:        id3,
 										ParentID:  &id2,
 										Title:     placeRepoRes[2].Title,
-										CreatedAt: placeRepoRes[2].CreatedAt,
-										UpdatedAt: placeRepoRes[2].UpdatedAt,
+										CreatedAt: placeRepoRes[2].CreatedAt.Format(layout),
+										UpdatedAt: placeRepoRes[2].UpdatedAt.Format(layout),
 									},
 								},
 							},

@@ -32,6 +32,7 @@ func Test_GetThingImagesHandler(t *testing.T) {
 		mc        = minimock.NewController(t)
 		thingID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -42,19 +43,19 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			{
 				ID:        gofakeit.Number(1, 1000),
 				Image:     gofakeit.URL(),
-				CreatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
 			},
 			{
 				ID:        gofakeit.Number(1, 1000),
 				Image:     gofakeit.URL(),
-				CreatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
 			},
 			{
 				ID:        gofakeit.Number(1, 1000),
 				Image:     gofakeit.URL(),
-				CreatedAt: gofakeit.Date().String(),
+				CreatedAt: gofakeit.Date(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
 			},
 		}
@@ -64,19 +65,19 @@ func Test_GetThingImagesHandler(t *testing.T) {
 				{
 					ID:        imageRepoRes[0].ID,
 					Image:     imageRepoRes[0].Image,
-					CreatedAt: imageRepoRes[0].CreatedAt,
+					CreatedAt: imageRepoRes[0].CreatedAt.Format(layout),
 					ThingID:   &thingID,
 				},
 				{
 					ID:        imageRepoRes[1].ID,
 					Image:     imageRepoRes[1].Image,
-					CreatedAt: imageRepoRes[1].CreatedAt,
+					CreatedAt: imageRepoRes[1].CreatedAt.Format(layout),
 					ThingID:   &thingID,
 				},
 				{
 					ID:        imageRepoRes[2].ID,
 					Image:     imageRepoRes[2].Image,
-					CreatedAt: imageRepoRes[2].CreatedAt,
+					CreatedAt: imageRepoRes[2].CreatedAt.Format(layout),
 					ThingID:   &thingID,
 				},
 			},

@@ -39,6 +39,7 @@ func Test_UpdateThingHandler(t *testing.T) {
 		title       = gofakeit.Phrase()
 		description = gofakeit.Phrase()
 		testError   = errors.New(gofakeit.Phrase())
+		layout      = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodPut,
@@ -55,31 +56,31 @@ func Test_UpdateThingHandler(t *testing.T) {
 			ID:          thingID,
 			Title:       gofakeit.Phrase(),
 			Description: gofakeit.Phrase(),
-			CreatedAt:   gofakeit.Date().String(),
-			UpdatedAt:   gofakeit.Date().String(),
+			CreatedAt:   gofakeit.Date(),
+			UpdatedAt:   gofakeit.Date(),
 		}
 
 		placeThingRepoResBeforeUpdate = models.PlaceThing{
 			PlaceID:   gofakeit.Number(1, 1000),
 			ThingID:   thingID,
-			CreatedAt: gofakeit.Date().String(),
-			UpdatedAt: gofakeit.Date().String(),
+			CreatedAt: gofakeit.Date(),
+			UpdatedAt: gofakeit.Date(),
 		}
 
 		repoRes = models.Thing{
 			ID:          thingID,
 			Title:       title,
 			Description: description,
-			CreatedAt:   gofakeit.Date().String(),
-			UpdatedAt:   gofakeit.Date().String(),
+			CreatedAt:   gofakeit.Date(),
+			UpdatedAt:   gofakeit.Date(),
 		}
 
 		expectedRes = dto.ThingResponse{
 			ID:          thingID,
 			Title:       title,
 			Description: description,
-			CreatedAt:   repoRes.CreatedAt,
-			UpdatedAt:   repoRes.UpdatedAt,
+			CreatedAt:   repoRes.CreatedAt.Format(layout),
+			UpdatedAt:   repoRes.UpdatedAt.Format(layout),
 		}
 	)
 

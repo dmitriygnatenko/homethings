@@ -32,6 +32,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 		mc        = minimock.NewController(t)
 		placeID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -44,16 +45,16 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 				PlaceID:     placeID,
 				Title:       gofakeit.Phrase(),
 				Description: gofakeit.Phrase(),
-				CreatedAt:   gofakeit.Date().String(),
-				UpdatedAt:   gofakeit.Date().String(),
+				CreatedAt:   gofakeit.Date(),
+				UpdatedAt:   gofakeit.Date(),
 			},
 			{
 				ID:          gofakeit.Number(1, 1000),
 				PlaceID:     placeID,
 				Title:       gofakeit.Phrase(),
 				Description: gofakeit.Phrase(),
-				CreatedAt:   gofakeit.Date().String(),
-				UpdatedAt:   gofakeit.Date().String(),
+				CreatedAt:   gofakeit.Date(),
+				UpdatedAt:   gofakeit.Date(),
 			},
 		}
 
@@ -64,16 +65,16 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 					PlaceID:     thingRepoRes[0].PlaceID,
 					Title:       thingRepoRes[0].Title,
 					Description: thingRepoRes[0].Description,
-					CreatedAt:   thingRepoRes[0].CreatedAt,
-					UpdatedAt:   thingRepoRes[0].UpdatedAt,
+					CreatedAt:   thingRepoRes[0].CreatedAt.Format(layout),
+					UpdatedAt:   thingRepoRes[0].UpdatedAt.Format(layout),
 				},
 				{
 					ID:          thingRepoRes[1].ID,
 					PlaceID:     thingRepoRes[1].PlaceID,
 					Title:       thingRepoRes[1].Title,
 					Description: thingRepoRes[1].Description,
-					CreatedAt:   thingRepoRes[1].CreatedAt,
-					UpdatedAt:   thingRepoRes[1].UpdatedAt,
+					CreatedAt:   thingRepoRes[1].CreatedAt.Format(layout),
+					UpdatedAt:   thingRepoRes[1].UpdatedAt.Format(layout),
 				},
 			},
 		}
