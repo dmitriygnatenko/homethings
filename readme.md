@@ -28,20 +28,6 @@ SMTP_PASSWORD=pass
 ERRORS_EMAIL=user@example.ru
 ```
 
-### Пример запуска приложения, администрирования пользователей
-
-#### Запуск приложения
-./app --config=../../.env
-
-#### Добавление пользователя
-./app --config=../../.env --action=add-user --username=user --password=pass
-
-#### Изменение пароля
-./app --config=../../.env --action=update-user --username=user --password=pass
-
-#### Удаление пользователя
-./app --config=../../.env --action=delete-user --username=user
-
 
 ### Команды
 

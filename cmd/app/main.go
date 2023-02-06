@@ -18,11 +18,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if serviceProvider.GetFlagService().IsRunCommand() {
-		serviceProvider.GetCommandService().Run()
-		return
-	}
-
 	fiberApp, err := fiber.Init(serviceProvider)
 	if err != nil {
 		log.Fatal(err)

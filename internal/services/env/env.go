@@ -1,9 +1,13 @@
 package env
 
 import (
+	"flag"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/spf13/viper"
 )
+
+const defaultConfigPath = "../../.env"
 
 type env struct {
 	AppPort string `mapstructure:"APP_PORT"`
@@ -32,7 +36,15 @@ type env struct {
 	ErrorsEmail string `mapstructure:"ERRORS_EMAIL"`
 }
 
-func Init(configPath string) (interfaces.IEnv, error) {
+func Init() (interfaces.IEnv, error) {
+	var configPath string
+	flag.StringVar(&configPath, "config", "", "Path to .env config file")
+	flag.Parse()
+
+	if configPath == "" {
+		configPath = defaultConfigPath
+	}
+
 	viper.SetConfigFile(configPath)
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()

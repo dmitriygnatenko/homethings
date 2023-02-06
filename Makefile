@@ -18,7 +18,7 @@ usage:
 	@echo "make app-build"
 
 run:
-	cd cmd/app && go run main.go --config=../../.env
+	cd cmd/app && go run main.go
 
 test:
 	go test ./...
