@@ -10,7 +10,9 @@ import (
 
 // @title 						Homethings API
 // @version 					1.0
-// @securityDefinitions.basic 	BasicAuth
+// @securitydefinitions.apikey 	APIKey
+// @in 							header
+// @name 						Authorization
 // @BasePath 					/api
 func main() {
 	serviceProvider, err := sp.Init()

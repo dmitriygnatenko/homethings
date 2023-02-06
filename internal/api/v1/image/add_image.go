@@ -27,7 +27,7 @@ const fileDateLayout = "2006-01-02-15-04-05"
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Add images
 // @Tags  		Images
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      mpfd
 // @Produce     json
 func AddImageHandler(sp interfaces.IServiceProvider) fiber.Handler {

@@ -59,7 +59,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -122,7 +122,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -168,7 +168,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -216,7 +216,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -262,7 +262,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -310,7 +310,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -341,7 +341,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -391,7 +391,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -424,7 +424,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -476,7 +476,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -531,7 +531,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -579,7 +579,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -627,7 +627,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -675,7 +675,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -725,7 +725,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -773,7 +773,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -825,7 +825,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -880,7 +880,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "BasicAuth": []
+                        "APIKey": []
                     }
                 ],
                 "consumes": [
@@ -1124,8 +1124,10 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+        "APIKey": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -1134,7 +1136,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/api",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Homethings API",
 	Description:      "",

@@ -1,4 +1,3 @@
-basePath: /api
 definitions:
   dto.AddPlaceRequest:
     properties:
@@ -192,7 +191,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Add images
       tags:
       - Images
@@ -222,7 +221,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Delete image
       tags:
       - Images
@@ -251,7 +250,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get images by place ID (with child places)
       tags:
       - Images
@@ -281,7 +280,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Delete image
       tags:
       - Images
@@ -310,7 +309,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get images by thing ID
       tags:
       - Images
@@ -330,7 +329,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get places
       tags:
       - Places
@@ -360,7 +359,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Add place
       tags:
       - Places
@@ -390,7 +389,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Delete place
       tags:
       - Places
@@ -423,7 +422,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get one place by ID
       tags:
       - Places
@@ -458,7 +457,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Update place
       tags:
       - Places
@@ -488,7 +487,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get nested places by parent ID
       tags:
       - Places
@@ -518,7 +517,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get things by place ID
       tags:
       - Places
@@ -538,7 +537,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get places tree
       tags:
       - Places
@@ -569,7 +568,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Add thing
       tags:
       - Things
@@ -599,7 +598,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Delete thing
       tags:
       - Things
@@ -632,7 +631,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Get one thing by ID
       tags:
       - Things
@@ -667,7 +666,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Update thing
       tags:
       - Things
@@ -697,11 +696,13 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Search things
       tags:
       - Things
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  APIKey:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

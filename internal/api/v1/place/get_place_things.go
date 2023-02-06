@@ -14,7 +14,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Get things by place ID
 // @Tags  		Places
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func GetPlaceThingsHandler(sp interfaces.IServiceProvider) fiber.Handler {

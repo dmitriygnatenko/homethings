@@ -16,7 +16,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Delete image
 // @Tags  		Images
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func DeletePlaceImageHandler(sp interfaces.IServiceProvider) fiber.Handler {

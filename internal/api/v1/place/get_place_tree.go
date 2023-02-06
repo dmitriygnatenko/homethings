@@ -12,7 +12,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Get places tree
 // @Tags  		Places
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func GetPlaceTreeHandler(sp interfaces.IServiceProvider) fiber.Handler {

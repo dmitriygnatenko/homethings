@@ -18,7 +18,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Delete place
 // @Tags  		Places
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {

@@ -17,7 +17,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Add thing
 // @Tags  		Things
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {

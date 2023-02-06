@@ -17,7 +17,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Delete thing
 // @Tags  		Things
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func DeleteThingHandler(sp interfaces.IServiceProvider) fiber.Handler {

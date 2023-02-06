@@ -14,7 +14,7 @@ import (
 // @Failure     400 {object} dto.ErrorResponse
 // @Summary     Get nested places by parent ID
 // @Tags  		Places
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func GetNestedPlacesHandler(sp interfaces.IServiceProvider) fiber.Handler {

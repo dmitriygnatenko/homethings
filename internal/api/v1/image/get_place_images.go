@@ -17,7 +17,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Get images by place ID (with child places)
 // @Tags  		Images
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func GetPlaceImagesHandler(sp interfaces.IServiceProvider) fiber.Handler {

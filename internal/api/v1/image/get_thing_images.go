@@ -14,7 +14,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Get images by thing ID
 // @Tags  		Images
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func GetThingImagesHandler(sp interfaces.IServiceProvider) fiber.Handler {

@@ -18,7 +18,7 @@ import (
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Search things
 // @Tags  		Things
-// @security 	BasicAuth
+// @security 	APIKey
 // @Accept      json
 // @Produce     json
 func SearchThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
