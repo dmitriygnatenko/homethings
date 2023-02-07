@@ -59,6 +59,7 @@ func getFiberConfig() fiber.Config {
 	}
 }
 
+// nolint
 func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
 	return jwt.Config{
 		SigningKey: []byte(sp.GetEnvService().GetJWTSecretKey()),
