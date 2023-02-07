@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type User struct {
 	ID        int
@@ -8,4 +11,10 @@ type User struct {
 	Password  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type UpdateUserRequest struct {
+	ID       int
+	Username sql.NullString
+	Password sql.NullString
 }

@@ -151,6 +151,13 @@ definitions:
     - place_id
     - title
     type: object
+  dto.UpdateUserRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   title: Homethings API
@@ -764,6 +771,13 @@ paths:
     put:
       consumes:
       - application/json
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -771,10 +785,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.EmptyResponse'
-        "403":
-          description: Forbidden
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/dto.EmptyResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:

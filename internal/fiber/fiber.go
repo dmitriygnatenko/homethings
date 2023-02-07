@@ -69,9 +69,12 @@ func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
 			method := fctx.Method()
 			path := fctx.Path()
 
-			if (method == fiber.MethodGet || method == fiber.MethodPost ||
-				method == fiber.MethodPut || method == fiber.MethodDelete) &&
-				strings.HasPrefix(path, "/api/") && path != "/api/v1/auth/login" {
+			if method != fiber.MethodGet && method != fiber.MethodPost &&
+				method != fiber.MethodPut && method != fiber.MethodDelete {
+				return true
+			}
+
+			if strings.HasPrefix(path, "/api/") && path != "/api/v1/auth/login" {
 				return false
 			}
 

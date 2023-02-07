@@ -67,19 +67,26 @@ func (r userRepository) Add(ctx context.Context, username string, password strin
 	return id, nil
 }
 
-//func (r userRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
-//	query, args, err := sq.Update(userTableName).
-//		PlaceholderFormat(sq.Dollar).
-//		Set("password", req.Password).
-//		Set("updated_at", "NOW()").
-//		Where(sq.Eq{"username": req.Username}).
-//		ToSql()
-//
-//	if err != nil {
-//		return err
-//	}
-//
-//	_, err = r.db.ExecContext(ctx, query, args...)
-//
-//	return err
-//}
+func (r userRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
+	qb := sq.Update(userTableName).
+		PlaceholderFormat(sq.Dollar).
+		Set("updated_at", "NOW()").
+		Where(sq.Eq{"id": req.ID})
+
+	if req.Username.Valid {
+		qb = qb.Set("username", req.Username.String)
+	}
+
+	if req.Password.Valid {
+		qb = qb.Set("password", req.Password.String)
+	}
+
+	query, args, err := qb.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
+
+	return err
+}
