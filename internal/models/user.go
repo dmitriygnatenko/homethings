@@ -9,13 +9,3 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
-
-type AddUserRequest struct {
-	Username string
-	Password string
-}
-
-type UpdateUserRequest struct {
-	Username string
-	Password string
-}

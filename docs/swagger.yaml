@@ -20,6 +20,16 @@ definitions:
     - place_id
     - title
     type: object
+  dto.AddUserRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
   dto.EmptyResponse:
     type: object
   dto.ErrorResponse:
@@ -720,10 +730,17 @@ paths:
       summary: Search things
       tags:
       - Things
-  /api/v1/user/add:
+  /api/v1/users:
     post:
       consumes:
       - application/json
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddUserRequest'
       produces:
       - application/json
       responses:
@@ -731,20 +748,19 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.EmptyResponse'
-        "403":
-          description: Forbidden
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/dto.EmptyResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Add user
       tags:
       - User
-  /api/v1/user/update:
     put:
       consumes:
       - application/json
@@ -764,7 +780,7 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
-      - BasicAuth: []
+      - APIKey: []
       summary: Update user
       tags:
       - User

@@ -47,11 +47,11 @@ func (r userRepository) Get(ctx context.Context, username string) (*models.User,
 	return &res, nil
 }
 
-func (r userRepository) Add(ctx context.Context, req models.AddUserRequest) (int, error) {
+func (r userRepository) Add(ctx context.Context, username string, password string) (int, error) {
 	query, args, err := sq.Insert(userTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("username", "password").
-		Values(req.Username, req.Password).
+		Values(username, password).
 		Suffix("RETURNING id").
 		ToSql()
 
@@ -67,34 +67,19 @@ func (r userRepository) Add(ctx context.Context, req models.AddUserRequest) (int
 	return id, nil
 }
 
-func (r userRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
-	query, args, err := sq.Update(userTableName).
-		PlaceholderFormat(sq.Dollar).
-		Set("password", req.Password).
-		Set("updated_at", "NOW()").
-		Where(sq.Eq{"username": req.Username}).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-
-	return err
-}
-
-func (r userRepository) Delete(ctx context.Context, username string) error {
-	query, args, err := sq.Delete(userTableName).
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"username": username}).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.ExecContext(ctx, query, args...)
-
-	return err
-}
+//func (r userRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
+//	query, args, err := sq.Update(userTableName).
+//		PlaceholderFormat(sq.Dollar).
+//		Set("password", req.Password).
+//		Set("updated_at", "NOW()").
+//		Where(sq.Eq{"username": req.Username}).
+//		ToSql()
+//
+//	if err != nil {
+//		return err
+//	}
+//
+//	_, err = r.db.ExecContext(ctx, query, args...)
+//
+//	return err
+//}

@@ -60,9 +60,8 @@ type IThingImageRepository interface {
 
 type IUserRepository interface {
 	Get(ctx context.Context, username string) (*models.User, error)
-	//Add(ctx context.Context, req models.AddUserRequest) (int, error)
+	Add(ctx context.Context, username string, password string) (int, error)
 	//Update(ctx context.Context, req models.UpdateUserRequest) error
-	//Delete(ctx context.Context, username string) error
 }
 
 type IFileRepository interface {
