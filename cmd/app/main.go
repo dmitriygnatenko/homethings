@@ -13,7 +13,6 @@ import (
 // @securitydefinitions.apikey 	APIKey
 // @in 							header
 // @name 						Authorization
-// @BasePath 					/api
 func main() {
 	serviceProvider, err := sp.Init()
 	if err != nil {

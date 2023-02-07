@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/auth/check [get]
+// @Router 		/api/v1/auth/logout [post]
 // @Success     200 {object} dto.EmptyResponse
 // @Success     403 {object} dto.EmptyResponse
 // @Failure     500 {object} dto.ErrorResponse
@@ -15,7 +15,7 @@ import (
 // @security 	BasicAuth
 // @Accept      json
 // @Produce     json
-func CheckAuthHandler(_ interfaces.IServiceProvider) fiber.Handler {
+func LogoutHandler(_ interfaces.IServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		return fctx.JSON(factory.CreateEmptyResponse())
 	}

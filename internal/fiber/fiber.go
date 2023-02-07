@@ -1,17 +1,20 @@
 package fiber
 
 import (
+	"strings"
+
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
 	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
 	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
+	userAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/user"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
 )
 
@@ -33,33 +36,46 @@ func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
 	// Configure recover middleware
 	fiberApp.Use(recover.New())
 
+	// Configure JWT middleware
+	fiberApp.Use(jwt.New(getJWTConfig(sp)))
+
 	// Swagger
 	fiberApp.Get(swaggerURI+"/*", swagger.HandlerDefault)
 
 	// API
-	api := fiberApp.Group("/api", basicauth.New(getBasicAuthConfig(sp)))
+	api := fiberApp.Group("/api")
 	registerHandlers(api, sp)
 
 	return fiberApp, nil
 }
 
 func getFiberConfig() fiber.Config {
+
+	// TODO Logger errors (email)
+
 	return fiber.Config{
 		AppName:               appName,
 		DisableStartupMessage: true,
 	}
 }
 
-func getBasicAuthConfig(sp interfaces.IServiceProvider) basicauth.Config {
-	user := sp.GetEnvService().GetAuthUser()
-	password := sp.GetEnvService().GetAuthPassword()
-
-	return basicauth.Config{
-		Users: map[string]string{
-			user: password,
+func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
+	return jwt.Config{
+		SigningKey: []byte(sp.GetEnvService().GetJWTSecretKey()),
+		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
+			return factory.CreateBadRequestResponse(fctx, err)
 		},
-		Unauthorized: func(c *fiber.Ctx) error {
-			return factory.CreateForbiddenResponse(c, nil)
+		Filter: func(fctx *fiber.Ctx) bool {
+			method := fctx.Method()
+			path := fctx.Path()
+
+			if (method == fiber.MethodGet || method == fiber.MethodPost ||
+				method == fiber.MethodPut || method == fiber.MethodDelete) &&
+				strings.HasPrefix(path, "/api/") && path != "/api/v1/auth/login" {
+				return false
+			}
+
+			return true
 		},
 	}
 }
@@ -72,6 +88,10 @@ func getCORSConfig(sp interfaces.IServiceProvider) cors.Config {
 }
 
 func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
+	// Public routes
+	r.Post("/v1/auth/login", authAPI.LoginHandler(sp))
+
+	// Protected routes
 	r.Get("/v1/places", placeAPI.GetPlacesHandler(sp))
 	r.Get("/v1/places/tree", placeAPI.GetPlaceTreeHandler(sp))
 	r.Get("/v1/places/:id<int>", placeAPI.GetPlaceHandler(sp))
@@ -93,5 +113,6 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Delete("/v1/images/place/:id<int>", imageAPI.DeletePlaceImageHandler(sp))
 	r.Delete("/v1/images/thing/:id<int>", imageAPI.DeleteThingImageHandler(sp))
 
-	r.Get("/v1/auth/check", authAPI.CheckAuthHandler(sp))
+	r.Post("/v1/users", userAPI.AddUserHandler(sp))
+	r.Put("/v1/users", userAPI.UpdateUserHandler(sp))
 }

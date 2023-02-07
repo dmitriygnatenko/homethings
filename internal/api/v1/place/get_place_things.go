@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/places/{id}/things [get]
+// @Router 		/api/v1/places/{id}/things [get]
 // @Param       id path int true "Place ID"
 // @Success     200 {object} dto.ThingsResponse
 // @Failure     400 {object} dto.ErrorResponse

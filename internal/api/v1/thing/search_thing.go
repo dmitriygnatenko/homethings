@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/things/search/{search} [get]
+// @Router 		/api/v1/things/search/{search} [get]
 // @Param       search path string true "Search string"
 // @Success     200 {object} dto.ThingResponse
 // @Failure     400 {object} dto.ErrorResponse

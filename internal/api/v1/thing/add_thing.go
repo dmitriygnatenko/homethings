@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/things [post]
+// @Router 		/api/v1/things [post]
 // @Param       data body dto.AddThingRequest true "Request body"
 // @Success     200 {object} dto.ThingResponse
 // @Failure     400 {object} dto.ErrorResponse

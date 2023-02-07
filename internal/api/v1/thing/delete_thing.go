@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/things/{id} [delete]
+// @Router 		/api/v1/things/{id} [delete]
 // @Param       id path int true "Thing ID"
 // @Success     200 {object} dto.EmptyResponse
 // @Failure     400 {object} dto.ErrorResponse

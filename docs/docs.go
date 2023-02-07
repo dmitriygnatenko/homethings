@@ -16,13 +16,8 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/auth/check": {
-            "get": {
-                "security": [
-                    {
-                        "BasicAuth": []
-                    }
-                ],
+        "/api/v1/auth/login": {
+            "post": {
                 "consumes": [
                     "application/json"
                 ],
@@ -32,18 +27,29 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Check username/password",
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EmptyResponse"
+                            "$ref": "#/definitions/dto.LoginResponse"
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.EmptyResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
@@ -55,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/images": {
+        "/api/v1/images": {
             "post": {
                 "security": [
                     {
@@ -118,7 +124,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/images/place/{id}": {
+        "/api/v1/images/place/{id}": {
             "get": {
                 "security": [
                     {
@@ -212,7 +218,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/images/thing/{id}": {
+        "/api/v1/images/thing/{id}": {
             "get": {
                 "security": [
                     {
@@ -306,7 +312,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/places": {
+        "/api/v1/places": {
             "get": {
                 "security": [
                     {
@@ -387,7 +393,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/places/tree": {
+        "/api/v1/places/tree": {
             "get": {
                 "security": [
                     {
@@ -420,7 +426,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/places/{id}": {
+        "/api/v1/places/{id}": {
             "get": {
                 "security": [
                     {
@@ -575,7 +581,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/places/{id}/nested": {
+        "/api/v1/places/{id}/nested": {
             "get": {
                 "security": [
                     {
@@ -623,7 +629,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/places/{id}/things": {
+        "/api/v1/places/{id}/things": {
             "get": {
                 "security": [
                     {
@@ -671,7 +677,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/things": {
+        "/api/v1/things": {
             "post": {
                 "security": [
                     {
@@ -721,7 +727,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/things/search/{search}": {
+        "/api/v1/things/search/{search}": {
             "get": {
                 "security": [
                     {
@@ -769,7 +775,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/things/{id}": {
+        "/api/v1/things/{id}": {
             "get": {
                 "security": [
                     {
@@ -923,6 +929,84 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/user/add": {
+            "post": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Add user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/update": {
+            "put": {
+                "security": [
+                    {
+                        "BasicAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -997,6 +1081,29 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.ImageResponse"
                     }
+                }
+            }
+        },
+        "dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         },

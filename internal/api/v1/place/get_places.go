@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/places [get]
+// @Router 		/api/v1/places [get]
 // @Success     200 {object} dto.PlacesResponse
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Get places

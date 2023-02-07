@@ -59,9 +59,10 @@ type IThingImageRepository interface {
 }
 
 type IUserRepository interface {
-	Add(ctx context.Context, req models.AddUserRequest) (int, error)
-	Update(ctx context.Context, req models.UpdateUserRequest) error
-	Delete(ctx context.Context, username string) error
+	Get(ctx context.Context, username string) (*models.User, error)
+	//Add(ctx context.Context, req models.AddUserRequest) (int, error)
+	//Update(ctx context.Context, req models.UpdateUserRequest) error
+	//Delete(ctx context.Context, username string) error
 }
 
 type IFileRepository interface {

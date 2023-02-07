@@ -22,6 +22,7 @@ type IEnv interface {
 	GetSMTPPassword() string
 
 	GetJWTSecretKey() string
+	GetJWTLifetime() int
 
 	GetErrorsEmail() string
 }

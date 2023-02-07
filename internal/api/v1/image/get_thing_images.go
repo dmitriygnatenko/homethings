@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/images/thing/{id} [get]
+// @Router 		/api/v1/images/thing/{id} [get]
 // @Param       id path int true "Thing ID"
 // @Success     200 {object} dto.ImagesResponse
 // @Failure     400 {object} dto.ErrorResponse

@@ -18,7 +18,7 @@ import (
 
 const fileDateLayout = "2006-01-02-15-04-05"
 
-// @Router 		/v1/images [post]
+// @Router 		/api/v1/images [post]
 // @Param       place_id formData int false "Place ID"
 // @Param       thing_id formData int false "Thing ID"
 // @Param       files formData []file true "Files"

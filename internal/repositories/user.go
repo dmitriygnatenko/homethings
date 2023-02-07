@@ -25,6 +25,28 @@ func InitUserRepository(db *sql.DB) interfaces.IUserRepository {
 	return userRepository{db: db}
 }
 
+func (r userRepository) Get(ctx context.Context, username string) (*models.User, error) {
+	query, args, err := sq.Select("id", "username", "password", "created_at", "updated_at").
+		From(userTableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"username": username}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res models.User
+	err = r.db.QueryRowContext(ctx, query, args...).
+		Scan(&res.ID, &res.Username, &res.Password, &res.CreatedAt, &res.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (r userRepository) Add(ctx context.Context, req models.AddUserRequest) (int, error) {
 	query, args, err := sq.Insert(userTableName).
 		PlaceholderFormat(sq.Dollar).

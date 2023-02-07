@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/v1/places [post]
+// @Router 		/api/v1/places [post]
 // @Param       data body dto.AddPlaceRequest true "Request body"
 // @Success     200 {object} dto.PlaceResponse
 // @Failure     400 {object} dto.ErrorResponse

@@ -27,6 +27,7 @@ type env struct {
 	CORSAllowMethods string `mapstructure:"CORS_ALLOW_METHODS"`
 
 	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
+	JWTLifeTime  int    `mapstructure:"JWT_LIFETIME"`
 
 	SMTPHost     string `mapstructure:"SMTP_HOST"`
 	SMTPPort     string `mapstructure:"SMTP_PORT"`
@@ -125,6 +126,10 @@ func (e *env) GetSMTPPassword() string {
 
 func (e *env) GetJWTSecretKey() string {
 	return e.JWTSecretKey
+}
+
+func (e *env) GetJWTLifetime() int {
+	return e.JWTLifeTime
 }
 
 func (e *env) GetErrorsEmail() string {
