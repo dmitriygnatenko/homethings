@@ -9,6 +9,7 @@ export const methodPost = "POST"
 export const methodPut = "PUT"
 export const methodDelete = "DELETE"
 
+export const routeLogin = "/api/v1/auth/login"
 export const routeCheckAuth = "/api/v1/auth/check"
 export const routeAddPlace = "/api/v1/places"
 export const routeUpdatePlace = "/api/v1/places/{id}"
@@ -31,12 +32,16 @@ export const routeDeleteThingImages = "/api/v1/images/thing/{id}"
 
 export function jsonRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
+    let token = getToken()
 
     xhr.open(method, url, false);
 
     xhr.setRequestHeader("Accept", "application/json")
-    xhr.setRequestHeader("Authorization", "Basic " + getToken())
     xhr.setRequestHeader("Content-Type", "application/json")
+
+    if (token !== "") {
+        xhr.setRequestHeader("Authorization", "Bearer " + token)
+    }
 
     if (data !== undefined) {
         xhr.send(JSON.stringify(data));
@@ -52,11 +57,15 @@ export function jsonRequest(method, url, data) {
 
 export function formDataRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
+    let token = getToken()
 
     xhr.open(method, url, false);
 
     xhr.setRequestHeader("Accept", "application/json")
-    xhr.setRequestHeader("Authorization", "Basic " + getToken())
+
+    if (token !== "") {
+        xhr.setRequestHeader("Authorization", "Bearer " + token)
+    }
 
     xhr.send(data);
 

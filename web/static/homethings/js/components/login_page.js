@@ -33,10 +33,14 @@ export const loginPageComponent = {
                 return
             }
 
-            auth.setToken(this.form.username, this.form.password)
+            let res = client.jsonRequest(client.methodPost, client.routeLogin, {
+                "username": this.form.username,
+                "password": this.form.password,
+            })
 
-            let res = client.jsonRequest(client.methodGet, client.routeCheckAuth)
-            if (res.status === client.statusOK) {
+            if (res.status === client.statusOK && res.data.token !== undefined) {
+                auth.setToken(res.data.token)
+
                 this.errors.username = false
                 this.errors.password = false
                 this.form.username = ""
