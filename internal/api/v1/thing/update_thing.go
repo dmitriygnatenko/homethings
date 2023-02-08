@@ -26,12 +26,12 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")
 		if err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		req := dto.UpdateThingRequest{}
 		if err = fctx.BodyParser(&req); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
@@ -41,40 +41,40 @@ func UpdateThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		thing, err := sp.GetThingRepository().Get(ctx, id)
 		if err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		placeThing, err := sp.GetPlaceThingRepository().GetByThingID(ctx, id)
 		if err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		tx, err := sp.GetThingRepository().BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if req.Title != thing.Title || req.Description != thing.Description {
 			err = sp.GetThingRepository().Update(ctx, mappers.ConvertToUpdateThingRequestModel(id, req), tx)
 			if err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		if placeThing.PlaceID != req.PlaceID {
 			err = sp.GetPlaceThingRepository().UpdatePlace(ctx, mappers.ConvertToUpdatePlaceThingRequestModel(id, req.PlaceID), tx)
 			if err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		if err = sp.GetThingRepository().CommitTx(tx); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res, err := sp.GetThingRepository().Get(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))

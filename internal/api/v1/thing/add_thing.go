@@ -25,7 +25,7 @@ func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		req := dto.AddThingRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
@@ -35,26 +35,26 @@ func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		tx, err := sp.GetThingRepository().BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		id, err := sp.GetThingRepository().Add(ctx, mappers.ConvertToAddThingRequestModel(req), tx)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		err = sp.GetPlaceThingRepository().Add(ctx, mappers.ConvertToAddPlaceThingRequestModel(id, req.PlaceID), tx)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if err = sp.GetThingRepository().CommitTx(tx); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res, err := sp.GetThingRepository().Get(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))

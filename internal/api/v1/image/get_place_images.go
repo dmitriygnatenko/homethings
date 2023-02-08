@@ -3,7 +3,6 @@ package image
 import (
 	"sort"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
@@ -26,18 +25,18 @@ func GetPlaceImagesHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")
 		if err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		placesRes, err := sp.GetPlaceImageRepository().GetByPlaceID(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 		res = append(res, placesRes...)
 
 		thingsRes, err := sp.GetThingImageRepository().GetByPlaceID(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 		res = append(res, thingsRes...)
 

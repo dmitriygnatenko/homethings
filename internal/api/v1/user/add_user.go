@@ -25,7 +25,7 @@ func AddUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		req := dto.AddUserRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
@@ -35,12 +35,12 @@ func AddUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		hash, err := sp.GetAuthService().GeneratePasswordHash(strings.TrimSpace(req.Password))
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		_, err = sp.GetUserRepository().Add(ctx, strings.TrimSpace(req.Username), string(hash))
+		_, err = sp.GetUserRepository().Add(ctx, strings.TrimSpace(req.Username), hash)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(factory.CreateEmptyResponse())

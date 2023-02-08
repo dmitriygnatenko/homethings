@@ -29,7 +29,7 @@ func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		req := dto.UpdateUserRequest{}
 		if err = fctx.BodyParser(&req); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		if req.Username != nil {
@@ -39,12 +39,12 @@ func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		if req.Password != nil {
 			password, err = sp.GetAuthService().GeneratePasswordHash(strings.TrimSpace(*req.Password))
 			if err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		if username == "" && password == "" {
-			return factory.CreateBadRequestResponse(fctx, nil)
+			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
 		claims := sp.GetAuthService().GetClaims(fctx)
@@ -52,10 +52,10 @@ func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		user, err := sp.GetUserRepository().Get(ctx, claims["name"].(string))
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return factory.CreateBadRequestResponse(fctx, nil)
+				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		req.Password = &password
@@ -63,7 +63,7 @@ func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		err = sp.GetUserRepository().Update(ctx, mappers.ConvertToUpdateUserRequestModel(user.ID, req))
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(factory.CreateEmptyResponse())

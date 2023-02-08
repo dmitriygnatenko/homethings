@@ -27,7 +27,6 @@ const (
 	swaggerURI         = "/docs"
 	limiterMaxRequests = 30
 	limiterExpiration  = 30 * time.Second
-	loggerTimeFormat   = "02-01-2006 15:04:05"
 )
 
 func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {

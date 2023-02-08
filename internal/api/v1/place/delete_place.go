@@ -5,7 +5,6 @@ import (
 
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	"github.com/gofiber/fiber/v2"
@@ -26,35 +25,35 @@ func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")
 		if err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		_, err = sp.GetPlaceRepository().Get(ctx, id)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return factory.CreateBadRequestResponse(fctx, nil)
+				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		nestedRes, err := sp.GetPlaceRepository().GetNestedPlaces(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if len(nestedRes) > 0 {
-			return factory.CreateBadRequestResponse(fctx, nil)
+			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
 		placeImages, err := sp.GetPlaceImageRepository().GetByPlaceID(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		things, err := sp.GetThingRepository().GetByPlaceID(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		var thingImages []models.Image
@@ -65,7 +64,7 @@ func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 			thingImagesRes, thingImagesErr := sp.GetThingImageRepository().GetByThingID(ctx, thing.ID)
 			if thingImagesErr != nil {
-				return factory.CreateInternalErrorResponse(fctx, thingImagesErr)
+				return fiber.NewError(fiber.StatusInternalServerError, thingImagesErr.Error())
 			}
 
 			for i := range thingImagesRes {
@@ -75,7 +74,7 @@ func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		tx, err := sp.GetPlaceRepository().BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		placeImageURLs := make([]string, 0, len(placeImages))
@@ -83,45 +82,45 @@ func DeletePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			placeImageURLs = append(placeImageURLs, placeImages[i].Image)
 
 			if err = sp.GetPlaceImageRepository().Delete(ctx, placeImages[i].ID, tx); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		for i := range thingImages {
 			if err = sp.GetThingImageRepository().Delete(ctx, thingImages[i].ID, tx); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		for _, thingID := range thingIDs {
 			if err = sp.GetPlaceThingRepository().DeleteThing(ctx, thingID, tx); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
 			if err = sp.GetThingRepository().Delete(ctx, thingID, tx); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		if err = sp.GetPlaceRepository().Delete(ctx, id, tx); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if err = sp.GetPlaceRepository().CommitTx(tx); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if len(placeImageURLs) > 0 {
 			for i := range placeImageURLs {
 				if err = sp.GetFileRepository().Delete(placeImageURLs[i]); err != nil {
-					return factory.CreateInternalErrorResponse(fctx, err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
 			}
 		}
 
 		for i := range thingImages {
 			if err = sp.GetFileRepository().Delete(thingImages[i].Image); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 

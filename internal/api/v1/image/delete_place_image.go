@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,24 +23,24 @@ func DeletePlaceImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")
 		if err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		image, err := sp.GetPlaceImageRepository().Get(ctx, id)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return factory.CreateBadRequestResponse(fctx, nil)
+				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if err = sp.GetPlaceImageRepository().Delete(ctx, id, nil); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if err = sp.GetFileRepository().Delete(image.Image); err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(dto.EmptyResponse{})

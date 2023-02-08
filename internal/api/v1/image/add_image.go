@@ -9,7 +9,6 @@ import (
 
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
@@ -40,20 +39,20 @@ func AddImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 
 		if form, err = fctx.MultipartForm(); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		if formPlace := form.Value["place_id"]; len(formPlace) > 0 {
 			placeID, err = strconv.Atoi(formPlace[0])
 			if err != nil {
-				return factory.CreateBadRequestResponse(fctx, err)
+				return fiber.NewError(fiber.StatusBadRequest, err.Error())
 			}
 		}
 
 		if formThing := form.Value["thing_id"]; len(formThing) > 0 {
 			thingID, err = strconv.Atoi(formThing[0])
 			if err != nil {
-				return factory.CreateBadRequestResponse(fctx, err)
+				return fiber.NewError(fiber.StatusBadRequest, err.Error())
 			}
 		}
 
@@ -62,46 +61,46 @@ func AddImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			filename := "/files/" + date + "_" + helpers.GenerateRandomString(10) + filepath.Ext(file.Filename)
 
 			if err = sp.GetFileRepository().Save(fctx, file, filename); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
 			files = append(files, filename)
 		}
 
 		if (placeID == 0 && thingID == 0) || len(files) == 0 {
-			return factory.CreateBadRequestResponse(fctx, nil)
+			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
 		var tx *sql.Tx
 		if thingID > 0 {
 			tx, err = sp.GetThingImageRepository().BeginTx(ctx, API.DefaultTxLevel)
 			if err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
 			for _, file := range files {
 				if err = sp.GetThingImageRepository().Add(ctx, mappers.ConvertToAddThingImageRequestModel(thingID, file), tx); err != nil {
-					return factory.CreateInternalErrorResponse(fctx, err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
 			}
 
 			if err = sp.GetThingImageRepository().CommitTx(tx); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		} else {
 			tx, err = sp.GetPlaceImageRepository().BeginTx(ctx, API.DefaultTxLevel)
 			if err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
 			for _, file := range files {
 				if err = sp.GetPlaceImageRepository().Add(ctx, mappers.ConvertToAddPlaceImageRequestModel(placeID, file), tx); err != nil {
-					return factory.CreateInternalErrorResponse(fctx, err)
+					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
 			}
 
 			if err = sp.GetPlaceImageRepository().CommitTx(tx); err != nil {
-				return factory.CreateInternalErrorResponse(fctx, err)
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 

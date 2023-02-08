@@ -24,7 +24,7 @@ func AddPlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		req := dto.AddPlaceRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
@@ -34,12 +34,12 @@ func AddPlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		id, err := sp.GetPlaceRepository().Add(ctx, mappers.ConvertToAddPlaceRequestModel(req), nil)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res, err := sp.GetPlaceRepository().Get(ctx, id)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(mappers.ConvertToPlaceResponseDTO(*res))
