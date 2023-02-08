@@ -1,6 +1,7 @@
 package fiber
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
@@ -31,7 +31,7 @@ const (
 )
 
 func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
-	fiberApp := fiber.New(getFiberConfig())
+	fiberApp := fiber.New(getFiberConfig(sp))
 
 	// Configure web root
 	fiberApp.Static("/", staticPath)
@@ -44,9 +44,6 @@ func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
 
 	// Configure limiter middleware
 	fiberApp.Use(limiter.New(getLimiterConfig()))
-
-	// Configure logger middleware
-	fiberApp.Use(logger.New(getLoggerConfig()))
 
 	// Configure JWT middleware
 	fiberApp.Use(jwt.New(getJWTConfig(sp)))
@@ -61,13 +58,31 @@ func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
 	return fiberApp, nil
 }
 
-func getFiberConfig() fiber.Config {
-
-	// TODO Logger errors (email)
-
+func getFiberConfig(sp interfaces.IServiceProvider) fiber.Config {
 	return fiber.Config{
 		AppName:               appName,
 		DisableStartupMessage: true,
+		ErrorHandler:          initErrorHandler(sp),
+	}
+}
+
+func initErrorHandler(sp interfaces.IServiceProvider) fiber.ErrorHandler {
+	return func(fctx *fiber.Ctx, err error) error {
+		errCode := fiber.StatusInternalServerError
+		if e, ok := err.(*fiber.Error); ok {
+			errCode = e.Code
+		}
+
+		if err.Error() == "" {
+			if errCode == fiber.StatusInternalServerError {
+				log.Println(err)
+				// mail
+			}
+
+			return fctx.Status(errCode).JSON(factory.CreateEmptyResponse())
+		}
+
+		return fctx.Status(errCode).JSON(factory.CreateErrorResponse(err))
 	}
 }
 
@@ -100,12 +115,6 @@ func getLimiterConfig() limiter.Config {
 	return limiter.Config{
 		Max:        limiterMaxRequests,
 		Expiration: limiterExpiration,
-	}
-}
-
-func getLoggerConfig() logger.Config {
-	return logger.Config{
-		TimeFormat: loggerTimeFormat,
 	}
 }
 

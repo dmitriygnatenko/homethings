@@ -24,7 +24,7 @@ func LoginHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		ctx := fctx.Context()
 		req := dto.LoginRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
@@ -35,19 +35,19 @@ func LoginHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		user, err := sp.GetUserRepository().Get(ctx, req.Username)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return factory.CreateBadRequestResponse(fctx, nil)
+				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if !sp.GetAuthService().IsCorrectPassword(req.Password, user.Password) {
-			return factory.CreateBadRequestResponse(fctx, nil)
+			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
 		token, err := sp.GetAuthService().GenerateToken(*user)
 		if err != nil {
-			return factory.CreateInternalErrorResponse(fctx, err)
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		return fctx.JSON(dto.LoginResponse{Token: token})
