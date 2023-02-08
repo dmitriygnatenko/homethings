@@ -2,6 +2,7 @@ package fiber
 
 import (
 	"strings"
+	"time"
 
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
@@ -13,15 +14,18 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
 )
 
 const (
-	appName    = "homethings"
-	staticPath = "../../web"
-	swaggerURI = "/docs"
+	appName            = "homethings"
+	staticPath         = "../../web"
+	swaggerURI         = "/docs"
+	limiterMaxRequests = 30
+	limiterExpiration  = 30 * time.Second
 )
 
 func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
@@ -35,6 +39,9 @@ func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
 
 	// Configure recover middleware
 	fiberApp.Use(recover.New())
+
+	// Configure limiter middleware
+	fiberApp.Use(limiter.New(getLimiterConfig()))
 
 	// Configure JWT middleware
 	fiberApp.Use(jwt.New(getJWTConfig(sp)))
@@ -54,8 +61,8 @@ func getFiberConfig() fiber.Config {
 	// TODO Logger errors (email)
 
 	return fiber.Config{
-		AppName:               appName,
-		DisableStartupMessage: true,
+		AppName: appName,
+		//DisableStartupMessage: true,
 	}
 }
 
@@ -81,6 +88,13 @@ func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
 
 			return true
 		},
+	}
+}
+
+func getLimiterConfig() limiter.Config {
+	return limiter.Config{
+		Max:        limiterMaxRequests,
+		Expiration: limiterExpiration,
 	}
 }
 
