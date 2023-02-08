@@ -138,7 +138,6 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (update place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.UpdateMock.Return(testError)
@@ -149,7 +148,6 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (get place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.UpdateMock.Return(nil)

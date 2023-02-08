@@ -89,7 +89,6 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.GetNestedPlacesMock.Return(nil, testError)

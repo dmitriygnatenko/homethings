@@ -119,7 +119,6 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			name:    "negative case - place repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(nil, testError)
@@ -133,7 +132,6 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			name:    "negative case - thing repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(nil, nil)

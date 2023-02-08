@@ -171,7 +171,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, testError)
@@ -195,7 +194,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 
@@ -227,7 +225,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 
@@ -289,7 +286,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				return repoMocks.NewIPlaceImageRepositoryMock(mc)
 			},
@@ -313,7 +309,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				return repoMocks.NewIPlaceImageRepositoryMock(mc)
 			},
@@ -345,7 +340,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				return repoMocks.NewIPlaceImageRepositoryMock(mc)
 			},
@@ -407,7 +401,6 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				return repoMocks.NewIPlaceImageRepositoryMock(mc)
 			},

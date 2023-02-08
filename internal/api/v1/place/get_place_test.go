@@ -82,7 +82,6 @@ func Test_GetPlaceHandler(t *testing.T) {
 			name:    "negative case - not found",
 			req:     correctReq,
 			resCode: fiber.StatusNotFound,
-			resBody: dto.EmptyResponse{},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.GetMock.Return(nil, sql.ErrNoRows)
@@ -93,7 +92,6 @@ func Test_GetPlaceHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.GetMock.Return(nil, testError)

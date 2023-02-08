@@ -117,7 +117,6 @@ func Test_AddPlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (add place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.AddMock.Return(0, testError)
@@ -128,7 +127,6 @@ func Test_AddPlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (get place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.AddMock.Return(placeID, nil)

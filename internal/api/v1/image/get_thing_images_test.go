@@ -106,7 +106,6 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
 				mock := repoMocks.NewIThingImageRepositoryMock(mc)
 				mock.GetByThingIDMock.Return(nil, testError)

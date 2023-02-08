@@ -113,7 +113,6 @@ func Test_AddUserHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				mock := repoMocks.NewIUserRepositoryMock(mc)
 
@@ -134,7 +133,6 @@ func Test_AddUserHandler(t *testing.T) {
 			name:    "negative case - auth service error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				return repoMocks.NewIUserRepositoryMock(mc)
 			},

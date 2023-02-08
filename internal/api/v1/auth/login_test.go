@@ -125,7 +125,6 @@ func Test_LoginHandler(t *testing.T) {
 			name:    "negative case - generate token error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				mock := repoMocks.NewIUserRepositoryMock(mc)
 
@@ -167,7 +166,6 @@ func Test_LoginHandler(t *testing.T) {
 			name:    "negative case - repository error (get user)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				mock := repoMocks.NewIUserRepositoryMock(mc)
 

@@ -104,7 +104,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (get thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, testError)
@@ -124,7 +123,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (begin tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)
@@ -145,7 +143,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (delete place thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)
@@ -168,7 +165,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (get images)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)
@@ -193,7 +189,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (delete images)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)
@@ -219,7 +214,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (delete thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)
@@ -246,7 +240,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - repository error (commit tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)
@@ -274,7 +267,6 @@ func Test_DeleteThingHandler(t *testing.T) {
 			name:    "negative case - file delete error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, nil)

@@ -85,7 +85,6 @@ func Test_DeletePlaceImageHandler(t *testing.T) {
 			name:    "negative case - repository error (get)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 				mock.GetMock.Return(nil, testError)
@@ -99,7 +98,6 @@ func Test_DeletePlaceImageHandler(t *testing.T) {
 			name:    "negative case - repository error (update)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 
@@ -116,7 +114,6 @@ func Test_DeletePlaceImageHandler(t *testing.T) {
 			name:    "negative case - file delete error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
 				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
 

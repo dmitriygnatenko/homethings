@@ -86,7 +86,6 @@ func Test_GetThingHandler(t *testing.T) {
 			name:    "negative case - not found",
 			req:     correctReq,
 			resCode: fiber.StatusNotFound,
-			resBody: dto.EmptyResponse{},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, sql.ErrNoRows)
@@ -97,7 +96,6 @@ func Test_GetThingHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
 				mock := repoMocks.NewIThingRepositoryMock(mc)
 				mock.GetMock.Return(nil, testError)

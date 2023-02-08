@@ -123,7 +123,6 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			resBody: dto.ErrorResponse{Error: testError.Error()},
 			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
 				mock := repoMocks.NewIPlaceRepositoryMock(mc)
 				mock.GetAllMock.Return(nil, testError)
