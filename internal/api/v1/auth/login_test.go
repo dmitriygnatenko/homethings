@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"context"
@@ -18,48 +18,43 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_UpdateUserHandler(t *testing.T) {
+func Test_LoginHandler(t *testing.T) {
 	type authServiceMockFunc func(mc *minimock.Controller) interfaces.IAuth
 	type userRepoMockFunc func(mc *minimock.Controller) interfaces.IUserRepository
 
 	type req struct {
 		method      string
 		route       string
-		body        *dto.UpdateUserRequest
+		body        *dto.LoginRequest
 		contentType string
 	}
 
 	var (
-		mc          = minimock.NewController(t)
-		id          = gofakeit.Number(1, 1000)
-		username    = gofakeit.Username()
-		password    = gofakeit.Word()
-		newUsername = gofakeit.Username()
-		newPassword = gofakeit.Word()
-		testError   = errors.New(gofakeit.Phrase())
+		mc           = minimock.NewController(t)
+		id           = gofakeit.Number(1, 1000)
+		username     = gofakeit.Username()
+		password     = gofakeit.Word()
+		passwordHash = gofakeit.Word()
+		token        = gofakeit.Word()
+		testError    = errors.New(gofakeit.Phrase())
 
 		correctReq = req{
-			method: fiber.MethodPut,
-			route:  "/v1/users",
-			body: &dto.UpdateUserRequest{
-				Username: &newUsername,
-				Password: &newPassword,
+			method: fiber.MethodPost,
+			route:  "/v1/auth/login",
+			body: &dto.LoginRequest{
+				Username: username,
+				Password: password,
 			},
 			contentType: fiber.MIMEApplicationJSON,
-		}
-
-		claims = jwt.MapClaims{
-			"name": username,
 		}
 
 		user = models.User{
 			ID:       id,
 			Username: username,
-			Password: password,
+			Password: passwordHash,
 		}
 	)
 
@@ -75,6 +70,7 @@ func Test_UpdateUserHandler(t *testing.T) {
 			name:    "positive case",
 			req:     correctReq,
 			resCode: fiber.StatusOK,
+			resBody: dto.LoginResponse{Token: token},
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				mock := repoMocks.NewIUserRepositoryMock(mc)
 
@@ -82,19 +78,13 @@ func Test_UpdateUserHandler(t *testing.T) {
 					assert.Equal(mc, username, reqUsername)
 				}).Return(&user, nil)
 
-				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateUserRequest) {
-					assert.Equal(mc, id, req.ID)
-					assert.Equal(mc, newUsername, req.Username.String)
-					assert.Equal(mc, newPassword, req.Password.String)
-				}).Return(nil)
-
 				return mock
 			},
 			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
 				mock := authMocks.NewIAuthMock(mc)
 
-				mock.GeneratePasswordHashMock.Expect(newPassword).Return(newPassword, nil)
-				mock.GetClaimsMock.Return(claims)
+				mock.IsCorrectPasswordMock.Expect(password, passwordHash).Return(true)
+				mock.GenerateTokenMock.Expect(user).Return(token, nil)
 
 				return mock
 			},
@@ -102,8 +92,8 @@ func Test_UpdateUserHandler(t *testing.T) {
 		{
 			name: "negative case - body parse error",
 			req: req{
-				method: fiber.MethodPut,
-				route:  "/v1/users",
+				method: fiber.MethodPost,
+				route:  "/v1/auth/login",
 			},
 			resCode: fiber.StatusBadRequest,
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
@@ -116,9 +106,11 @@ func Test_UpdateUserHandler(t *testing.T) {
 		{
 			name: "negative case - bad request",
 			req: req{
-				method:      fiber.MethodPut,
-				route:       "/v1/users",
-				body:        &dto.UpdateUserRequest{},
+				method: fiber.MethodPost,
+				route:  "/v1/auth/login",
+				body: &dto.LoginRequest{
+					Password: password,
+				},
 				contentType: fiber.MIMEApplicationJSON,
 			},
 			resCode: fiber.StatusBadRequest,
@@ -130,32 +122,7 @@ func Test_UpdateUserHandler(t *testing.T) {
 			},
 		},
 		{
-			name:    "negative case - auth service error",
-			req:     correctReq,
-			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				mock := repoMocks.NewIUserRepositoryMock(mc)
-
-				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
-					assert.Equal(mc, username, reqUsername)
-				}).Return(&user, nil)
-
-				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateUserRequest) {
-					assert.Equal(mc, id, req.ID)
-					assert.Equal(mc, newUsername, req.Username.String)
-					assert.Equal(mc, newPassword, req.Password.String)
-				}).Return(nil)
-
-				return mock
-			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
-				mock.GeneratePasswordHashMock.Expect(newPassword).Return("", testError)
-				return mock
-			},
-		},
-		{
-			name:    "negative case - repository error (update)",
+			name:    "negative case - generate token error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
 			resBody: dto.ErrorResponse{Error: testError.Error()},
@@ -166,20 +133,33 @@ func Test_UpdateUserHandler(t *testing.T) {
 					assert.Equal(mc, username, reqUsername)
 				}).Return(&user, nil)
 
-				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateUserRequest) {
-					assert.Equal(mc, id, req.ID)
-					assert.Equal(mc, newUsername, req.Username.String)
-					assert.Equal(mc, newPassword, req.Password.String)
-				}).Return(testError)
-
 				return mock
 			},
 			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
 				mock := authMocks.NewIAuthMock(mc)
 
-				mock.GeneratePasswordHashMock.Expect(newPassword).Return(newPassword, nil)
-				mock.GetClaimsMock.Return(claims)
+				mock.IsCorrectPasswordMock.Expect(password, passwordHash).Return(true)
+				mock.GenerateTokenMock.Expect(user).Return("", testError)
 
+				return mock
+			},
+		},
+		{
+			name:    "negative case - incorrect password",
+			req:     correctReq,
+			resCode: fiber.StatusBadRequest,
+			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
+				mock := repoMocks.NewIUserRepositoryMock(mc)
+
+				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
+					assert.Equal(mc, username, reqUsername)
+				}).Return(&user, nil)
+
+				return mock
+			},
+			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
+				mock := authMocks.NewIAuthMock(mc)
+				mock.IsCorrectPasswordMock.Expect(password, passwordHash).Return(false)
 				return mock
 			},
 		},
@@ -198,16 +178,11 @@ func Test_UpdateUserHandler(t *testing.T) {
 				return mock
 			},
 			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
-
-				mock.GeneratePasswordHashMock.Expect(newPassword).Return(newPassword, nil)
-				mock.GetClaimsMock.Return(claims)
-
-				return mock
+				return authMocks.NewIAuthMock(mc)
 			},
 		},
 		{
-			name:    "negative case - repository error (user not found)",
+			name:    "negative case - user not found",
 			req:     correctReq,
 			resCode: fiber.StatusBadRequest,
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
@@ -220,12 +195,7 @@ func Test_UpdateUserHandler(t *testing.T) {
 				return mock
 			},
 			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
-
-				mock.GeneratePasswordHashMock.Expect(newPassword).Return(newPassword, nil)
-				mock.GetClaimsMock.Return(claims)
-
-				return mock
+				return authMocks.NewIAuthMock(mc)
 			},
 		},
 	}
@@ -233,10 +203,9 @@ func Test_UpdateUserHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fiberApp := fiber.New()
-
 			serviceProvider := sp.InitMock(tt.userRepoMock(mc), tt.authServiceMock(mc))
 
-			fiberApp.Put("/v1/users", UpdateUserHandler(serviceProvider))
+			fiberApp.Post("/v1/auth/login", LoginHandler(serviceProvider))
 
 			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)

@@ -12,6 +12,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
+	authMocks "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth/mocks"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
@@ -19,6 +20,7 @@ import (
 )
 
 func Test_AddUserHandler(t *testing.T) {
+	type authServiceMockFunc func(mc *minimock.Controller) interfaces.IAuth
 	type userRepoMockFunc func(mc *minimock.Controller) interfaces.IUserRepository
 
 	type req struct {
@@ -47,11 +49,12 @@ func Test_AddUserHandler(t *testing.T) {
 	)
 
 	tests := []struct {
-		name         string
-		req          req
-		resCode      int
-		resBody      interface{}
-		userRepoMock userRepoMockFunc
+		name            string
+		req             req
+		resCode         int
+		resBody         interface{}
+		userRepoMock    userRepoMockFunc
+		authServiceMock authServiceMockFunc
 	}{
 		{
 			name:    "positive case",
@@ -68,6 +71,11 @@ func Test_AddUserHandler(t *testing.T) {
 
 				return mock
 			},
+			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
+				mock := authMocks.NewIAuthMock(mc)
+				mock.GeneratePasswordHashMock.Return(password, nil)
+				return mock
+			},
 		},
 		{
 			name: "negative case - body parse error",
@@ -78,6 +86,9 @@ func Test_AddUserHandler(t *testing.T) {
 			resCode: fiber.StatusBadRequest,
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				return repoMocks.NewIUserRepositoryMock(mc)
+			},
+			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
+				return authMocks.NewIAuthMock(mc)
 			},
 		},
 		{
@@ -93,6 +104,9 @@ func Test_AddUserHandler(t *testing.T) {
 			resCode: fiber.StatusBadRequest,
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				return repoMocks.NewIUserRepositoryMock(mc)
+			},
+			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
+				return authMocks.NewIAuthMock(mc)
 			},
 		},
 		{
@@ -110,13 +124,32 @@ func Test_AddUserHandler(t *testing.T) {
 
 				return mock
 			},
+			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
+				mock := authMocks.NewIAuthMock(mc)
+				mock.GeneratePasswordHashMock.Return(password, nil)
+				return mock
+			},
+		},
+		{
+			name:    "negative case - auth service error",
+			req:     correctReq,
+			resCode: fiber.StatusInternalServerError,
+			resBody: dto.ErrorResponse{Error: testError.Error()},
+			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
+				return repoMocks.NewIUserRepositoryMock(mc)
+			},
+			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
+				mock := authMocks.NewIAuthMock(mc)
+				mock.GeneratePasswordHashMock.Return("", testError)
+				return mock
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.userRepoMock(mc))
+			serviceProvider := sp.InitMock(tt.userRepoMock(mc), tt.authServiceMock(mc))
 
 			fiberApp.Post("/v1/users", AddUserHandler(serviceProvider))
 

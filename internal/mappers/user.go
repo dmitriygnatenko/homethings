@@ -26,7 +26,7 @@ func ConvertToUpdateUserRequestModel(id int, req dto.UpdateUserRequest) models.U
 	}
 
 	if password != "" {
-		res.Username = sql.NullString{String: password, Valid: true}
+		res.Password = sql.NullString{String: password, Valid: true}
 	}
 
 	return res
