@@ -72,7 +72,7 @@ func initErrorHandler(sp interfaces.IServiceProvider) fiber.ErrorHandler {
 			errCode = e.Code
 		}
 
-		if err.Error() == "" {
+		if err.Error() != "" {
 			if errCode == fiber.StatusInternalServerError {
 				log.Println(err)
 				// nolint
@@ -83,10 +83,10 @@ func initErrorHandler(sp interfaces.IServiceProvider) fiber.ErrorHandler {
 				)
 			}
 
-			return fctx.Status(errCode).JSON(factory.CreateEmptyResponse())
+			return fctx.Status(errCode).JSON(factory.CreateErrorResponse(err))
 		}
 
-		return fctx.Status(errCode).JSON(factory.CreateErrorResponse(err))
+		return fctx.Status(errCode).JSON(factory.CreateEmptyResponse())
 	}
 }
 
