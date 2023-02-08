@@ -163,6 +163,24 @@ info:
   title: Homethings API
   version: "1.0"
 paths:
+  /api/v1/auth/check:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Check auth
+      tags:
+      - Auth
   /api/v1/auth/login:
     post:
       consumes:

@@ -134,6 +134,8 @@ func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
 	r.Post("/v1/auth/login", authAPI.LoginHandler(sp))
 
 	// Protected routes
+	r.Get("/v1/auth/check", authAPI.CheckAuthHandler(sp))
+
 	r.Get("/v1/places", placeAPI.GetPlacesHandler(sp))
 	r.Get("/v1/places/tree", placeAPI.GetPlaceTreeHandler(sp))
 	r.Get("/v1/places/:id<int>", placeAPI.GetPlaceHandler(sp))
