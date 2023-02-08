@@ -76,7 +76,12 @@ func initErrorHandler(sp interfaces.IServiceProvider) fiber.ErrorHandler {
 		if err.Error() == "" {
 			if errCode == fiber.StatusInternalServerError {
 				log.Println(err)
-				// mail
+
+				sp.GetMailerService().Send(
+					sp.GetEnvService().GetErrorsEmail(),
+					"AUTO - Homethings error",
+					err.Error(),
+				)
 			}
 
 			return fctx.Status(errCode).JSON(factory.CreateEmptyResponse())
@@ -91,7 +96,7 @@ func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
 	return jwt.Config{
 		SigningKey: []byte(sp.GetEnvService().GetJWTSecretKey()),
 		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
-			return factory.CreateBadRequestResponse(fctx, err)
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		},
 		Filter: func(fctx *fiber.Ctx) bool {
 			method := fctx.Method()

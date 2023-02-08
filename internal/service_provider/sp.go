@@ -6,11 +6,13 @@ import (
 	authService "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
 	dbService "git.dmitriygnatenko.ru/dima/homethings/internal/services/db"
 	envService "git.dmitriygnatenko.ru/dima/homethings/internal/services/env"
+	mailerService "git.dmitriygnatenko.ru/dima/homethings/internal/services/mailer"
 )
 
 type ServiceProvider struct {
 	env                  interfaces.IEnv
 	auth                 interfaces.IAuth
+	mailer               interfaces.IMailer
 	placeRepository      interfaces.IPlaceRepository
 	thingRepository      interfaces.IThingRepository
 	placeThingRepository interfaces.IPlaceThingRepository
@@ -35,6 +37,12 @@ func Init() (interfaces.IServiceProvider, error) {
 	}
 	sp.auth = auth
 
+	mailer, err := mailerService.Init(env)
+	if err != nil {
+		return nil, err
+	}
+	sp.mailer = mailer
+
 	db, err := dbService.Init(env)
 	if err != nil {
 		return nil, err
@@ -58,6 +66,10 @@ func (sp *ServiceProvider) GetEnvService() interfaces.IEnv {
 
 func (sp *ServiceProvider) GetAuthService() interfaces.IAuth {
 	return sp.auth
+}
+
+func (sp *ServiceProvider) GetMailerService() interfaces.IMailer {
+	return sp.mailer
 }
 
 func (sp *ServiceProvider) GetPlaceRepository() interfaces.IPlaceRepository {
