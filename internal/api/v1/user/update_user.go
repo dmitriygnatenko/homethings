@@ -28,7 +28,7 @@ func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 
 		ctx := fctx.Context()
 		req := dto.UpdateUserRequest{}
-		if err := fctx.BodyParser(&req); err != nil {
+		if err = fctx.BodyParser(&req); err != nil {
 			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
