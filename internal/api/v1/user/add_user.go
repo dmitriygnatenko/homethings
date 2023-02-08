@@ -8,7 +8,6 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // @Router 		/api/v1/users [post]
@@ -34,7 +33,7 @@ func AddUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		hash, err := bcrypt.GenerateFromPassword([]byte(strings.TrimSpace(req.Password)), bcrypt.DefaultCost)
+		hash, err := sp.GetAuthService().GeneratePasswordHash(strings.TrimSpace(req.Password))
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}

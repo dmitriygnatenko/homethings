@@ -2,15 +2,12 @@ package auth
 
 import (
 	"database/sql"
-	"time"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // @Router 		/api/v1/auth/login [post]
@@ -44,22 +41,15 @@ func LoginHandler(sp interfaces.IServiceProvider) fiber.Handler {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		if !sp.GetAuthService().IsCorrectPassword(req.Password, user.Password) {
 			return factory.CreateBadRequestResponse(fctx, nil)
 		}
 
-		claims := jwt.MapClaims{
-			"name": user.Username,
-			"exp":  time.Now().Add(time.Duration(sp.GetEnvService().GetJWTLifetime()) * time.Second).Unix(),
-		}
-
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-		encodedToken, err := token.SignedString([]byte(sp.GetEnvService().GetJWTSecretKey()))
+		token, err := sp.GetAuthService().GenerateToken(*user)
 		if err != nil {
 			return factory.CreateInternalErrorResponse(fctx, err)
 		}
 
-		return fctx.JSON(dto.LoginResponse{Token: encodedToken})
+		return fctx.JSON(dto.LoginResponse{Token: token})
 	}
 }

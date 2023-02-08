@@ -3,12 +3,14 @@ package sp
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
+	authService "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
 	dbService "git.dmitriygnatenko.ru/dima/homethings/internal/services/db"
 	envService "git.dmitriygnatenko.ru/dima/homethings/internal/services/env"
 )
 
 type ServiceProvider struct {
 	env                  interfaces.IEnv
+	auth                 interfaces.IAuth
 	placeRepository      interfaces.IPlaceRepository
 	thingRepository      interfaces.IThingRepository
 	placeThingRepository interfaces.IPlaceThingRepository
@@ -26,6 +28,12 @@ func Init() (interfaces.IServiceProvider, error) {
 		return nil, err
 	}
 	sp.env = env
+
+	auth, err := authService.Init(env)
+	if err != nil {
+		return nil, err
+	}
+	sp.auth = auth
 
 	db, err := dbService.Init(env)
 	if err != nil {
@@ -46,6 +54,10 @@ func Init() (interfaces.IServiceProvider, error) {
 
 func (sp *ServiceProvider) GetEnvService() interfaces.IEnv {
 	return sp.env
+}
+
+func (sp *ServiceProvider) GetAuthService() interfaces.IAuth {
+	return sp.auth
 }
 
 func (sp *ServiceProvider) GetPlaceRepository() interfaces.IPlaceRepository {
@@ -83,6 +95,8 @@ func InitMock(deps ...interface{}) interfaces.IServiceProvider {
 		switch s := d.(type) {
 		case interfaces.IEnv:
 			sp.env = s
+		case interfaces.IAuth:
+			sp.auth = s
 		case interfaces.IPlaceThingRepository:
 			sp.placeThingRepository = s
 		case interfaces.IThingRepository:

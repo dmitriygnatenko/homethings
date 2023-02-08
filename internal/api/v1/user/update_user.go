@@ -9,8 +9,6 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // @Router 		/api/v1/users [put]
@@ -25,31 +23,31 @@ import (
 // @Produce     json
 func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
+		var err error
+		var username, password string
+
 		ctx := fctx.Context()
 		req := dto.UpdateUserRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
 			return factory.CreateBadRequestResponse(fctx, err)
 		}
 
-		var username, password string
 		if req.Username != nil {
 			username = strings.TrimSpace(*req.Username)
 		}
 
 		if req.Password != nil {
-			hash, err := bcrypt.GenerateFromPassword([]byte(strings.TrimSpace(*req.Password)), bcrypt.DefaultCost)
+			password, err = sp.GetAuthService().GeneratePasswordHash(strings.TrimSpace(*req.Password))
 			if err != nil {
 				return factory.CreateInternalErrorResponse(fctx, err)
 			}
-			password = string(hash)
 		}
 
 		if username == "" && password == "" {
 			return factory.CreateBadRequestResponse(fctx, nil)
 		}
 
-		jwtUser := fctx.Locals("user").(*jwt.Token)
-		claims := jwtUser.Claims.(jwt.MapClaims)
+		claims := sp.GetAuthService().GetClaims(fctx)
 
 		user, err := sp.GetUserRepository().Get(ctx, claims["name"].(string))
 		if err != nil {
