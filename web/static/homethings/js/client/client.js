@@ -30,6 +30,7 @@ export const routeGetThingImages = "/api/v1/images/thing/{id}"
 export const routeDeletePlaceImages = "/api/v1/images/place/{id}"
 export const routeDeleteThingImages = "/api/v1/images/thing/{id}"
 export const routeAddUser = "/api/v1/users"
+export const routeUpdateUser = "/api/v1/users"
 
 export function jsonRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
