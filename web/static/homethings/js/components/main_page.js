@@ -10,6 +10,8 @@ import {modalDeleteThingComponent} from "./modal_delete_thing.js";
 import {modalAddImageComponent, typePlace} from "./modal_add_image.js";
 import {modalShowImagesComponent} from "./modal_show_image.js"
 import {modalSearchThingComponent} from "./modal_search_thing.js"
+import {modalAddUserComponent} from "./modal_add_user.js";
+import {toastComponent} from "./toast.js";
 
 import * as client from "../client/client.js";
 import * as auth from "../auth/auth.js"
@@ -27,6 +29,8 @@ export const mainPageComponent = {
         "modal-add-image": modalAddImageComponent,
         "modal-show-images": modalShowImagesComponent,
         "modal-search-thing": modalSearchThingComponent,
+        "modal-add-user": modalAddUserComponent,
+        "toast": toastComponent,
     },
     emits: ["set-auth"],
     props: {
@@ -252,7 +256,17 @@ export const mainPageComponent = {
         logout() {
             auth.clearToken()
             this.$emit("set-auth", false)
-        }
+        },
+        addUser() {
+            this.$refs.modalAddUser.init()
+        },
+        afterAddUser(success) {
+            if (success) {
+                this.$refs.toast.showSuccess("Пользователь добавлен")
+            } else {
+                this.$refs.toast.showError("Ошибка при добавлении пользователя")
+            }
+        },
     },
     template: `
     <template v-if="showMainPage">
@@ -267,7 +281,7 @@ export const mainPageComponent = {
                         {{ username }}
                     </button>      
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Добавить пользователя</a></li>
+                        <li><button class="dropdown-item" @click="addUser">Добавить пользователя</button></li>
                         <li><a class="dropdown-item" href="#">Изменить свой логин</a></li>
                         <li><a class="dropdown-item" href="#">Изменить свой пароль</a></li>
                         <li><hr class="dropdown-divider"></li>
@@ -410,6 +424,8 @@ export const mainPageComponent = {
         <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @after-add-image="afterAddImage"></modal-add-image>
         <modal-show-images ref="modalShowImages" :images="imagesList"></modal-show-images>
         <modal-search-thing ref="modalSearchThing" @after-search-thing="afterSearchThing"></modal-search-thing>
+        <modal-add-user ref="modalAddUser" @after-add-user="afterAddUser"></modal-add-user>
+        <toast ref="toast"></toast>
     </template>
     `
 }
