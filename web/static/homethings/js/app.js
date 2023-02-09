@@ -12,17 +12,22 @@ export const app = {
     data() {
         return {
             isAuth: false,
+            username: "",
         };
     },
     created() {
         let res = client.jsonRequest(client.methodGet, client.routeCheckAuth)
         if (res.status === client.statusOK) {
             this.isAuth = true
+            this.username = res.data.username
         }
     },
     methods: {
         setIsAuth(isAuth) {
             this.isAuth = isAuth
         },
+        setUsername(username) {
+            this.username = username
+        }
     }
 };

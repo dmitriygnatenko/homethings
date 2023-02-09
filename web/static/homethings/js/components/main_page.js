@@ -31,6 +31,7 @@ export const mainPageComponent = {
     emits: ["set-auth"],
     props: {
         isAuth: Boolean,
+        username: String,
     },
     data() {
         return {
@@ -263,6 +264,7 @@ export const mainPageComponent = {
                         class="btn btn-sm dropdown-toggle"
                         data-bs-toggle="dropdown">
                         <i class="bi bi-person-fill"></i>
+                        {{ username }}
                     </button>      
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#">Добавить пользователя</a></li>

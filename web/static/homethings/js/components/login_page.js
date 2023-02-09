@@ -7,7 +7,7 @@ export const loginPageComponent = {
     props: {
         isAuth: Boolean,
     },
-    emits: ["set-auth"],
+    emits: ["set-auth", "set-username"],
     data() {
         return {
             form: {
@@ -41,6 +41,7 @@ export const loginPageComponent = {
             if (res.status === client.statusOK && res.data.token !== undefined) {
                 auth.setToken(res.data.token)
 
+                this.$emit("set-username", this.form.username)
                 this.errors.username = false
                 this.errors.password = false
                 this.form.username = ""
