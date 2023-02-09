@@ -11,6 +11,8 @@ import {modalAddImageComponent, typePlace} from "./modal_add_image.js";
 import {modalShowImagesComponent} from "./modal_show_image.js"
 import {modalSearchThingComponent} from "./modal_search_thing.js"
 import {modalAddUserComponent} from "./modal_add_user.js";
+import {modalUpdateUsernameComponent} from "./modal_update_username.js";
+import {modalUpdatePasswordComponent} from "./modal_update_password.js";
 import {toastComponent} from "./toast.js";
 
 import * as client from "../client/client.js";
@@ -30,6 +32,8 @@ export const mainPageComponent = {
         "modal-show-images": modalShowImagesComponent,
         "modal-search-thing": modalSearchThingComponent,
         "modal-add-user": modalAddUserComponent,
+        "modal-update-username": modalUpdateUsernameComponent,
+        "modal-update-password": modalUpdatePasswordComponent,
         "toast": toastComponent,
     },
     emits: ["set-auth"],
@@ -267,6 +271,26 @@ export const mainPageComponent = {
                 this.$refs.toast.showError("Ошибка при добавлении пользователя")
             }
         },
+        updateUsername() {
+            this.$refs.modalUpdateUsername.init()
+        },
+        afterUpdateUsername(success) {
+            if (success) {
+                this.logout()
+            } else {
+                this.$refs.toast.showError("Ошибка при изменении имени пользователя")
+            }
+        },
+        updatePassword() {
+            this.$refs.modalUpdatePassword.init()
+        },
+        afterUpdatePassword(success) {
+            if (success) {
+                this.logout()
+            } else {
+                this.$refs.toast.showError("Ошибка при изменении пароля пользователя")
+            }
+        },
     },
     template: `
     <template v-if="showMainPage">
@@ -282,8 +306,8 @@ export const mainPageComponent = {
                     </button>      
                     <ul class="dropdown-menu">
                         <li><button class="dropdown-item" @click="addUser">Добавить пользователя</button></li>
-                        <li><a class="dropdown-item" href="#">Изменить свой логин</a></li>
-                        <li><a class="dropdown-item" href="#">Изменить свой пароль</a></li>
+                        <li><a class="dropdown-item" @click="updateUsername">Изменить свой логин</a></li>
+                        <li><a class="dropdown-item" @click="updatePassword">Изменить свой пароль</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><button class="dropdown-item" @click="logout">Выход</button></li>
                     </ul>
@@ -425,6 +449,8 @@ export const mainPageComponent = {
         <modal-show-images ref="modalShowImages" :images="imagesList"></modal-show-images>
         <modal-search-thing ref="modalSearchThing" @after-search-thing="afterSearchThing"></modal-search-thing>
         <modal-add-user ref="modalAddUser" @after-add-user="afterAddUser"></modal-add-user>
+        <modal-update-username ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></modal-update-username>
+        <modal-update-password ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></modal-update-password>
         <toast ref="toast"></toast>
     </template>
     `
