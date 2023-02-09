@@ -158,6 +158,11 @@ definitions:
       username:
         type: string
     type: object
+  dto.UserResponse:
+    properties:
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   title: Homethings API
@@ -173,9 +178,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.LoginResponse'
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/dto.UserResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Check auth
@@ -201,6 +210,10 @@ paths:
             $ref: '#/definitions/dto.LoginResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":

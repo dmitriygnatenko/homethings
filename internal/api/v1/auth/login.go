@@ -14,6 +14,7 @@ import (
 // @Param       data body dto.LoginRequest true "Request body"
 // @Success     200 {object} dto.LoginResponse
 // @Failure     400 {object} dto.ErrorResponse
+// @Failure     403 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Login user
 // @Tags  		Auth
