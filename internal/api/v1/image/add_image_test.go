@@ -25,9 +25,9 @@ import (
 
 // nolint:errcheck
 func Test_AddImageHandler(t *testing.T) {
-	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceImageRepository
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.IThingImageRepository
-	type fileRepoMockFunc func(mc *minimock.Controller) interfaces.IFileRepository
+	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceImageRepository
+	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
+	type fileRepoMockFunc func(mc *minimock.Controller) interfaces.FileRepository
 
 	type req struct {
 		method      string
@@ -95,14 +95,14 @@ func Test_AddImageHandler(t *testing.T) {
 				route:  "/v1/images",
 			},
 			resCode: fiber.StatusBadRequest,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				return repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				return repoMocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
@@ -114,14 +114,14 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceIncorrectContentType,
 			},
 			resCode: fiber.StatusBadRequest,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				return repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				return repoMocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
@@ -133,14 +133,14 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingIncorrectContentType,
 			},
 			resCode: fiber.StatusBadRequest,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				return repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				return repoMocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
@@ -152,14 +152,14 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: emptyContentType,
 			},
 			resCode: fiber.StatusBadRequest,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				return repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				return repoMocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
@@ -171,16 +171,16 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, testError)
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -194,8 +194,8 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -207,11 +207,11 @@ func Test_AddImageHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -225,8 +225,8 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -236,11 +236,11 @@ func Test_AddImageHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -255,8 +255,8 @@ func Test_AddImageHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -268,11 +268,11 @@ func Test_AddImageHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -286,16 +286,16 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, testError)
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -309,11 +309,11 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -325,8 +325,8 @@ func Test_AddImageHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -340,11 +340,11 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -354,8 +354,8 @@ func Test_AddImageHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -370,11 +370,11 @@ func Test_AddImageHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -386,8 +386,8 @@ func Test_AddImageHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(nil)
 				return mock
 			},
@@ -401,14 +401,14 @@ func Test_AddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.IFileRepository {
-				mock := repoMocks.NewIFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.SaveMock.Return(testError)
 				return mock
 			},

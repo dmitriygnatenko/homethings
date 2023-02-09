@@ -14,7 +14,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceTreeHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func GetPlaceTreeHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		res, err := sp.GetPlaceRepository().GetAll(fctx.Context())
 		if err != nil {

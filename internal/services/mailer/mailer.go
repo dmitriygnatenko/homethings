@@ -21,7 +21,7 @@ type mailerAuth struct {
 	password string
 }
 
-func Init(env interfaces.IEnv) (interfaces.IMailer, error) {
+func Init(env interfaces.Env) (interfaces.Mailer, error) {
 	host := strings.TrimSpace(env.GetSMTPHost())
 	port := strings.TrimSpace(env.GetSMTPPort())
 	user := strings.TrimSpace(env.GetSMTPUser())

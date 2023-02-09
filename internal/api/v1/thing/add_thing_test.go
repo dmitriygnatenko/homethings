@@ -21,8 +21,8 @@ import (
 )
 
 func Test_AddThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.IThingRepository
-	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceThingRepository
+	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
+	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceThingRepository
 
 	type req struct {
 		method      string
@@ -83,8 +83,8 @@ func Test_AddThingHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 
 				mock.BeginTxMock.Return(nil, nil)
 
@@ -101,8 +101,8 @@ func Test_AddThingHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
 					assert.Equal(mc, thingID, req.ThingID)
@@ -119,11 +119,11 @@ func Test_AddThingHandler(t *testing.T) {
 				route:  "/v1/things",
 			},
 			resCode: fiber.StatusBadRequest,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				return repoMocks.NewPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
@@ -144,11 +144,11 @@ func Test_AddThingHandler(t *testing.T) {
 					Tag:   "required",
 				},
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				return repoMocks.NewPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
@@ -169,52 +169,52 @@ func Test_AddThingHandler(t *testing.T) {
 					Tag:   "required",
 				},
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				return repoMocks.NewPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (begin tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, testError)
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				return repoMocks.NewPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (add thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.AddMock.Return(0, testError)
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				return repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				return repoMocks.NewPlaceThingRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (add place thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.AddMock.Return(thingID, nil)
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
 				mock.AddMock.Return(testError)
 				return mock
 			},
@@ -223,15 +223,15 @@ func Test_AddThingHandler(t *testing.T) {
 			name:    "negative case - repository error (commit tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.AddMock.Return(thingID, nil)
 				mock.CommitTxMock.Return(testError)
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
 				mock.AddMock.Return(nil)
 				return mock
 			},
@@ -240,16 +240,16 @@ func Test_AddThingHandler(t *testing.T) {
 			name:    "negative case - repository error (get thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.BeginTxMock.Return(nil, nil)
 				mock.AddMock.Return(thingID, nil)
 				mock.CommitTxMock.Return(nil)
 				mock.GetMock.Return(nil, sql.ErrNoRows)
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.IPlaceThingRepository {
-				mock := repoMocks.NewIPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
 				mock.AddMock.Return(nil)
 				return mock
 			},

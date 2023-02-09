@@ -37,7 +37,7 @@ type env struct {
 	ErrorsEmail string `mapstructure:"ERRORS_EMAIL"`
 }
 
-func Init() (interfaces.IEnv, error) {
+func Init() (interfaces.Env, error) {
 	var configPath string
 	flag.StringVar(&configPath, "config", "", "Path to .env config file")
 	flag.Parse()

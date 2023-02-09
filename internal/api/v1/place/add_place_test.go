@@ -20,7 +20,7 @@ import (
 )
 
 func Test_AddPlaceHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceRepository
+	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
 
 	type req struct {
 		method      string
@@ -76,8 +76,8 @@ func Test_AddPlaceHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.AddMock.Return(placeID, nil)
 				mock.GetMock.Return(&repoRes, nil)
 				return mock
@@ -90,8 +90,8 @@ func Test_AddPlaceHandler(t *testing.T) {
 				route:  "/v1/places",
 			},
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				return repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				return repoMocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
@@ -109,16 +109,16 @@ func Test_AddPlaceHandler(t *testing.T) {
 					Tag:   "required",
 				},
 			},
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				return repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				return repoMocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (add place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.AddMock.Return(0, testError)
 				return mock
 			},
@@ -127,8 +127,8 @@ func Test_AddPlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (get place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.AddMock.Return(placeID, nil)
 				mock.GetMock.Return(nil, testError)
 				return mock

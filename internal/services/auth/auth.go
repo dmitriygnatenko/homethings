@@ -2,7 +2,7 @@ package auth
 
 //go:generate mkdir -p mocks
 //go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.IAuth -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.Auth -o ./mocks/ -s "_minimock.go"
 
 import (
 	"time"
@@ -20,10 +20,10 @@ const (
 )
 
 type auth struct {
-	env interfaces.IEnv
+	env interfaces.Env
 }
 
-func Init(env interfaces.IEnv) (interfaces.IAuth, error) {
+func Init(env interfaces.Env) (interfaces.Auth, error) {
 	return auth{env: env}, nil
 }
 

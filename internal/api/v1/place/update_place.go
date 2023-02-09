@@ -20,7 +20,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdatePlaceHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func UpdatePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")

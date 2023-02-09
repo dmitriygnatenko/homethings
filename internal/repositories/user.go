@@ -2,7 +2,7 @@ package repositories
 
 //go:generate mkdir -p mocks
 //go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.IUserRepository -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.UserRepository -o ./mocks/ -s "_minimock.go"
 
 import (
 	"context"
@@ -21,7 +21,7 @@ type userRepository struct {
 	db *sql.DB
 }
 
-func InitUserRepository(db *sql.DB) interfaces.IUserRepository {
+func InitUserRepository(db *sql.DB) interfaces.UserRepository {
 	return userRepository{db: db}
 }
 

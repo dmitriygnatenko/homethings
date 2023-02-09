@@ -29,7 +29,7 @@ const fileDateLayout = "2006-01-02-15-04-05"
 // @security 	APIKey
 // @Accept      mpfd
 // @Produce     json
-func AddImageHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func AddImageHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var form *multipart.Form
 		var placeID, thingID int

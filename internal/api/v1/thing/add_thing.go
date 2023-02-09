@@ -20,7 +20,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func AddThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func AddThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		req := dto.AddThingRequest{}

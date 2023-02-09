@@ -10,19 +10,19 @@ import (
 )
 
 type ServiceProvider struct {
-	env                  interfaces.IEnv
-	auth                 interfaces.IAuth
-	mailer               interfaces.IMailer
-	placeRepository      interfaces.IPlaceRepository
-	thingRepository      interfaces.IThingRepository
-	placeThingRepository interfaces.IPlaceThingRepository
-	placeImageRepository interfaces.IPlaceImageRepository
-	thingImageRepository interfaces.IThingImageRepository
-	userRepository       interfaces.IUserRepository
-	fileRepository       interfaces.IFileRepository
+	env                  interfaces.Env
+	auth                 interfaces.Auth
+	mailer               interfaces.Mailer
+	placeRepository      interfaces.PlaceRepository
+	thingRepository      interfaces.ThingRepository
+	placeThingRepository interfaces.PlaceThingRepository
+	placeImageRepository interfaces.PlaceImageRepository
+	thingImageRepository interfaces.ThingImageRepository
+	userRepository       interfaces.UserRepository
+	fileRepository       interfaces.FileRepository
 }
 
-func Init() (interfaces.IServiceProvider, error) {
+func Init() (interfaces.ServiceProvider, error) {
 	sp := &ServiceProvider{}
 
 	env, err := envService.Init()
@@ -60,68 +60,68 @@ func Init() (interfaces.IServiceProvider, error) {
 	return sp, nil
 }
 
-func (sp *ServiceProvider) GetEnvService() interfaces.IEnv {
+func (sp *ServiceProvider) GetEnvService() interfaces.Env {
 	return sp.env
 }
 
-func (sp *ServiceProvider) GetAuthService() interfaces.IAuth {
+func (sp *ServiceProvider) GetAuthService() interfaces.Auth {
 	return sp.auth
 }
 
-func (sp *ServiceProvider) GetMailerService() interfaces.IMailer {
+func (sp *ServiceProvider) GetMailerService() interfaces.Mailer {
 	return sp.mailer
 }
 
-func (sp *ServiceProvider) GetPlaceRepository() interfaces.IPlaceRepository {
+func (sp *ServiceProvider) GetPlaceRepository() interfaces.PlaceRepository {
 	return sp.placeRepository
 }
 
-func (sp *ServiceProvider) GetThingRepository() interfaces.IThingRepository {
+func (sp *ServiceProvider) GetThingRepository() interfaces.ThingRepository {
 	return sp.thingRepository
 }
 
-func (sp *ServiceProvider) GetPlaceThingRepository() interfaces.IPlaceThingRepository {
+func (sp *ServiceProvider) GetPlaceThingRepository() interfaces.PlaceThingRepository {
 	return sp.placeThingRepository
 }
 
-func (sp *ServiceProvider) GetPlaceImageRepository() interfaces.IPlaceImageRepository {
+func (sp *ServiceProvider) GetPlaceImageRepository() interfaces.PlaceImageRepository {
 	return sp.placeImageRepository
 }
 
-func (sp *ServiceProvider) GetThingImageRepository() interfaces.IThingImageRepository {
+func (sp *ServiceProvider) GetThingImageRepository() interfaces.ThingImageRepository {
 	return sp.thingImageRepository
 }
 
-func (sp *ServiceProvider) GetUserRepository() interfaces.IUserRepository {
+func (sp *ServiceProvider) GetUserRepository() interfaces.UserRepository {
 	return sp.userRepository
 }
 
-func (sp *ServiceProvider) GetFileRepository() interfaces.IFileRepository {
+func (sp *ServiceProvider) GetFileRepository() interfaces.FileRepository {
 	return sp.fileRepository
 }
 
-func InitMock(deps ...interface{}) interfaces.IServiceProvider {
+func InitMock(deps ...interface{}) interfaces.ServiceProvider {
 	sp := ServiceProvider{}
 
 	for _, d := range deps {
 		switch s := d.(type) {
-		case interfaces.IEnv:
+		case interfaces.Env:
 			sp.env = s
-		case interfaces.IAuth:
+		case interfaces.Auth:
 			sp.auth = s
-		case interfaces.IPlaceThingRepository:
+		case interfaces.PlaceThingRepository:
 			sp.placeThingRepository = s
-		case interfaces.IThingRepository:
+		case interfaces.ThingRepository:
 			sp.thingRepository = s
-		case interfaces.IPlaceRepository:
+		case interfaces.PlaceRepository:
 			sp.placeRepository = s
-		case interfaces.IPlaceImageRepository:
+		case interfaces.PlaceImageRepository:
 			sp.placeImageRepository = s
-		case interfaces.IThingImageRepository:
+		case interfaces.ThingImageRepository:
 			sp.thingImageRepository = s
-		case interfaces.IUserRepository:
+		case interfaces.UserRepository:
 			sp.userRepository = s
-		case interfaces.IFileRepository:
+		case interfaces.FileRepository:
 			sp.fileRepository = s
 		}
 	}

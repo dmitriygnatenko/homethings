@@ -7,7 +7,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 )
 
-func Init(env interfaces.IEnv) (*sql.DB, error) {
+func Init(env interfaces.Env) (*sql.DB, error) {
 	dataSource := "user=" + env.GetDBUser() +
 		" password=" + env.GetDBPassword() +
 		" dbname=" + env.GetDBName() +

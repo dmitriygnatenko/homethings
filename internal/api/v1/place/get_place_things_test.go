@@ -21,7 +21,7 @@ import (
 )
 
 func Test_GetPlaceThingsHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.IThingRepository
+	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
 
 	type req struct {
 		method string
@@ -92,8 +92,8 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 
 				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -106,8 +106,8 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.GetAllByPlaceIDMock.Return(nil, testError)
 				return mock
 			},
@@ -120,8 +120,8 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusBadRequest,
 			resBody: nil,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
 		},
 	}

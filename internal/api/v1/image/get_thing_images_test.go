@@ -21,7 +21,7 @@ import (
 )
 
 func Test_GetThingImagesHandler(t *testing.T) {
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.IThingImageRepository
+	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
 
 	type req struct {
 		method string
@@ -98,16 +98,16 @@ func Test_GetThingImagesHandler(t *testing.T) {
 				route:  "/v1/images/thing/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 				mock.GetByThingIDMock.Return(nil, testError)
 				return mock
 			},
@@ -117,8 +117,8 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 				mock.GetByThingIDMock.Return(imageRepoRes, nil)
 				return mock
 			},

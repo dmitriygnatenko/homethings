@@ -2,7 +2,7 @@ package repositories
 
 //go:generate mkdir -p mocks
 //go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.IPlaceThingRepository -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.PlaceThingRepository -o ./mocks/ -s "_minimock.go"
 
 import (
 	"context"
@@ -21,7 +21,7 @@ type placeThingRepository struct {
 	db *sql.DB
 }
 
-func InitPlaceThingRepository(db *sql.DB) interfaces.IPlaceThingRepository {
+func InitPlaceThingRepository(db *sql.DB) interfaces.PlaceThingRepository {
 	return placeThingRepository{db: db}
 }
 

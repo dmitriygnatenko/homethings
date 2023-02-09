@@ -25,7 +25,7 @@ const (
 	swaggerURI = "/docs"
 )
 
-func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
+func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
 	fiberApp := fiber.New(getFiberConfig(sp))
 
 	// Configure web root
@@ -50,7 +50,7 @@ func Init(sp interfaces.IServiceProvider) (*fiber.App, error) {
 	return fiberApp, nil
 }
 
-func getFiberConfig(sp interfaces.IServiceProvider) fiber.Config {
+func getFiberConfig(sp interfaces.ServiceProvider) fiber.Config {
 	return fiber.Config{
 		AppName:               appName,
 		DisableStartupMessage: true,
@@ -58,7 +58,7 @@ func getFiberConfig(sp interfaces.IServiceProvider) fiber.Config {
 	}
 }
 
-func initErrorHandler(sp interfaces.IServiceProvider) fiber.ErrorHandler {
+func initErrorHandler(sp interfaces.ServiceProvider) fiber.ErrorHandler {
 	return func(fctx *fiber.Ctx, err error) error {
 		errCode := fiber.StatusInternalServerError
 		if e, ok := err.(*fiber.Error); ok {
@@ -84,7 +84,7 @@ func initErrorHandler(sp interfaces.IServiceProvider) fiber.ErrorHandler {
 }
 
 // nolint
-func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
+func getJWTConfig(sp interfaces.ServiceProvider) jwt.Config {
 	return jwt.Config{
 		SigningKey: []byte(sp.GetEnvService().GetJWTSecretKey()),
 		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
@@ -108,14 +108,14 @@ func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
 	}
 }
 
-func getCORSConfig(sp interfaces.IServiceProvider) cors.Config {
+func getCORSConfig(sp interfaces.ServiceProvider) cors.Config {
 	return cors.Config{
 		AllowOrigins: sp.GetEnvService().GetCORSAllowOrigins(),
 		AllowMethods: sp.GetEnvService().GetCORSAllowMethods(),
 	}
 }
 
-func registerHandlers(r fiber.Router, sp interfaces.IServiceProvider) {
+func registerHandlers(r fiber.Router, sp interfaces.ServiceProvider) {
 	// Public routes
 	r.Post("/v1/auth/login", authAPI.LoginHandler(sp))
 

@@ -1,6 +1,6 @@
 package interfaces
 
-type IEnv interface {
+type Env interface {
 	GetAppPort() string
 	GetDBHost() string
 	GetDBPort() string

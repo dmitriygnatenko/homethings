@@ -6,7 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type IAuth interface {
+type Auth interface {
 	GeneratePasswordHash(password string) (string, error)
 	IsCorrectPassword(password string, hash string) bool
 	GenerateToken(user models.User) (string, error)

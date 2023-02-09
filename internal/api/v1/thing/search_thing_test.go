@@ -20,7 +20,7 @@ import (
 )
 
 func Test_SearchThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.IThingRepository
+	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
 
 	type req struct {
 		method string
@@ -96,8 +96,8 @@ func Test_SearchThingHandler(t *testing.T) {
 				route:  "/v1/things/search/" + url.QueryEscape(incorrectSearch),
 			},
 			resCode: fiber.StatusBadRequest,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
 		},
 		{
@@ -107,16 +107,16 @@ func Test_SearchThingHandler(t *testing.T) {
 				route:  "/v1/things/search/" + url.QueryEscape(incorrectSearch2),
 			},
 			resCode: fiber.StatusBadRequest,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				return repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.SearchMock.Return(nil, testError)
 				return mock
 			},
@@ -126,8 +126,8 @@ func Test_SearchThingHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.IThingRepository {
-				mock := repoMocks.NewIThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
 				mock.SearchMock.Return(thingRepoRes, nil)
 				return mock
 			},

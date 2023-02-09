@@ -16,7 +16,7 @@ import (
 // @Tags  		Auth
 // @Accept      json
 // @Produce     json
-func CheckAuthHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func CheckAuthHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		claims := sp.GetAuthService().GetClaims(fctx)

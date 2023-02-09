@@ -20,7 +20,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func SearchThingHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func SearchThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		search, err := url.QueryUnescape(fctx.Params("search", ""))

@@ -20,8 +20,8 @@ import (
 )
 
 func Test_AddUserHandler(t *testing.T) {
-	type authServiceMockFunc func(mc *minimock.Controller) interfaces.IAuth
-	type userRepoMockFunc func(mc *minimock.Controller) interfaces.IUserRepository
+	type authServiceMockFunc func(mc *minimock.Controller) interfaces.Auth
+	type userRepoMockFunc func(mc *minimock.Controller) interfaces.UserRepository
 
 	type req struct {
 		method      string
@@ -61,8 +61,8 @@ func Test_AddUserHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				mock := repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				mock := repoMocks.NewUserRepositoryMock(mc)
 
 				mock.AddMock.Inspect(func(ctx context.Context, reqUsername string, reqPassword string) {
 					assert.Equal(mc, username, reqUsername)
@@ -71,8 +71,8 @@ func Test_AddUserHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				mock := authMocks.NewAuthMock(mc)
 				mock.GeneratePasswordHashMock.Return(password, nil)
 				return mock
 			},
@@ -84,11 +84,11 @@ func Test_AddUserHandler(t *testing.T) {
 				route:  "/v1/users",
 			},
 			resCode: fiber.StatusBadRequest,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				return repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				return repoMocks.NewUserRepositoryMock(mc)
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				return authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				return authMocks.NewAuthMock(mc)
 			},
 		},
 		{
@@ -102,19 +102,19 @@ func Test_AddUserHandler(t *testing.T) {
 				contentType: fiber.MIMEApplicationJSON,
 			},
 			resCode: fiber.StatusBadRequest,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				return repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				return repoMocks.NewUserRepositoryMock(mc)
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				return authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				return authMocks.NewAuthMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				mock := repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				mock := repoMocks.NewUserRepositoryMock(mc)
 
 				mock.AddMock.Inspect(func(ctx context.Context, reqUsername string, reqPassword string) {
 					assert.Equal(mc, username, reqUsername)
@@ -123,8 +123,8 @@ func Test_AddUserHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				mock := authMocks.NewAuthMock(mc)
 				mock.GeneratePasswordHashMock.Return(password, nil)
 				return mock
 			},
@@ -133,11 +133,11 @@ func Test_AddUserHandler(t *testing.T) {
 			name:    "negative case - auth service error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				return repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				return repoMocks.NewUserRepositoryMock(mc)
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				mock := authMocks.NewAuthMock(mc)
 				mock.GeneratePasswordHashMock.Return("", testError)
 				return mock
 			},

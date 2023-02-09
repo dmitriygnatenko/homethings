@@ -16,7 +16,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetThingImagesHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func GetThingImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")

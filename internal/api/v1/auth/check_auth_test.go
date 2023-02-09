@@ -23,8 +23,8 @@ import (
 )
 
 func Test_CheckAuthHandler(t *testing.T) {
-	type authServiceMockFunc func(mc *minimock.Controller) interfaces.IAuth
-	type userRepoMockFunc func(mc *minimock.Controller) interfaces.IUserRepository
+	type authServiceMockFunc func(mc *minimock.Controller) interfaces.Auth
+	type userRepoMockFunc func(mc *minimock.Controller) interfaces.UserRepository
 
 	type req struct {
 		method      string
@@ -67,8 +67,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				mock := repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				mock := repoMocks.NewUserRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
@@ -76,8 +76,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				mock := authMocks.NewAuthMock(mc)
 				mock.GetClaimsMock.Return(claims)
 				return mock
 			},
@@ -86,8 +86,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 			name:    "negative case - user not found",
 			req:     correctReq,
 			resCode: fiber.StatusForbidden,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				mock := repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				mock := repoMocks.NewUserRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
@@ -95,8 +95,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				mock := authMocks.NewAuthMock(mc)
 				mock.GetClaimsMock.Return(claims)
 				return mock
 			},
@@ -105,8 +105,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
-				mock := repoMocks.NewIUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
+				mock := repoMocks.NewUserRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
@@ -114,8 +114,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.IAuth {
-				mock := authMocks.NewIAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
+				mock := authMocks.NewAuthMock(mc)
 				mock.GetClaimsMock.Return(claims)
 				return mock
 			},

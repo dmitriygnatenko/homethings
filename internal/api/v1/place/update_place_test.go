@@ -22,7 +22,7 @@ import (
 )
 
 func Test_UpdatePlaceHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceRepository
+	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
 
 	type req struct {
 		method      string
@@ -78,8 +78,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 
 				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
 					assert.Equal(mc, title, req.Title)
@@ -100,8 +100,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 				route:  "/v1/places/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				return repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				return repoMocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
@@ -111,8 +111,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 				route:  "/v1/places/" + strconv.Itoa(placeID),
 			},
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				return repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				return repoMocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
@@ -130,16 +130,16 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 					Tag:   "required",
 				},
 			},
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				return repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				return repoMocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (update place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.UpdateMock.Return(testError)
 				return mock
 			},
@@ -148,8 +148,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (get place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.UpdateMock.Return(nil)
 				mock.GetMock.Return(nil, testError)
 				return mock

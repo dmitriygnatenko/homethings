@@ -2,7 +2,7 @@ package repositories
 
 //go:generate mkdir -p mocks
 //go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.IFileRepository -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.FileRepository -o ./mocks/ -s "_minimock.go"
 
 import (
 	"mime/multipart"
@@ -16,7 +16,7 @@ const uploadPath = "../../web"
 
 type fileRepository struct{}
 
-func InitFileRepository() interfaces.IFileRepository {
+func InitFileRepository() interfaces.FileRepository {
 	return fileRepository{}
 }
 

@@ -19,7 +19,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceImagesHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func GetPlaceImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var res []models.Image
 		ctx := fctx.Context()

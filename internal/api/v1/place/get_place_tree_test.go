@@ -20,7 +20,7 @@ import (
 )
 
 func Test_GetPlaceTreeHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceRepository
+	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
 
 	type req struct {
 		method string
@@ -113,8 +113,8 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.GetAllMock.Return(placeRepoRes, nil)
 				return mock
 			},
@@ -123,8 +123,8 @@ func Test_GetPlaceTreeHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.IPlaceRepository {
-				mock := repoMocks.NewIPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
+				mock := repoMocks.NewPlaceRepositoryMock(mc)
 				mock.GetAllMock.Return(nil, testError)
 				return mock
 			},

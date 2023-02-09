@@ -21,7 +21,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdateUserHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func UpdateUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var err error
 		var username, password string

@@ -20,7 +20,7 @@ import (
 // @Tags  		Auth
 // @Accept      json
 // @Produce     json
-func LoginHandler(sp interfaces.IServiceProvider) fiber.Handler {
+func LoginHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		req := dto.LoginRequest{}

@@ -22,8 +22,8 @@ import (
 )
 
 func Test_GetPlaceImagesHandler(t *testing.T) {
-	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.IPlaceImageRepository
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.IThingImageRepository
+	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceImageRepository
+	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
 
 	type req struct {
 		method string
@@ -108,37 +108,37 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 				route:  "/v1/images/place/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				return repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				return repoMocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - place repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(nil, testError)
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				return repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				return repoMocks.NewThingImageRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - thing repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(nil, nil)
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(nil, testError)
 				return mock
 			},
@@ -148,13 +148,13 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.IPlaceImageRepository {
-				mock := repoMocks.NewIPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
+				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(placeImageRepoRes, nil)
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.IThingImageRepository {
-				mock := repoMocks.NewIThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
 				mock.GetByPlaceIDMock.Return(thingImageRepoRes, nil)
 				return mock
 			},
