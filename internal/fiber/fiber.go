@@ -1,6 +1,9 @@
 package fiber
 
 import (
+	"log"
+	"strings"
+
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
@@ -14,8 +17,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
-	"log"
-	"strings"
 )
 
 const (
@@ -87,7 +88,7 @@ func getJWTConfig(sp interfaces.IServiceProvider) jwt.Config {
 	return jwt.Config{
 		SigningKey: []byte(sp.GetEnvService().GetJWTSecretKey()),
 		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+			return fiber.NewError(fiber.StatusForbidden, err.Error())
 		},
 		Filter: func(fctx *fiber.Ctx) bool {
 			method := fctx.Method()

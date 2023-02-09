@@ -146,7 +146,7 @@ func Test_LoginHandler(t *testing.T) {
 		{
 			name:    "negative case - incorrect password",
 			req:     correctReq,
-			resCode: fiber.StatusBadRequest,
+			resCode: fiber.StatusForbidden,
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				mock := repoMocks.NewIUserRepositoryMock(mc)
 
@@ -182,7 +182,7 @@ func Test_LoginHandler(t *testing.T) {
 		{
 			name:    "negative case - user not found",
 			req:     correctReq,
-			resCode: fiber.StatusBadRequest,
+			resCode: fiber.StatusForbidden,
 			userRepoMock: func(mc *minimock.Controller) interfaces.IUserRepository {
 				mock := repoMocks.NewIUserRepositoryMock(mc)
 

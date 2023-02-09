@@ -35,14 +35,14 @@ func LoginHandler(sp interfaces.IServiceProvider) fiber.Handler {
 		user, err := sp.GetUserRepository().Get(ctx, req.Username)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return fiber.NewError(fiber.StatusBadRequest, "")
+				return fiber.NewError(fiber.StatusForbidden, "")
 			}
 
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if !sp.GetAuthService().IsCorrectPassword(req.Password, user.Password) {
-			return fiber.NewError(fiber.StatusBadRequest, "")
+			return fiber.NewError(fiber.StatusForbidden, "")
 		}
 
 		token, err := sp.GetAuthService().GenerateToken(*user)
