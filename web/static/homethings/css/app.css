@@ -34,21 +34,26 @@ body {
     margin: 0;
     background-color: #f7f7f7;
 }
-.btn.logout {
+.dropdown.logout {
     position: absolute;
     right: 10px;
+}
+.dropdown.logout .btn.dropdown-toggle {
     font-size: 12px;
     color: #7e7e7e;
 }
-.btn.logout:focus {
+.dropdown.logout .btn.dropdown-toggle:focus {
     outline: 0;
     -webkit-box-shadow: none;
     -o-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
 }
-.btn.logout:hover {
+.dropdown.logout .btn.dropdown-toggle:hover {
     color: #306ae4;
+}
+.dropdown.logout .dropdown-item {
+    font-size: 12px;
 }
 .col-l {
     width: 34%;

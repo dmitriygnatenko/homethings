@@ -257,14 +257,22 @@ export const mainPageComponent = {
     <template v-if="showMainPage">
         <main class="container-fluid">
             <div class="d-flex flex-grow h-100">
-                <button
-                    type="button"
-                    class="btn btn-sm logout"
-                    title="Выход"
-                    @click="logout">
-                    <i class="bi bi-arrow-right-square"></i>
-                </button>
-                
+                <div class="dropdown logout">
+                    <button
+                        type="button"
+                        class="btn btn-sm dropdown-toggle"
+                        data-bs-toggle="dropdown">
+                        <i class="bi bi-person-fill"></i>
+                    </button>      
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Добавить пользователя</a></li>
+                        <li><a class="dropdown-item" href="#">Изменить свой логин</a></li>
+                        <li><a class="dropdown-item" href="#">Изменить свой пароль</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item" @click="logout">Выход</button></li>
+                    </ul>
+                </div>
+
                 <div class="col-l">
                     <div class="places rounded-3 shadow d-flex flex-column">
                         <div class="header rounded-top">
