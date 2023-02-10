@@ -13,16 +13,18 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
 )
 
 const (
-	appName    = "homethings"
 	staticPath = "../../web"
-	swaggerURI = "/docs"
+	swaggerURI = "/docs/*"
+	metricsURI = "/metrics"
 )
 
 func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
@@ -40,8 +42,18 @@ func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
 	// Configure JWT middleware
 	fiberApp.Use(jwt.New(getJWTConfig(sp)))
 
+	// Configure Basic auth
+	basicAuth := basicauth.New(basicauth.Config{
+		Users: map[string]string{
+			sp.GetEnvService().GetBasicAuthUser(): sp.GetEnvService().GetBasicAuthPassword(),
+		},
+	})
+
 	// Swagger
-	fiberApp.Get(swaggerURI+"/*", swagger.HandlerDefault)
+	fiberApp.Get(swaggerURI, swagger.HandlerDefault)
+
+	// Metrics
+	fiberApp.Get(metricsURI, basicAuth, monitor.New(getMetricsConfig()))
 
 	// API
 	api := fiberApp.Group("/api")
@@ -52,13 +64,13 @@ func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
 
 func getFiberConfig(sp interfaces.ServiceProvider) fiber.Config {
 	return fiber.Config{
-		AppName:               appName,
+		AppName:               "Homethings",
 		DisableStartupMessage: true,
-		ErrorHandler:          initErrorHandler(sp),
+		ErrorHandler:          getErrorHandler(sp),
 	}
 }
 
-func initErrorHandler(sp interfaces.ServiceProvider) fiber.ErrorHandler {
+func getErrorHandler(sp interfaces.ServiceProvider) fiber.ErrorHandler {
 	return func(fctx *fiber.Ctx, err error) error {
 		errCode := fiber.StatusInternalServerError
 		if e, ok := err.(*fiber.Error); ok {
@@ -105,6 +117,12 @@ func getJWTConfig(sp interfaces.ServiceProvider) jwt.Config {
 
 			return true
 		},
+	}
+}
+
+func getMetricsConfig() monitor.Config {
+	return monitor.Config{
+		Title: "Homethings metrics",
 	}
 }
 

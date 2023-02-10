@@ -27,6 +27,9 @@ SMTP_USER=user@example.ru
 SMTP_PASSWORD=pass
 
 ERRORS_EMAIL=user@example.ru
+
+BASIC_AUTH_USER=user
+BASIC_AUTH_PASSWORD=pass
 ```
 
 
@@ -50,3 +53,8 @@ ERRORS_EMAIL=user@example.ru
 ### Документация по методам API
 
 /docs/
+
+
+### Метрики (защищены Basic auth)
+
+/metrics/

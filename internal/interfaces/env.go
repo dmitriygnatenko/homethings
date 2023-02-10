@@ -24,5 +24,8 @@ type Env interface {
 	GetJWTSecretKey() string
 	GetJWTLifetime() int
 
+	GetBasicAuthUser() string
+	GetBasicAuthPassword() string
+
 	GetErrorsEmail() string
 }

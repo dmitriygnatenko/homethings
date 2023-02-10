@@ -29,6 +29,9 @@ type env struct {
 	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
 	JWTLifeTime  int    `mapstructure:"JWT_LIFETIME"`
 
+	BasicAuthUser     string `mapstructure:"BASIC_AUTH_USER"`
+	BasicAuthPassword string `mapstructure:"BASIC_AUTH_PASSWORD"`
+
 	SMTPHost     string `mapstructure:"SMTP_HOST"`
 	SMTPPort     string `mapstructure:"SMTP_PORT"`
 	SMTPUser     string `mapstructure:"SMTP_USER"`
@@ -134,4 +137,12 @@ func (e *env) GetJWTLifetime() int {
 
 func (e *env) GetErrorsEmail() string {
 	return e.ErrorsEmail
+}
+
+func (e *env) GetBasicAuthUser() string {
+	return e.BasicAuthUser
+}
+
+func (e *env) GetBasicAuthPassword() string {
+	return e.BasicAuthPassword
 }
