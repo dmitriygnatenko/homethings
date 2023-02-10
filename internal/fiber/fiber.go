@@ -78,11 +78,13 @@ func getErrorHandler(sp interfaces.ServiceProvider) fiber.ErrorHandler {
 		}
 
 		if err.Error() != "" {
-			if errCode == fiber.StatusInternalServerError {
+			errorsEmail := sp.GetEnvService().GetErrorsEmail()
+
+			if errCode == fiber.StatusInternalServerError && errorsEmail != "" {
 				log.Println(err)
 				// nolint
 				sp.GetMailerService().Send(
-					sp.GetEnvService().GetErrorsEmail(),
+					errorsEmail,
 					"AUTO - Homethings error",
 					err.Error(),
 				)
