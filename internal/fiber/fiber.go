@@ -1,9 +1,6 @@
 package fiber
 
 import (
-	"log"
-	"strings"
-
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
@@ -19,6 +16,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
+	"log"
 )
 
 const (
@@ -40,7 +38,7 @@ func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
 	fiberApp.Use(recover.New())
 
 	// Configure JWT middleware
-	fiberApp.Use(jwt.New(getJWTConfig(sp)))
+	jwtAuth := jwt.New(getJWTConfig(sp))
 
 	// Configure Basic auth
 	basicAuth := basicauth.New(basicauth.Config{
@@ -56,7 +54,7 @@ func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
 	fiberApp.Get(metricsURI, basicAuth, monitor.New(getMetricsConfig()))
 
 	// API
-	api := fiberApp.Group("/api")
+	api := fiberApp.Group("/api", jwtAuth)
 	registerHandlers(api, sp)
 
 	return fiberApp, nil
@@ -113,11 +111,11 @@ func getJWTConfig(sp interfaces.ServiceProvider) jwt.Config {
 				return true
 			}
 
-			if strings.HasPrefix(path, "/api/") && path != "/api/v1/auth/login" {
-				return false
+			if path == "/api/v1/auth/login" {
+				return true
 			}
 
-			return true
+			return false
 		},
 	}
 }
