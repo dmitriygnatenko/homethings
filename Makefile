@@ -63,4 +63,4 @@ install-swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
 
 app-build:
-	env GOOS=linux GOARCH=amd64 go build -o build/app/app cmd/app/main.go
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build/app/app cmd/app/main.go
