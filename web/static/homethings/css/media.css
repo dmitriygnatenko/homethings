@@ -35,4 +35,8 @@
         padding-top: 1px;
         padding-left: 0;
     }
+    #add-thing-modal .btn.add, #add-thing-modal .btn.delete {
+        padding-top: 1px;
+        padding-left: 0;
+    }
 }

@@ -12,7 +12,7 @@ export const modalAddImageComponent = {
     },
     data() {
         return {
-            maxFiles: 8,
+            maxFiles: 6,
             typePlace: typePlace,
             typeThing: typeThing,
             modal: Object,
@@ -110,7 +110,7 @@ export const modalAddImageComponent = {
                         </div>
                     </div>
                     <div
-                        class="row mt-3"
+                        class="row mt-2"
                         v-for="(file, index) in form.files"
                         :key="index">
                         <div class="col-9">
