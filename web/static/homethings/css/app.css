@@ -170,6 +170,14 @@ body {
     background-color: #229346;
     border-color: #229346;
 }
+#add-thing-modal .btn.add {
+    color: green;
+    padding-top: 2px;
+}
+#add-thing-modal .btn.delete {
+    color: #cf0000;
+    padding-top: 2px;
+}
 .info {
     background-color: #ffffff;
     height: 100%;
