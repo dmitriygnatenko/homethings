@@ -24,3 +24,12 @@ type ThingResponse struct {
 type ThingsResponse struct {
 	Things []ThingResponse `json:"things"`
 }
+
+type ThingExtResponse struct {
+	ThingResponse
+	Tags []TagResponse `json:"tags"`
+}
+
+type ThingsExtResponse struct {
+	Things []ThingExtResponse `json:"things"`
+}

@@ -15,9 +15,11 @@ type ServiceProvider struct {
 	mailer               interfaces.Mailer
 	placeRepository      interfaces.PlaceRepository
 	thingRepository      interfaces.ThingRepository
+	tagRepository        interfaces.TagRepository
 	placeThingRepository interfaces.PlaceThingRepository
 	placeImageRepository interfaces.PlaceImageRepository
 	thingImageRepository interfaces.ThingImageRepository
+	thingTagRepository   interfaces.ThingTagRepository
 	userRepository       interfaces.UserRepository
 	fileRepository       interfaces.FileRepository
 }
@@ -54,6 +56,8 @@ func Init() (interfaces.ServiceProvider, error) {
 	sp.placeThingRepository = repositories.InitPlaceThingRepository(db)
 	sp.placeImageRepository = repositories.InitPlaceImageRepository(db)
 	sp.thingImageRepository = repositories.InitThingImageRepository(db)
+	sp.tagRepository = repositories.InitTagRepository(db)
+	sp.thingTagRepository = repositories.InitThingTagRepository(db)
 	sp.userRepository = repositories.InitUserRepository(db)
 	sp.fileRepository = repositories.InitFileRepository()
 
@@ -80,6 +84,10 @@ func (sp *ServiceProvider) GetThingRepository() interfaces.ThingRepository {
 	return sp.thingRepository
 }
 
+func (sp *ServiceProvider) GetTagRepository() interfaces.TagRepository {
+	return sp.tagRepository
+}
+
 func (sp *ServiceProvider) GetPlaceThingRepository() interfaces.PlaceThingRepository {
 	return sp.placeThingRepository
 }
@@ -90,6 +98,10 @@ func (sp *ServiceProvider) GetPlaceImageRepository() interfaces.PlaceImageReposi
 
 func (sp *ServiceProvider) GetThingImageRepository() interfaces.ThingImageRepository {
 	return sp.thingImageRepository
+}
+
+func (sp *ServiceProvider) GetThingTagRepository() interfaces.ThingTagRepository {
+	return sp.thingTagRepository
 }
 
 func (sp *ServiceProvider) GetUserRepository() interfaces.UserRepository {
@@ -119,6 +131,8 @@ func InitMock(deps ...interface{}) interfaces.ServiceProvider {
 			sp.placeImageRepository = s
 		case interfaces.ThingImageRepository:
 			sp.thingImageRepository = s
+		case interfaces.TagRepository:
+			sp.tagRepository = s
 		case interfaces.UserRepository:
 			sp.userRepository = s
 		case interfaces.FileRepository:

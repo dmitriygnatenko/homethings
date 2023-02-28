@@ -5,6 +5,7 @@ import (
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
 	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
+	tagAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag"
 	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
 	userAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/user"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
@@ -160,6 +161,14 @@ func registerHandlers(r fiber.Router, sp interfaces.ServiceProvider) {
 	r.Post("/v1/images", imageAPI.AddImageHandler(sp))
 	r.Delete("/v1/images/place/:id<int>", imageAPI.DeletePlaceImageHandler(sp))
 	r.Delete("/v1/images/thing/:id<int>", imageAPI.DeleteThingImageHandler(sp))
+
+	r.Get("/v1/tags", tagAPI.GetTagsHandler(sp))
+	r.Get("/v1/tags/:id<int>", tagAPI.GetTagHandler(sp))
+	r.Post("/v1/tags", tagAPI.AddTagHandler(sp))
+	r.Post("/v1/tags/:id<int>/thing/:thing_id<int>", tagAPI.AddThingTagHandler(sp))
+	r.Put("/v1/tags/:id<int>", tagAPI.UpdateTagHandler(sp))
+	r.Delete("/v1/tags/:id<int>", tagAPI.DeleteTagHandler(sp))
+	r.Delete("/v1/tags/:id<int>/thing/:thing_id<int>", tagAPI.DeleteThingTagHandler(sp))
 
 	r.Post("/v1/users", userAPI.AddUserHandler(sp))
 	r.Put("/v1/users", userAPI.UpdateUserHandler(sp))

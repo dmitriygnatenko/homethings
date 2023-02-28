@@ -1,22 +1,25 @@
-package place
+package tag
 
 import (
+	"database/sql"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/places/{id}/things [get]
-// @Param       id path int true "Place ID"
-// @Success     200 {object} dto.ThingsExtResponse
+// @Router 		/api/v1/tags/{id} [get]
+// @Param       id path int true "Tag ID"
+// @Success     200 {object} dto.TagResponse
+// @Failure     404 {object} dto.EmptyResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
-// @Summary     Get things by place ID
-// @Tags  		Places
+// @Summary     Get one tag by ID
+// @Tags  		Tags
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("id")
@@ -24,16 +27,15 @@ func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		things, err := sp.GetThingRepository().GetAllByPlaceID(ctx, id)
+		res, err := sp.GetTagRepository().Get(ctx, id)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				return fiber.NewError(fiber.StatusNotFound, "")
+			}
+
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		tags, err := sp.GetThingTagRepository().GetByPlaceID(ctx, id)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-
-		return fctx.JSON(mappers.ConvertToThingsExtResponseDTO(things, tags))
+		return fctx.JSON(mappers.ConvertToTagResponseDTO(*res))
 	}
 }
