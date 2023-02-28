@@ -66,11 +66,13 @@ func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, e
 func (r thingRepository) Search(ctx context.Context, search string) ([]models.Thing, error) {
 	var res []models.Thing
 
+	s := fmt.Sprint("%", search, "%")
+
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
 		From(thingTableName+" t").
 		Join(placeThingTableName+" p ON p.thing_id = t.id").
 		PlaceholderFormat(sq.Dollar).
-		Where("t.title ILIKE ?", fmt.Sprint("%", search, "%")).
+		Where("t.title ILIKE ? OR t.description ILIKE ?", s, s).
 		OrderBy("t.updated_at DESC").
 		ToSql()
 
