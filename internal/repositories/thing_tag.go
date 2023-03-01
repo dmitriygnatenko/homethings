@@ -78,10 +78,10 @@ func (r thingTagRepository) Delete(ctx context.Context, req models.DeleteThingTa
 	return err
 }
 
-func (r thingTagRepository) DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) error {
+func (r thingTagRepository) DeleteByTagID(ctx context.Context, tagID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(thingTagTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"thing_id": thingID}).
+		Where(sq.Eq{"tag_id": tagID}).
 		ToSql()
 
 	if err != nil {

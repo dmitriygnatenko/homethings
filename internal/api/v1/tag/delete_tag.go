@@ -39,7 +39,7 @@ func DeleteTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetThingTagRepository().DeleteByThingID(ctx, id, tx); err != nil {
+		if err = sp.GetThingTagRepository().DeleteByTagID(ctx, id, tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

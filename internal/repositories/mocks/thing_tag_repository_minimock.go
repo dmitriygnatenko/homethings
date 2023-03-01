@@ -43,11 +43,11 @@ type ThingTagRepositoryMock struct {
 	beforeDeleteCounter uint64
 	DeleteMock          mThingTagRepositoryMockDelete
 
-	funcDeleteByThingID          func(ctx context.Context, thingID int, tx *sql.Tx) (err error)
-	inspectFuncDeleteByThingID   func(ctx context.Context, thingID int, tx *sql.Tx)
-	afterDeleteByThingIDCounter  uint64
-	beforeDeleteByThingIDCounter uint64
-	DeleteByThingIDMock          mThingTagRepositoryMockDeleteByThingID
+	funcDeleteByTagID          func(ctx context.Context, tagID int, tx *sql.Tx) (err error)
+	inspectFuncDeleteByTagID   func(ctx context.Context, tagID int, tx *sql.Tx)
+	afterDeleteByTagIDCounter  uint64
+	beforeDeleteByTagIDCounter uint64
+	DeleteByTagIDMock          mThingTagRepositoryMockDeleteByTagID
 
 	funcGetByPlaceID          func(ctx context.Context, placeID int) (ta1 []models.ThingTag, err error)
 	inspectFuncGetByPlaceID   func(ctx context.Context, placeID int)
@@ -75,8 +75,8 @@ func NewThingTagRepositoryMock(t minimock.Tester) *ThingTagRepositoryMock {
 	m.DeleteMock = mThingTagRepositoryMockDelete{mock: m}
 	m.DeleteMock.callArgs = []*ThingTagRepositoryMockDeleteParams{}
 
-	m.DeleteByThingIDMock = mThingTagRepositoryMockDeleteByThingID{mock: m}
-	m.DeleteByThingIDMock.callArgs = []*ThingTagRepositoryMockDeleteByThingIDParams{}
+	m.DeleteByTagIDMock = mThingTagRepositoryMockDeleteByTagID{mock: m}
+	m.DeleteByTagIDMock.callArgs = []*ThingTagRepositoryMockDeleteByTagIDParams{}
 
 	m.GetByPlaceIDMock = mThingTagRepositoryMockGetByPlaceID{mock: m}
 	m.GetByPlaceIDMock.callArgs = []*ThingTagRepositoryMockGetByPlaceIDParams{}
@@ -950,220 +950,220 @@ func (m *ThingTagRepositoryMock) MinimockDeleteInspect() {
 	}
 }
 
-type mThingTagRepositoryMockDeleteByThingID struct {
+type mThingTagRepositoryMockDeleteByTagID struct {
 	mock               *ThingTagRepositoryMock
-	defaultExpectation *ThingTagRepositoryMockDeleteByThingIDExpectation
-	expectations       []*ThingTagRepositoryMockDeleteByThingIDExpectation
+	defaultExpectation *ThingTagRepositoryMockDeleteByTagIDExpectation
+	expectations       []*ThingTagRepositoryMockDeleteByTagIDExpectation
 
-	callArgs []*ThingTagRepositoryMockDeleteByThingIDParams
+	callArgs []*ThingTagRepositoryMockDeleteByTagIDParams
 	mutex    sync.RWMutex
 }
 
-// ThingTagRepositoryMockDeleteByThingIDExpectation specifies expectation struct of the ThingTagRepository.DeleteByThingID
-type ThingTagRepositoryMockDeleteByThingIDExpectation struct {
+// ThingTagRepositoryMockDeleteByTagIDExpectation specifies expectation struct of the ThingTagRepository.DeleteByTagID
+type ThingTagRepositoryMockDeleteByTagIDExpectation struct {
 	mock    *ThingTagRepositoryMock
-	params  *ThingTagRepositoryMockDeleteByThingIDParams
-	results *ThingTagRepositoryMockDeleteByThingIDResults
+	params  *ThingTagRepositoryMockDeleteByTagIDParams
+	results *ThingTagRepositoryMockDeleteByTagIDResults
 	Counter uint64
 }
 
-// ThingTagRepositoryMockDeleteByThingIDParams contains parameters of the ThingTagRepository.DeleteByThingID
-type ThingTagRepositoryMockDeleteByThingIDParams struct {
-	ctx     context.Context
-	thingID int
-	tx      *sql.Tx
+// ThingTagRepositoryMockDeleteByTagIDParams contains parameters of the ThingTagRepository.DeleteByTagID
+type ThingTagRepositoryMockDeleteByTagIDParams struct {
+	ctx   context.Context
+	tagID int
+	tx    *sql.Tx
 }
 
-// ThingTagRepositoryMockDeleteByThingIDResults contains results of the ThingTagRepository.DeleteByThingID
-type ThingTagRepositoryMockDeleteByThingIDResults struct {
+// ThingTagRepositoryMockDeleteByTagIDResults contains results of the ThingTagRepository.DeleteByTagID
+type ThingTagRepositoryMockDeleteByTagIDResults struct {
 	err error
 }
 
-// Expect sets up expected params for ThingTagRepository.DeleteByThingID
-func (mmDeleteByThingID *mThingTagRepositoryMockDeleteByThingID) Expect(ctx context.Context, thingID int, tx *sql.Tx) *mThingTagRepositoryMockDeleteByThingID {
-	if mmDeleteByThingID.mock.funcDeleteByThingID != nil {
-		mmDeleteByThingID.mock.t.Fatalf("ThingTagRepositoryMock.DeleteByThingID mock is already set by Set")
+// Expect sets up expected params for ThingTagRepository.DeleteByTagID
+func (mmDeleteByTagID *mThingTagRepositoryMockDeleteByTagID) Expect(ctx context.Context, tagID int, tx *sql.Tx) *mThingTagRepositoryMockDeleteByTagID {
+	if mmDeleteByTagID.mock.funcDeleteByTagID != nil {
+		mmDeleteByTagID.mock.t.Fatalf("ThingTagRepositoryMock.DeleteByTagID mock is already set by Set")
 	}
 
-	if mmDeleteByThingID.defaultExpectation == nil {
-		mmDeleteByThingID.defaultExpectation = &ThingTagRepositoryMockDeleteByThingIDExpectation{}
+	if mmDeleteByTagID.defaultExpectation == nil {
+		mmDeleteByTagID.defaultExpectation = &ThingTagRepositoryMockDeleteByTagIDExpectation{}
 	}
 
-	mmDeleteByThingID.defaultExpectation.params = &ThingTagRepositoryMockDeleteByThingIDParams{ctx, thingID, tx}
-	for _, e := range mmDeleteByThingID.expectations {
-		if minimock.Equal(e.params, mmDeleteByThingID.defaultExpectation.params) {
-			mmDeleteByThingID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmDeleteByThingID.defaultExpectation.params)
+	mmDeleteByTagID.defaultExpectation.params = &ThingTagRepositoryMockDeleteByTagIDParams{ctx, tagID, tx}
+	for _, e := range mmDeleteByTagID.expectations {
+		if minimock.Equal(e.params, mmDeleteByTagID.defaultExpectation.params) {
+			mmDeleteByTagID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmDeleteByTagID.defaultExpectation.params)
 		}
 	}
 
-	return mmDeleteByThingID
+	return mmDeleteByTagID
 }
 
-// Inspect accepts an inspector function that has same arguments as the ThingTagRepository.DeleteByThingID
-func (mmDeleteByThingID *mThingTagRepositoryMockDeleteByThingID) Inspect(f func(ctx context.Context, thingID int, tx *sql.Tx)) *mThingTagRepositoryMockDeleteByThingID {
-	if mmDeleteByThingID.mock.inspectFuncDeleteByThingID != nil {
-		mmDeleteByThingID.mock.t.Fatalf("Inspect function is already set for ThingTagRepositoryMock.DeleteByThingID")
+// Inspect accepts an inspector function that has same arguments as the ThingTagRepository.DeleteByTagID
+func (mmDeleteByTagID *mThingTagRepositoryMockDeleteByTagID) Inspect(f func(ctx context.Context, tagID int, tx *sql.Tx)) *mThingTagRepositoryMockDeleteByTagID {
+	if mmDeleteByTagID.mock.inspectFuncDeleteByTagID != nil {
+		mmDeleteByTagID.mock.t.Fatalf("Inspect function is already set for ThingTagRepositoryMock.DeleteByTagID")
 	}
 
-	mmDeleteByThingID.mock.inspectFuncDeleteByThingID = f
+	mmDeleteByTagID.mock.inspectFuncDeleteByTagID = f
 
-	return mmDeleteByThingID
+	return mmDeleteByTagID
 }
 
-// Return sets up results that will be returned by ThingTagRepository.DeleteByThingID
-func (mmDeleteByThingID *mThingTagRepositoryMockDeleteByThingID) Return(err error) *ThingTagRepositoryMock {
-	if mmDeleteByThingID.mock.funcDeleteByThingID != nil {
-		mmDeleteByThingID.mock.t.Fatalf("ThingTagRepositoryMock.DeleteByThingID mock is already set by Set")
+// Return sets up results that will be returned by ThingTagRepository.DeleteByTagID
+func (mmDeleteByTagID *mThingTagRepositoryMockDeleteByTagID) Return(err error) *ThingTagRepositoryMock {
+	if mmDeleteByTagID.mock.funcDeleteByTagID != nil {
+		mmDeleteByTagID.mock.t.Fatalf("ThingTagRepositoryMock.DeleteByTagID mock is already set by Set")
 	}
 
-	if mmDeleteByThingID.defaultExpectation == nil {
-		mmDeleteByThingID.defaultExpectation = &ThingTagRepositoryMockDeleteByThingIDExpectation{mock: mmDeleteByThingID.mock}
+	if mmDeleteByTagID.defaultExpectation == nil {
+		mmDeleteByTagID.defaultExpectation = &ThingTagRepositoryMockDeleteByTagIDExpectation{mock: mmDeleteByTagID.mock}
 	}
-	mmDeleteByThingID.defaultExpectation.results = &ThingTagRepositoryMockDeleteByThingIDResults{err}
-	return mmDeleteByThingID.mock
+	mmDeleteByTagID.defaultExpectation.results = &ThingTagRepositoryMockDeleteByTagIDResults{err}
+	return mmDeleteByTagID.mock
 }
 
-// Set uses given function f to mock the ThingTagRepository.DeleteByThingID method
-func (mmDeleteByThingID *mThingTagRepositoryMockDeleteByThingID) Set(f func(ctx context.Context, thingID int, tx *sql.Tx) (err error)) *ThingTagRepositoryMock {
-	if mmDeleteByThingID.defaultExpectation != nil {
-		mmDeleteByThingID.mock.t.Fatalf("Default expectation is already set for the ThingTagRepository.DeleteByThingID method")
+// Set uses given function f to mock the ThingTagRepository.DeleteByTagID method
+func (mmDeleteByTagID *mThingTagRepositoryMockDeleteByTagID) Set(f func(ctx context.Context, tagID int, tx *sql.Tx) (err error)) *ThingTagRepositoryMock {
+	if mmDeleteByTagID.defaultExpectation != nil {
+		mmDeleteByTagID.mock.t.Fatalf("Default expectation is already set for the ThingTagRepository.DeleteByTagID method")
 	}
 
-	if len(mmDeleteByThingID.expectations) > 0 {
-		mmDeleteByThingID.mock.t.Fatalf("Some expectations are already set for the ThingTagRepository.DeleteByThingID method")
+	if len(mmDeleteByTagID.expectations) > 0 {
+		mmDeleteByTagID.mock.t.Fatalf("Some expectations are already set for the ThingTagRepository.DeleteByTagID method")
 	}
 
-	mmDeleteByThingID.mock.funcDeleteByThingID = f
-	return mmDeleteByThingID.mock
+	mmDeleteByTagID.mock.funcDeleteByTagID = f
+	return mmDeleteByTagID.mock
 }
 
-// When sets expectation for the ThingTagRepository.DeleteByThingID which will trigger the result defined by the following
+// When sets expectation for the ThingTagRepository.DeleteByTagID which will trigger the result defined by the following
 // Then helper
-func (mmDeleteByThingID *mThingTagRepositoryMockDeleteByThingID) When(ctx context.Context, thingID int, tx *sql.Tx) *ThingTagRepositoryMockDeleteByThingIDExpectation {
-	if mmDeleteByThingID.mock.funcDeleteByThingID != nil {
-		mmDeleteByThingID.mock.t.Fatalf("ThingTagRepositoryMock.DeleteByThingID mock is already set by Set")
+func (mmDeleteByTagID *mThingTagRepositoryMockDeleteByTagID) When(ctx context.Context, tagID int, tx *sql.Tx) *ThingTagRepositoryMockDeleteByTagIDExpectation {
+	if mmDeleteByTagID.mock.funcDeleteByTagID != nil {
+		mmDeleteByTagID.mock.t.Fatalf("ThingTagRepositoryMock.DeleteByTagID mock is already set by Set")
 	}
 
-	expectation := &ThingTagRepositoryMockDeleteByThingIDExpectation{
-		mock:   mmDeleteByThingID.mock,
-		params: &ThingTagRepositoryMockDeleteByThingIDParams{ctx, thingID, tx},
+	expectation := &ThingTagRepositoryMockDeleteByTagIDExpectation{
+		mock:   mmDeleteByTagID.mock,
+		params: &ThingTagRepositoryMockDeleteByTagIDParams{ctx, tagID, tx},
 	}
-	mmDeleteByThingID.expectations = append(mmDeleteByThingID.expectations, expectation)
+	mmDeleteByTagID.expectations = append(mmDeleteByTagID.expectations, expectation)
 	return expectation
 }
 
-// Then sets up ThingTagRepository.DeleteByThingID return parameters for the expectation previously defined by the When method
-func (e *ThingTagRepositoryMockDeleteByThingIDExpectation) Then(err error) *ThingTagRepositoryMock {
-	e.results = &ThingTagRepositoryMockDeleteByThingIDResults{err}
+// Then sets up ThingTagRepository.DeleteByTagID return parameters for the expectation previously defined by the When method
+func (e *ThingTagRepositoryMockDeleteByTagIDExpectation) Then(err error) *ThingTagRepositoryMock {
+	e.results = &ThingTagRepositoryMockDeleteByTagIDResults{err}
 	return e.mock
 }
 
-// DeleteByThingID implements interfaces.ThingTagRepository
-func (mmDeleteByThingID *ThingTagRepositoryMock) DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) (err error) {
-	mm_atomic.AddUint64(&mmDeleteByThingID.beforeDeleteByThingIDCounter, 1)
-	defer mm_atomic.AddUint64(&mmDeleteByThingID.afterDeleteByThingIDCounter, 1)
+// DeleteByTagID implements interfaces.ThingTagRepository
+func (mmDeleteByTagID *ThingTagRepositoryMock) DeleteByTagID(ctx context.Context, tagID int, tx *sql.Tx) (err error) {
+	mm_atomic.AddUint64(&mmDeleteByTagID.beforeDeleteByTagIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmDeleteByTagID.afterDeleteByTagIDCounter, 1)
 
-	if mmDeleteByThingID.inspectFuncDeleteByThingID != nil {
-		mmDeleteByThingID.inspectFuncDeleteByThingID(ctx, thingID, tx)
+	if mmDeleteByTagID.inspectFuncDeleteByTagID != nil {
+		mmDeleteByTagID.inspectFuncDeleteByTagID(ctx, tagID, tx)
 	}
 
-	mm_params := &ThingTagRepositoryMockDeleteByThingIDParams{ctx, thingID, tx}
+	mm_params := &ThingTagRepositoryMockDeleteByTagIDParams{ctx, tagID, tx}
 
 	// Record call args
-	mmDeleteByThingID.DeleteByThingIDMock.mutex.Lock()
-	mmDeleteByThingID.DeleteByThingIDMock.callArgs = append(mmDeleteByThingID.DeleteByThingIDMock.callArgs, mm_params)
-	mmDeleteByThingID.DeleteByThingIDMock.mutex.Unlock()
+	mmDeleteByTagID.DeleteByTagIDMock.mutex.Lock()
+	mmDeleteByTagID.DeleteByTagIDMock.callArgs = append(mmDeleteByTagID.DeleteByTagIDMock.callArgs, mm_params)
+	mmDeleteByTagID.DeleteByTagIDMock.mutex.Unlock()
 
-	for _, e := range mmDeleteByThingID.DeleteByThingIDMock.expectations {
+	for _, e := range mmDeleteByTagID.DeleteByTagIDMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
 			return e.results.err
 		}
 	}
 
-	if mmDeleteByThingID.DeleteByThingIDMock.defaultExpectation != nil {
-		mm_atomic.AddUint64(&mmDeleteByThingID.DeleteByThingIDMock.defaultExpectation.Counter, 1)
-		mm_want := mmDeleteByThingID.DeleteByThingIDMock.defaultExpectation.params
-		mm_got := ThingTagRepositoryMockDeleteByThingIDParams{ctx, thingID, tx}
+	if mmDeleteByTagID.DeleteByTagIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmDeleteByTagID.DeleteByTagIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmDeleteByTagID.DeleteByTagIDMock.defaultExpectation.params
+		mm_got := ThingTagRepositoryMockDeleteByTagIDParams{ctx, tagID, tx}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmDeleteByThingID.t.Errorf("ThingTagRepositoryMock.DeleteByThingID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmDeleteByTagID.t.Errorf("ThingTagRepositoryMock.DeleteByTagID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
-		mm_results := mmDeleteByThingID.DeleteByThingIDMock.defaultExpectation.results
+		mm_results := mmDeleteByTagID.DeleteByTagIDMock.defaultExpectation.results
 		if mm_results == nil {
-			mmDeleteByThingID.t.Fatal("No results are set for the ThingTagRepositoryMock.DeleteByThingID")
+			mmDeleteByTagID.t.Fatal("No results are set for the ThingTagRepositoryMock.DeleteByTagID")
 		}
 		return (*mm_results).err
 	}
-	if mmDeleteByThingID.funcDeleteByThingID != nil {
-		return mmDeleteByThingID.funcDeleteByThingID(ctx, thingID, tx)
+	if mmDeleteByTagID.funcDeleteByTagID != nil {
+		return mmDeleteByTagID.funcDeleteByTagID(ctx, tagID, tx)
 	}
-	mmDeleteByThingID.t.Fatalf("Unexpected call to ThingTagRepositoryMock.DeleteByThingID. %v %v %v", ctx, thingID, tx)
+	mmDeleteByTagID.t.Fatalf("Unexpected call to ThingTagRepositoryMock.DeleteByTagID. %v %v %v", ctx, tagID, tx)
 	return
 }
 
-// DeleteByThingIDAfterCounter returns a count of finished ThingTagRepositoryMock.DeleteByThingID invocations
-func (mmDeleteByThingID *ThingTagRepositoryMock) DeleteByThingIDAfterCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmDeleteByThingID.afterDeleteByThingIDCounter)
+// DeleteByTagIDAfterCounter returns a count of finished ThingTagRepositoryMock.DeleteByTagID invocations
+func (mmDeleteByTagID *ThingTagRepositoryMock) DeleteByTagIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDeleteByTagID.afterDeleteByTagIDCounter)
 }
 
-// DeleteByThingIDBeforeCounter returns a count of ThingTagRepositoryMock.DeleteByThingID invocations
-func (mmDeleteByThingID *ThingTagRepositoryMock) DeleteByThingIDBeforeCounter() uint64 {
-	return mm_atomic.LoadUint64(&mmDeleteByThingID.beforeDeleteByThingIDCounter)
+// DeleteByTagIDBeforeCounter returns a count of ThingTagRepositoryMock.DeleteByTagID invocations
+func (mmDeleteByTagID *ThingTagRepositoryMock) DeleteByTagIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmDeleteByTagID.beforeDeleteByTagIDCounter)
 }
 
-// Calls returns a list of arguments used in each call to ThingTagRepositoryMock.DeleteByThingID.
+// Calls returns a list of arguments used in each call to ThingTagRepositoryMock.DeleteByTagID.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmDeleteByThingID *mThingTagRepositoryMockDeleteByThingID) Calls() []*ThingTagRepositoryMockDeleteByThingIDParams {
-	mmDeleteByThingID.mutex.RLock()
+func (mmDeleteByTagID *mThingTagRepositoryMockDeleteByTagID) Calls() []*ThingTagRepositoryMockDeleteByTagIDParams {
+	mmDeleteByTagID.mutex.RLock()
 
-	argCopy := make([]*ThingTagRepositoryMockDeleteByThingIDParams, len(mmDeleteByThingID.callArgs))
-	copy(argCopy, mmDeleteByThingID.callArgs)
+	argCopy := make([]*ThingTagRepositoryMockDeleteByTagIDParams, len(mmDeleteByTagID.callArgs))
+	copy(argCopy, mmDeleteByTagID.callArgs)
 
-	mmDeleteByThingID.mutex.RUnlock()
+	mmDeleteByTagID.mutex.RUnlock()
 
 	return argCopy
 }
 
-// MinimockDeleteByThingIDDone returns true if the count of the DeleteByThingID invocations corresponds
+// MinimockDeleteByTagIDDone returns true if the count of the DeleteByTagID invocations corresponds
 // the number of defined expectations
-func (m *ThingTagRepositoryMock) MinimockDeleteByThingIDDone() bool {
-	for _, e := range m.DeleteByThingIDMock.expectations {
+func (m *ThingTagRepositoryMock) MinimockDeleteByTagIDDone() bool {
+	for _, e := range m.DeleteByTagIDMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.DeleteByThingIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteByThingIDCounter) < 1 {
+	if m.DeleteByTagIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteByTagIDCounter) < 1 {
 		return false
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcDeleteByThingID != nil && mm_atomic.LoadUint64(&m.afterDeleteByThingIDCounter) < 1 {
+	if m.funcDeleteByTagID != nil && mm_atomic.LoadUint64(&m.afterDeleteByTagIDCounter) < 1 {
 		return false
 	}
 	return true
 }
 
-// MinimockDeleteByThingIDInspect logs each unmet expectation
-func (m *ThingTagRepositoryMock) MinimockDeleteByThingIDInspect() {
-	for _, e := range m.DeleteByThingIDMock.expectations {
+// MinimockDeleteByTagIDInspect logs each unmet expectation
+func (m *ThingTagRepositoryMock) MinimockDeleteByTagIDInspect() {
+	for _, e := range m.DeleteByTagIDMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to ThingTagRepositoryMock.DeleteByThingID with params: %#v", *e.params)
+			m.t.Errorf("Expected call to ThingTagRepositoryMock.DeleteByTagID with params: %#v", *e.params)
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
-	if m.DeleteByThingIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteByThingIDCounter) < 1 {
-		if m.DeleteByThingIDMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to ThingTagRepositoryMock.DeleteByThingID")
+	if m.DeleteByTagIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterDeleteByTagIDCounter) < 1 {
+		if m.DeleteByTagIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to ThingTagRepositoryMock.DeleteByTagID")
 		} else {
-			m.t.Errorf("Expected call to ThingTagRepositoryMock.DeleteByThingID with params: %#v", *m.DeleteByThingIDMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to ThingTagRepositoryMock.DeleteByTagID with params: %#v", *m.DeleteByTagIDMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
-	if m.funcDeleteByThingID != nil && mm_atomic.LoadUint64(&m.afterDeleteByThingIDCounter) < 1 {
-		m.t.Error("Expected call to ThingTagRepositoryMock.DeleteByThingID")
+	if m.funcDeleteByTagID != nil && mm_atomic.LoadUint64(&m.afterDeleteByTagIDCounter) < 1 {
+		m.t.Error("Expected call to ThingTagRepositoryMock.DeleteByTagID")
 	}
 }
 
@@ -1395,7 +1395,7 @@ func (m *ThingTagRepositoryMock) MinimockFinish() {
 
 		m.MinimockDeleteInspect()
 
-		m.MinimockDeleteByThingIDInspect()
+		m.MinimockDeleteByTagIDInspect()
 
 		m.MinimockGetByPlaceIDInspect()
 		m.t.FailNow()
@@ -1425,6 +1425,6 @@ func (m *ThingTagRepositoryMock) minimockDone() bool {
 		m.MinimockBeginTxDone() &&
 		m.MinimockCommitTxDone() &&
 		m.MinimockDeleteDone() &&
-		m.MinimockDeleteByThingIDDone() &&
+		m.MinimockDeleteByTagIDDone() &&
 		m.MinimockGetByPlaceIDDone()
 }

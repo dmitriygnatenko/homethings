@@ -133,6 +133,8 @@ func InitMock(deps ...interface{}) interfaces.ServiceProvider {
 			sp.thingImageRepository = s
 		case interfaces.TagRepository:
 			sp.tagRepository = s
+		case interfaces.ThingTagRepository:
+			sp.thingTagRepository = s
 		case interfaces.UserRepository:
 			sp.userRepository = s
 		case interfaces.FileRepository:
