@@ -176,6 +176,7 @@ func (r placeRepository) Update(ctx context.Context, req models.UpdatePlaceReque
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("parent_id", req.ParentID).
+		Set("updated_at", "NOW()").
 		Where(sq.Eq{"id": req.ID}).
 		ToSql()
 

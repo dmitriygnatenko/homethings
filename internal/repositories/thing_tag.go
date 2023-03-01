@@ -111,7 +111,7 @@ func (r thingTagRepository) GetByPlaceID(ctx context.Context, placeID int) ([]mo
 		")" +
 		"SELECT t.id, t.title, t.style, t.created_at, t.updated_at, tt.thing_id " +
 		"FROM cte, " + placeThingTableName + " pt, " + thingTagTableName + " tt, " + tagTableName + " t " +
-		"WHERE pt.place_id = cte.id AND tt.thing_id = pt.thing_id AND tt.tag_id = t.id" +
+		"WHERE pt.place_id = cte.id AND tt.thing_id = pt.thing_id AND tt.tag_id = t.id " +
 		"ORDER BY t.updated_at DESC"
 
 	rows, err := r.db.QueryContext(ctx, query, placeID)

@@ -237,6 +237,7 @@ func (r thingRepository) Update(ctx context.Context, req models.UpdateThingReque
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("description", req.Description).
+		Set("updated_at", "NOW()").
 		Where(sq.Eq{"id": req.ID}).
 		ToSql()
 

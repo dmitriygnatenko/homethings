@@ -46,6 +46,16 @@ func ConvertToTagResponseDTO(req models.Tag) dto.TagResponse {
 	}
 }
 
+func ConvertThingTagToTagResponseDTO(req models.ThingTag) dto.TagResponse {
+	return dto.TagResponse{
+		ID:        req.ID,
+		Title:     req.Title,
+		Style:     req.Style,
+		CreatedAt: req.CreatedAt.Format(defaultDateTimeLayout),
+		UpdatedAt: req.UpdatedAt.Format(defaultDateTimeLayout),
+	}
+}
+
 func ConvertToTagsResponseDTO(req []models.Tag) dto.TagsResponse {
 	res := make([]dto.TagResponse, 0, len(req))
 

@@ -26,7 +26,7 @@ func InitPlaceThingRepository(db *sql.DB) interfaces.PlaceThingRepository {
 }
 
 func (r placeThingRepository) GetByThingID(ctx context.Context, thingID int) (*models.PlaceThing, error) {
-	query, args, err := sq.Select("place_id", "thing_id", "created_at", "updated_at").
+	query, args, err := sq.Select("place_id", "thing_id", "created_at").
 		From(placeThingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"thing_id": thingID}).
@@ -39,7 +39,7 @@ func (r placeThingRepository) GetByThingID(ctx context.Context, thingID int) (*m
 	var res models.PlaceThing
 
 	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.PlaceID, &res.ThingID, &res.CreatedAt, &res.UpdatedAt)
+		Scan(&res.PlaceID, &res.ThingID, &res.CreatedAt)
 
 	if err != nil {
 		return nil, err
@@ -72,6 +72,7 @@ func (r placeThingRepository) UpdatePlace(ctx context.Context, req models.Update
 	query, args, err := sq.Update(placeThingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("place_id", req.PlaceID).
+		Set("updated_at", "NOW()").
 		Where(sq.Eq{"thing_id": req.ThingID}).
 		ToSql()
 

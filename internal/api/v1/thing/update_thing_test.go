@@ -64,7 +64,6 @@ func Test_UpdateThingHandler(t *testing.T) {
 			PlaceID:   gofakeit.Number(1, 1000),
 			ThingID:   thingID,
 			CreatedAt: gofakeit.Date(),
-			UpdatedAt: gofakeit.Date(),
 		}
 
 		repoRes = models.Thing{

@@ -1,6 +1,8 @@
 package mappers
 
 import (
+	"sort"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
@@ -53,4 +55,34 @@ func ConvertToThingsResponseDTO(things []models.Thing) dto.ThingsResponse {
 	}
 
 	return dto.ThingsResponse{Things: res}
+}
+
+func ConvertToThingsExtResponseDTO(things []models.Thing, tags []models.ThingTag) dto.ThingsExtResponse {
+	res := make([]dto.ThingExtResponse, 0, len(things))
+
+	groupedTags := make(map[int][]dto.TagResponse)
+	for _, tag := range tags {
+		if _, ok := groupedTags[tag.ThingID]; !ok {
+			groupedTags[tag.ThingID] = make([]dto.TagResponse, 0)
+		}
+
+		groupedTags[tag.ThingID] = append(groupedTags[tag.ThingID], ConvertThingTagToTagResponseDTO(tag))
+	}
+
+	for _, thing := range things {
+		var thingTags []dto.TagResponse
+		if t, ok := groupedTags[thing.ID]; ok {
+			sort.Slice(t, func(i, j int) bool {
+				return t[i].Title < t[j].Title
+			})
+			thingTags = t
+		}
+
+		res = append(res, dto.ThingExtResponse{
+			ThingResponse: ConvertToThingResponseDTO(thing),
+			Tags:          thingTags,
+		})
+	}
+
+	return dto.ThingsExtResponse{Things: res}
 }

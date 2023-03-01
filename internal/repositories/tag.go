@@ -133,6 +133,7 @@ func (r tagRepository) Update(ctx context.Context, req models.UpdateTagRequest, 
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("style", req.Style).
+		Set("updated_at", "NOW()").
 		Where(sq.Eq{"id": req.ID}).
 		ToSql()
 
