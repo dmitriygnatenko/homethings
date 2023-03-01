@@ -9,7 +9,7 @@ import (
 // @Router 		/api/v1/places [get]
 // @Success     200 {object} dto.PlacesResponse
 // @Failure     500 {object} dto.ErrorResponse
-// @Summary     Get places
+// @Summary     Get places list
 // @Tags  		Places
 // @security 	APIKey
 // @Accept      json

@@ -9,8 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/things/{id} [delete]
-// @Param       id path int true "Thing ID"
+// @Router 		/api/v1/things/{thingId} [delete]
+// @Param       thingId path int true "Thing ID"
 // @Success     200 {object} dto.EmptyResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
@@ -22,7 +22,7 @@ import (
 func DeleteThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("id")
+		id, err := fctx.ParamsInt("thingId")
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}

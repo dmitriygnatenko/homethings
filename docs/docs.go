@@ -61,7 +61,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login user",
+                "summary": "Log in user",
                 "parameters": [
                     {
                         "description": "Request body",
@@ -164,53 +164,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/images/place/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "APIKey": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Images"
-                ],
-                "summary": "Get images by place ID (with child places)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Place ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ImagesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
+        "/api/v1/images/place/{imageId}": {
             "delete": {
                 "security": [
                     {
@@ -231,7 +185,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Image ID",
-                        "name": "id",
+                        "name": "imageId",
                         "in": "path",
                         "required": true
                     }
@@ -258,7 +212,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/images/thing/{id}": {
+        "/api/v1/images/place/{placeId}": {
             "get": {
                 "security": [
                     {
@@ -274,12 +228,12 @@ const docTemplate = `{
                 "tags": [
                     "Images"
                 ],
-                "summary": "Get images by thing ID",
+                "summary": "Get images by place ID (with child places)",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Thing ID",
-                        "name": "id",
+                        "description": "Place ID",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     }
@@ -304,7 +258,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/v1/images/thing/{imageId}": {
             "delete": {
                 "security": [
                     {
@@ -325,7 +281,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Image ID",
-                        "name": "id",
+                        "name": "imageId",
                         "in": "path",
                         "required": true
                     }
@@ -335,6 +291,54 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/images/thing/{thingId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Images"
+                ],
+                "summary": "Get images by thing ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ImagesResponse"
                         }
                     },
                     "400": {
@@ -368,7 +372,7 @@ const docTemplate = `{
                 "tags": [
                     "Places"
                 ],
-                "summary": "Get places",
+                "summary": "Get places list",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -466,7 +470,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/places/{id}": {
+        "/api/v1/places/{parentPlaceId}/nested": {
             "get": {
                 "security": [
                     {
@@ -482,12 +486,60 @@ const docTemplate = `{
                 "tags": [
                     "Places"
                 ],
-                "summary": "Get one place by ID",
+                "summary": "Get nested places by parent ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Place ID",
-                        "name": "id",
+                        "name": "parentPlaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PlacesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/places/{placeId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Places"
+                ],
+                "summary": "Get one place",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     }
@@ -539,7 +591,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Place ID",
-                        "name": "id",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     },
@@ -594,7 +646,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Place ID",
-                        "name": "id",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     }
@@ -604,102 +656,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/places/{id}/nested": {
-            "get": {
-                "security": [
-                    {
-                        "APIKey": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Places"
-                ],
-                "summary": "Get nested places by parent ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Place ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.PlacesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/places/{id}/things": {
-            "get": {
-                "security": [
-                    {
-                        "APIKey": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Places"
-                ],
-                "summary": "Get things by place ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Place ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ThingsExtResponse"
                         }
                     },
                     "400": {
@@ -733,7 +689,7 @@ const docTemplate = `{
                 "tags": [
                     "Tags"
                 ],
-                "summary": "Get all tags",
+                "summary": "Get tags",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -804,7 +760,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/tags/{id}": {
+        "/api/v1/tags/{tagId}": {
             "get": {
                 "security": [
                     {
@@ -820,12 +776,12 @@ const docTemplate = `{
                 "tags": [
                     "Tags"
                 ],
-                "summary": "Get one tag by ID",
+                "summary": "Get one tag",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Tag ID",
-                        "name": "id",
+                        "name": "tagId",
                         "in": "path",
                         "required": true
                     }
@@ -877,7 +833,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Tag ID",
-                        "name": "id",
+                        "name": "tagId",
                         "in": "path",
                         "required": true
                     },
@@ -932,7 +888,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Tag ID",
-                        "name": "id",
+                        "name": "tagId",
                         "in": "path",
                         "required": true
                     }
@@ -959,7 +915,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/tags/{id}/thing/{thing_id}": {
+        "/api/v1/tags/{tagId}/thing/{thingId}": {
             "post": {
                 "security": [
                     {
@@ -980,14 +936,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Tag ID",
-                        "name": "id",
+                        "name": "tagId",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "thing_id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -1033,14 +989,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Tag ID",
-                        "name": "id",
+                        "name": "tagId",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "thing_id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -1117,6 +1073,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/things/place/{placeId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Things"
+                ],
+                "summary": "Get things by place ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "placeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ThingsExtResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/things/search/{search}": {
             "get": {
                 "security": [
@@ -1165,7 +1169,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/things/{id}": {
+        "/api/v1/things/{thingId}": {
             "get": {
                 "security": [
                     {
@@ -1181,12 +1185,12 @@ const docTemplate = `{
                 "tags": [
                     "Things"
                 ],
-                "summary": "Get one thing by ID",
+                "summary": "Get one thing",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -1238,7 +1242,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     },
@@ -1293,7 +1297,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -1334,7 +1338,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
                 "summary": "Update user",
                 "parameters": [
@@ -1382,7 +1386,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
                 "summary": "Add user",
                 "parameters": [

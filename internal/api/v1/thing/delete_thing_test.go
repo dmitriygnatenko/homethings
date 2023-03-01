@@ -334,7 +334,7 @@ func Test_DeleteThingHandler(t *testing.T) {
 				tt.fileRepoMock(mc),
 			)
 
-			fiberApp.Delete("/v1/things/:id", DeleteThingHandler(serviceProvider))
+			fiberApp.Delete("/v1/things/:thingId", DeleteThingHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

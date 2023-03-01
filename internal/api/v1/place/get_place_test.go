@@ -117,7 +117,7 @@ func Test_GetPlaceHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.placeRepoMock(mc))
 
-			fiberApp.Get("/v1/places/:id", GetPlaceHandler(serviceProvider))
+			fiberApp.Get("/v1/places/:placeId", GetPlaceHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

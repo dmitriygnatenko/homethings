@@ -84,8 +84,6 @@ func Test_UpdateThingHandler(t *testing.T) {
 		}
 	)
 
-	_ = expectedRes
-
 	tests := []struct {
 		name               string
 		req                req
@@ -344,7 +342,7 @@ func Test_UpdateThingHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.thingRepoMock(mc), tt.placeThingRepoMock(mc))
 
-			fiberApp.Put("/v1/things/:id", UpdateThingHandler(serviceProvider))
+			fiberApp.Put("/v1/things/:thingId", UpdateThingHandler(serviceProvider))
 
 			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)

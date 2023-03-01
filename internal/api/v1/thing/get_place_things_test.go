@@ -1,4 +1,4 @@
-package place
+package thing
 
 import (
 	"context"
@@ -36,7 +36,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/places/" + strconv.Itoa(placeID) + "/things",
+			route:  "/v1/things/place/" + strconv.Itoa(placeID),
 		}
 
 		thingRepoRes = []models.Thing{
@@ -116,7 +116,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			name: "negative case - bad request",
 			req: req{
 				method: fiber.MethodGet,
-				route:  "/v1/places/" + gofakeit.Word() + "/things",
+				route:  "/v1/things/place/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
 			resBody: nil,
@@ -131,7 +131,7 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.thingRepoMock(mc))
 
-			fiberApp.Get("/v1/places/:id/things", GetPlaceThingsHandler(serviceProvider))
+			fiberApp.Get("/v1/things/place/:placeId", GetPlaceThingsHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

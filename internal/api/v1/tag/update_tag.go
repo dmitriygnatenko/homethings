@@ -9,8 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/tags/{id} [put]
-// @Param       id path int true "Tag ID"
+// @Router 		/api/v1/tags/{tagId} [put]
+// @Param       tagId path int true "Tag ID"
 // @Param       data body dto.UpdateTagRequest true "Request body"
 // @Success     200 {object} dto.TagResponse
 // @Failure     400 {object} dto.ErrorResponse
@@ -23,7 +23,7 @@ import (
 func UpdateTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("id")
+		id, err := fctx.ParamsInt("tagId")
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}

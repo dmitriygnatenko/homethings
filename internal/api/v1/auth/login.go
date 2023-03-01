@@ -16,7 +16,7 @@ import (
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     403 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
-// @Summary     Login user
+// @Summary     Log in user
 // @Tags  		Auth
 // @Accept      json
 // @Produce     json

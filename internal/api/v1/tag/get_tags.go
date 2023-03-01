@@ -10,7 +10,7 @@ import (
 // @Success     200 {object} dto.TagsResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
-// @Summary     Get all tags
+// @Summary     Get tags
 // @Tags  		Tags
 // @security 	APIKey
 // @Accept      json

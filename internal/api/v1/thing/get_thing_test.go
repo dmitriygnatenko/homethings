@@ -121,7 +121,7 @@ func Test_GetThingHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.thingRepoMock(mc))
 
-			fiberApp.Get("/v1/things/:id", GetThingHandler(serviceProvider))
+			fiberApp.Get("/v1/things/:thingId", GetThingHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

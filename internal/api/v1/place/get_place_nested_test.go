@@ -114,7 +114,7 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.placeRepoMock(mc))
 
-			fiberApp.Get("/v1/places/:id/nested", GetNestedPlacesHandler(serviceProvider))
+			fiberApp.Get("/v1/places/:parentPlaceId/nested", GetNestedPlacesHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

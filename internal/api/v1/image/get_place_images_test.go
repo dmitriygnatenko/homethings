@@ -166,7 +166,7 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.thingImageRepoMock(mc), tt.placeImageRepoMock(mc))
 
-			fiberApp.Get("/v1/images/place/:id", GetPlaceImagesHandler(serviceProvider))
+			fiberApp.Get("/v1/images/place/:placeId", GetPlaceImagesHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 
