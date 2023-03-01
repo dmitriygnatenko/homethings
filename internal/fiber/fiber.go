@@ -1,6 +1,8 @@
 package fiber
 
 import (
+	"log"
+
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
@@ -17,7 +19,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
-	"log"
 )
 
 const (
