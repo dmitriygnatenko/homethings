@@ -75,7 +75,6 @@ type TagRepository interface {
 }
 
 type ThingTagRepository interface {
-	GetByThingID(ctx context.Context, thingID int) ([]models.ThingTag, error)
 	GetByPlaceID(ctx context.Context, placeID int) ([]models.ThingTag, error)
 	Add(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) error
 	Delete(ctx context.Context, req models.DeleteThingTagRequest, tx *sql.Tx) error

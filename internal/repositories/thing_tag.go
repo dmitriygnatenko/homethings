@@ -38,51 +38,6 @@ func (r thingTagRepository) CommitTx(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-func (r thingTagRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error) {
-	var res []models.Tag
-
-	query, args, err := sq.Select("t.id", "t.title", "t.style", "t.created_at", "t.updated_at").
-		From(tagTableName + " t").
-		Join(thingTagTableName + " tt ON tt.thing_id = t.id").
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"tt.thing_id": thingID}).
-		OrderBy("t.updated_at DESC").
-		ToSql()
-
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Tag{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.Title,
-			&resRow.Style,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
-
 func (r thingTagRepository) Add(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) error {
 	query, args, err := sq.Insert(thingTagTableName).
 		PlaceholderFormat(sq.Dollar).
@@ -140,4 +95,52 @@ func (r thingTagRepository) DeleteByThingID(ctx context.Context, thingID int, tx
 	}
 
 	return err
+}
+
+func (r thingTagRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.ThingTag, error) {
+	var res []models.ThingTag
+
+	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
+		"SELECT id, parent_id " +
+		"FROM " + placeTableName + " " +
+		"WHERE id = $1 " +
+		"UNION ALL " +
+		"SELECT p.id, p.parent_id " +
+		"FROM " + placeTableName + " p " +
+		"INNER JOIN cte ON p.parent_id = cte.id " +
+		")" +
+		"SELECT t.id, t.title, t.style, t.created_at, t.updated_at, tt.thing_id " +
+		"FROM cte, " + placeThingTableName + " pt, " + thingTagTableName + " tt, " + tagTableName + " t " +
+		"WHERE pt.place_id = cte.id AND tt.thing_id = pt.thing_id AND tt.tag_id = t.id" +
+		"ORDER BY t.updated_at DESC"
+
+	rows, err := r.db.QueryContext(ctx, query, placeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.ThingTag{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.Title,
+			&resRow.Style,
+			&resRow.CreatedAt,
+			&resRow.UpdatedAt,
+			&resRow.ThingID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
