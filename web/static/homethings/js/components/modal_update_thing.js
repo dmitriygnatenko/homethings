@@ -30,7 +30,7 @@ export const modalUpdateThingComponent = {
             this.form.title = ""
             this.form.desc = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{id}", this.selectedThing))
+            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", this.selectedThing))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
                 this.form.desc = res.data.description
@@ -71,7 +71,7 @@ export const modalUpdateThingComponent = {
                 place_id: this.form.placeID,
             }
 
-            let res = client.jsonRequest(client.methodPut, client.routeUpdateThing.replace("{id}", this.selectedThing), data)
+            let res = client.jsonRequest(client.methodPut, client.routeUpdateThing.replace("{thingId}", this.selectedThing), data)
             if (res.status === client.statusOK) {
                 this.$emit("after-update-thing");
             }

@@ -79,6 +79,7 @@ export const modalSearchThingComponent = {
                             <input
                                 type="text"
                                 class="form-control form-control-sm"
+                                v-on:keyup.enter="submitForm"
                                 v-model.trim="form.search"
                                 :class="{ 'is-invalid': errors.search }">
                                 <div class="invalid-feedback">

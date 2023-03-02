@@ -31,7 +31,7 @@ export const modalAddImageComponent = {
             this.form.thingTitle = ""
 
             if (this.selectedPlace > 0) {
-                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
+                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.selectedPlace))
                 if (res.status === client.statusOK) {
                     this.form.type = this.typePlace
                     this.form.placeTitle = "Место: " + res.data.title
@@ -39,7 +39,7 @@ export const modalAddImageComponent = {
             }
 
             if (this.selectedThing > 0) {
-                let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{id}", this.selectedThing))
+                let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", this.selectedThing))
                 if (res.status === client.statusOK) {
                     this.form.type = this.typeThing
                     this.form.thingTitle = "Вещь: " + res.data.title

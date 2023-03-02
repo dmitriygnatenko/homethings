@@ -121,7 +121,7 @@ export const mainPageComponent = {
         refreshThings(placeID) {
             this.resetThings()
 
-            let res = this.request(client.methodGet, client.routeGetPlaceThings.replace("{id}", placeID))
+            let res = this.request(client.methodGet, client.routeGetPlaceThings.replace("{placeId}", placeID))
             if (Array.isArray(res.data.things) && res.data.things.length) {
                 res.data.things.forEach(thing => {
                     this.thingsList.push({
@@ -141,7 +141,7 @@ export const mainPageComponent = {
         refreshPlaceImages(placeID) {
             this.resetImages()
 
-            let res = this.request(client.methodGet, client.routeGetPlaceImages.replace("{id}", placeID))
+            let res = this.request(client.methodGet, client.routeGetPlaceImages.replace("{placeId}", placeID))
             if (Array.isArray(res.data.images) && res.data.images.length) {
                 res.data.images.forEach(image => {
                     this.imagesList.push({
@@ -157,7 +157,7 @@ export const mainPageComponent = {
         refreshThingImages(thingID) {
             this.resetImages()
 
-            let res = this.request(client.methodGet, client.routeGetThingImages.replace("{id}", thingID))
+            let res = this.request(client.methodGet, client.routeGetThingImages.replace("{thingId}", thingID))
             if (Array.isArray(res.data.images) && res.data.images.length) {
                 res.data.images.forEach(image => {
                     this.imagesList.push({
@@ -240,14 +240,14 @@ export const mainPageComponent = {
             }
 
             if (this.selectedImagePlace > 0) {
-                let res = this.request(client.methodDelete, client.routeDeletePlaceImages.replace("{id}", this.selectedImage))
+                let res = this.request(client.methodDelete, client.routeDeletePlaceImages.replace("{imageId}", this.selectedImage))
                 if (res.status === client.statusOK) {
                     this.refreshPlaceImages(this.selectedImagePlace)
                 }
             }
 
             if (this.selectedImageThing > 0) {
-                let res = this.request(client.methodDelete, client.routeDeleteThingImages.replace("{id}", this.selectedImage))
+                let res = this.request(client.methodDelete, client.routeDeleteThingImages.replace("{imageId}", this.selectedImage))
                 if (res.status === client.statusOK) {
                     this.refreshThingImages(this.selectedImageThing)
                 }

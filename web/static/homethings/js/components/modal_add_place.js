@@ -27,7 +27,7 @@ export const modalAddPlaceComponent = {
             this.form.parentID = this.selectedPlace
 
             if (this.selectedPlace > 0) {
-                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
+                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.selectedPlace))
                 if (res.status === client.statusOK) {
                     this.form.parentTitle = res.data.title
                 }
