@@ -165,6 +165,7 @@ func registerHandlers(r fiber.Router, sp interfaces.ServiceProvider) {
 
 	r.Get("/v1/tags", tagAPI.GetTagsHandler(sp))
 	r.Get("/v1/tags/:tagId<int>", tagAPI.GetTagHandler(sp))
+	r.Get("/v1/tags/thing/:thingId<int>", tagAPI.GetThingTagsHandler(sp))
 	r.Post("/v1/tags", tagAPI.AddTagHandler(sp))
 	r.Post("/v1/tags/:tagId<int>/thing/:thingId<int>", tagAPI.AddThingTagHandler(sp))
 	r.Put("/v1/tags/:tagId<int>", tagAPI.UpdateTagHandler(sp))

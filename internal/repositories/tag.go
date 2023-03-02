@@ -79,6 +79,50 @@ func (r tagRepository) GetAll(ctx context.Context) ([]models.Tag, error) {
 	return res, nil
 }
 
+func (r tagRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error) {
+	var res []models.Tag
+
+	query, args, err := sq.Select("t.id", "t.title", "t.style", "t.created_at", "t.updated_at").
+		From(tagTableName + " t").
+		Join(thingTagTableName + " tt ON tt.tag_id = t.id").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"tt.thing_id": thingID}).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.Tag{}
+
+		err = rows.Scan(
+			&resRow.ID,
+			&resRow.Title,
+			&resRow.Style,
+			&resRow.CreatedAt,
+			&resRow.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func (r tagRepository) Get(ctx context.Context, tagID int) (*models.Tag, error) {
 	query, args, err := sq.Select("id", "title", "style", "created_at", "updated_at").
 		From(tagTableName).

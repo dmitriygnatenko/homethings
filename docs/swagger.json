@@ -750,6 +750,54 @@
                 }
             }
         },
+        "/api/v1/tags/thing/{thingId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Get thing tags",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TagsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/tags/{tagId}": {
             "get": {
                 "security": [

@@ -861,6 +861,36 @@ paths:
       summary: Add thing tag
       tags:
       - Tags
+  /api/v1/tags/thing/{thingId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thing ID
+        in: path
+        name: thingId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get thing tags
+      tags:
+      - Tags
   /api/v1/things:
     post:
       consumes:

@@ -67,6 +67,7 @@ type UserRepository interface {
 type TagRepository interface {
 	GetAll(ctx context.Context) ([]models.Tag, error)
 	Get(ctx context.Context, tagID int) (*models.Tag, error)
+	GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error)
 	Add(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) (int, error)
 	Update(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) error
 	Delete(ctx context.Context, tagID int, tx *sql.Tx) error

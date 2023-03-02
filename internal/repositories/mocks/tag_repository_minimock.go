@@ -55,6 +55,12 @@ type TagRepositoryMock struct {
 	beforeGetAllCounter uint64
 	GetAllMock          mTagRepositoryMockGetAll
 
+	funcGetByThingID          func(ctx context.Context, thingID int) (ta1 []models.Tag, err error)
+	inspectFuncGetByThingID   func(ctx context.Context, thingID int)
+	afterGetByThingIDCounter  uint64
+	beforeGetByThingIDCounter uint64
+	GetByThingIDMock          mTagRepositoryMockGetByThingID
+
 	funcUpdate          func(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) (err error)
 	inspectFuncUpdate   func(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx)
 	afterUpdateCounter  uint64
@@ -86,6 +92,9 @@ func NewTagRepositoryMock(t minimock.Tester) *TagRepositoryMock {
 
 	m.GetAllMock = mTagRepositoryMockGetAll{mock: m}
 	m.GetAllMock.callArgs = []*TagRepositoryMockGetAllParams{}
+
+	m.GetByThingIDMock = mTagRepositoryMockGetByThingID{mock: m}
+	m.GetByThingIDMock.callArgs = []*TagRepositoryMockGetByThingIDParams{}
 
 	m.UpdateMock = mTagRepositoryMockUpdate{mock: m}
 	m.UpdateMock.callArgs = []*TagRepositoryMockUpdateParams{}
@@ -1393,6 +1402,223 @@ func (m *TagRepositoryMock) MinimockGetAllInspect() {
 	}
 }
 
+type mTagRepositoryMockGetByThingID struct {
+	mock               *TagRepositoryMock
+	defaultExpectation *TagRepositoryMockGetByThingIDExpectation
+	expectations       []*TagRepositoryMockGetByThingIDExpectation
+
+	callArgs []*TagRepositoryMockGetByThingIDParams
+	mutex    sync.RWMutex
+}
+
+// TagRepositoryMockGetByThingIDExpectation specifies expectation struct of the TagRepository.GetByThingID
+type TagRepositoryMockGetByThingIDExpectation struct {
+	mock    *TagRepositoryMock
+	params  *TagRepositoryMockGetByThingIDParams
+	results *TagRepositoryMockGetByThingIDResults
+	Counter uint64
+}
+
+// TagRepositoryMockGetByThingIDParams contains parameters of the TagRepository.GetByThingID
+type TagRepositoryMockGetByThingIDParams struct {
+	ctx     context.Context
+	thingID int
+}
+
+// TagRepositoryMockGetByThingIDResults contains results of the TagRepository.GetByThingID
+type TagRepositoryMockGetByThingIDResults struct {
+	ta1 []models.Tag
+	err error
+}
+
+// Expect sets up expected params for TagRepository.GetByThingID
+func (mmGetByThingID *mTagRepositoryMockGetByThingID) Expect(ctx context.Context, thingID int) *mTagRepositoryMockGetByThingID {
+	if mmGetByThingID.mock.funcGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("TagRepositoryMock.GetByThingID mock is already set by Set")
+	}
+
+	if mmGetByThingID.defaultExpectation == nil {
+		mmGetByThingID.defaultExpectation = &TagRepositoryMockGetByThingIDExpectation{}
+	}
+
+	mmGetByThingID.defaultExpectation.params = &TagRepositoryMockGetByThingIDParams{ctx, thingID}
+	for _, e := range mmGetByThingID.expectations {
+		if minimock.Equal(e.params, mmGetByThingID.defaultExpectation.params) {
+			mmGetByThingID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetByThingID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetByThingID
+}
+
+// Inspect accepts an inspector function that has same arguments as the TagRepository.GetByThingID
+func (mmGetByThingID *mTagRepositoryMockGetByThingID) Inspect(f func(ctx context.Context, thingID int)) *mTagRepositoryMockGetByThingID {
+	if mmGetByThingID.mock.inspectFuncGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("Inspect function is already set for TagRepositoryMock.GetByThingID")
+	}
+
+	mmGetByThingID.mock.inspectFuncGetByThingID = f
+
+	return mmGetByThingID
+}
+
+// Return sets up results that will be returned by TagRepository.GetByThingID
+func (mmGetByThingID *mTagRepositoryMockGetByThingID) Return(ta1 []models.Tag, err error) *TagRepositoryMock {
+	if mmGetByThingID.mock.funcGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("TagRepositoryMock.GetByThingID mock is already set by Set")
+	}
+
+	if mmGetByThingID.defaultExpectation == nil {
+		mmGetByThingID.defaultExpectation = &TagRepositoryMockGetByThingIDExpectation{mock: mmGetByThingID.mock}
+	}
+	mmGetByThingID.defaultExpectation.results = &TagRepositoryMockGetByThingIDResults{ta1, err}
+	return mmGetByThingID.mock
+}
+
+// Set uses given function f to mock the TagRepository.GetByThingID method
+func (mmGetByThingID *mTagRepositoryMockGetByThingID) Set(f func(ctx context.Context, thingID int) (ta1 []models.Tag, err error)) *TagRepositoryMock {
+	if mmGetByThingID.defaultExpectation != nil {
+		mmGetByThingID.mock.t.Fatalf("Default expectation is already set for the TagRepository.GetByThingID method")
+	}
+
+	if len(mmGetByThingID.expectations) > 0 {
+		mmGetByThingID.mock.t.Fatalf("Some expectations are already set for the TagRepository.GetByThingID method")
+	}
+
+	mmGetByThingID.mock.funcGetByThingID = f
+	return mmGetByThingID.mock
+}
+
+// When sets expectation for the TagRepository.GetByThingID which will trigger the result defined by the following
+// Then helper
+func (mmGetByThingID *mTagRepositoryMockGetByThingID) When(ctx context.Context, thingID int) *TagRepositoryMockGetByThingIDExpectation {
+	if mmGetByThingID.mock.funcGetByThingID != nil {
+		mmGetByThingID.mock.t.Fatalf("TagRepositoryMock.GetByThingID mock is already set by Set")
+	}
+
+	expectation := &TagRepositoryMockGetByThingIDExpectation{
+		mock:   mmGetByThingID.mock,
+		params: &TagRepositoryMockGetByThingIDParams{ctx, thingID},
+	}
+	mmGetByThingID.expectations = append(mmGetByThingID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up TagRepository.GetByThingID return parameters for the expectation previously defined by the When method
+func (e *TagRepositoryMockGetByThingIDExpectation) Then(ta1 []models.Tag, err error) *TagRepositoryMock {
+	e.results = &TagRepositoryMockGetByThingIDResults{ta1, err}
+	return e.mock
+}
+
+// GetByThingID implements interfaces.TagRepository
+func (mmGetByThingID *TagRepositoryMock) GetByThingID(ctx context.Context, thingID int) (ta1 []models.Tag, err error) {
+	mm_atomic.AddUint64(&mmGetByThingID.beforeGetByThingIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetByThingID.afterGetByThingIDCounter, 1)
+
+	if mmGetByThingID.inspectFuncGetByThingID != nil {
+		mmGetByThingID.inspectFuncGetByThingID(ctx, thingID)
+	}
+
+	mm_params := &TagRepositoryMockGetByThingIDParams{ctx, thingID}
+
+	// Record call args
+	mmGetByThingID.GetByThingIDMock.mutex.Lock()
+	mmGetByThingID.GetByThingIDMock.callArgs = append(mmGetByThingID.GetByThingIDMock.callArgs, mm_params)
+	mmGetByThingID.GetByThingIDMock.mutex.Unlock()
+
+	for _, e := range mmGetByThingID.GetByThingIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ta1, e.results.err
+		}
+	}
+
+	if mmGetByThingID.GetByThingIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetByThingID.GetByThingIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetByThingID.GetByThingIDMock.defaultExpectation.params
+		mm_got := TagRepositoryMockGetByThingIDParams{ctx, thingID}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetByThingID.t.Errorf("TagRepositoryMock.GetByThingID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetByThingID.GetByThingIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetByThingID.t.Fatal("No results are set for the TagRepositoryMock.GetByThingID")
+		}
+		return (*mm_results).ta1, (*mm_results).err
+	}
+	if mmGetByThingID.funcGetByThingID != nil {
+		return mmGetByThingID.funcGetByThingID(ctx, thingID)
+	}
+	mmGetByThingID.t.Fatalf("Unexpected call to TagRepositoryMock.GetByThingID. %v %v", ctx, thingID)
+	return
+}
+
+// GetByThingIDAfterCounter returns a count of finished TagRepositoryMock.GetByThingID invocations
+func (mmGetByThingID *TagRepositoryMock) GetByThingIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByThingID.afterGetByThingIDCounter)
+}
+
+// GetByThingIDBeforeCounter returns a count of TagRepositoryMock.GetByThingID invocations
+func (mmGetByThingID *TagRepositoryMock) GetByThingIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetByThingID.beforeGetByThingIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to TagRepositoryMock.GetByThingID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetByThingID *mTagRepositoryMockGetByThingID) Calls() []*TagRepositoryMockGetByThingIDParams {
+	mmGetByThingID.mutex.RLock()
+
+	argCopy := make([]*TagRepositoryMockGetByThingIDParams, len(mmGetByThingID.callArgs))
+	copy(argCopy, mmGetByThingID.callArgs)
+
+	mmGetByThingID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetByThingIDDone returns true if the count of the GetByThingID invocations corresponds
+// the number of defined expectations
+func (m *TagRepositoryMock) MinimockGetByThingIDDone() bool {
+	for _, e := range m.GetByThingIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByThingIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByThingID != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetByThingIDInspect logs each unmet expectation
+func (m *TagRepositoryMock) MinimockGetByThingIDInspect() {
+	for _, e := range m.GetByThingIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to TagRepositoryMock.GetByThingID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetByThingIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		if m.GetByThingIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to TagRepositoryMock.GetByThingID")
+		} else {
+			m.t.Errorf("Expected call to TagRepositoryMock.GetByThingID with params: %#v", *m.GetByThingIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetByThingID != nil && mm_atomic.LoadUint64(&m.afterGetByThingIDCounter) < 1 {
+		m.t.Error("Expected call to TagRepositoryMock.GetByThingID")
+	}
+}
+
 type mTagRepositoryMockUpdate struct {
 	mock               *TagRepositoryMock
 	defaultExpectation *TagRepositoryMockUpdateExpectation
@@ -1625,6 +1851,8 @@ func (m *TagRepositoryMock) MinimockFinish() {
 
 		m.MinimockGetAllInspect()
 
+		m.MinimockGetByThingIDInspect()
+
 		m.MinimockUpdateInspect()
 		m.t.FailNow()
 	}
@@ -1655,5 +1883,6 @@ func (m *TagRepositoryMock) minimockDone() bool {
 		m.MinimockDeleteDone() &&
 		m.MinimockGetDone() &&
 		m.MinimockGetAllDone() &&
+		m.MinimockGetByThingIDDone() &&
 		m.MinimockUpdateDone()
 }
