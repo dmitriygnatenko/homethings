@@ -51,6 +51,7 @@ export const mainPageComponent = {
             selectedImage: 0,
             selectedImagePlace: 0,
             selectedImageThing: 0,
+            selectedTag: 0,
         }
     },
     computed: {
@@ -75,6 +76,7 @@ export const mainPageComponent = {
         setSelectedPlace(id) {
             if (this.selectedPlace !== id) {
                 this.selectedPlace = id
+                this.resetTags()
                 this.refreshThings(id)
                 this.refreshPlaceImages(id)
             }
@@ -120,16 +122,32 @@ export const mainPageComponent = {
         },
         refreshThings(placeID) {
             this.resetThings()
+            let obj = this
 
             let res = this.request(client.methodGet, client.routeGetPlaceThings.replace("{placeId}", placeID))
             if (Array.isArray(res.data.things) && res.data.things.length) {
                 res.data.things.forEach(thing => {
-                    this.thingsList.push({
-                        "id": thing.id,
-                        "title": thing.title,
-                        "desc": thing.description,
-                        "date": formatDate(thing.updated_at),
-                    })
+                    let show = false
+
+                    if (obj.selectedTag === 0) {
+                        show = true
+                    } else if (obj.selectedTag > 0 && thing.tags) {
+                        thing.tags.forEach(tag => {
+                            if (tag.id === obj.selectedTag) {
+                                show = true
+                            }
+                        })
+                    }
+
+                    if (show) {
+                        obj.thingsList.push({
+                            "id": thing.id,
+                            "title": thing.title,
+                            "desc": thing.description,
+                            "date": formatDate(thing.updated_at),
+                            "tags": thing.tags
+                        })
+                    }
                 });
             }
         },
@@ -176,6 +194,9 @@ export const mainPageComponent = {
             this.selectedImageThing = 0
             this.imagesList = []
         },
+        resetTags() {
+            this.selectedTag = 0
+        },
         // Action methods
         addPlace() {
             this.$refs.modalAddPlace.init();
@@ -199,6 +220,7 @@ export const mainPageComponent = {
             this.$refs.modalAddThing.init()
         },
         afterAddThing(placeID, thingID) {
+            this.resetTags()
             this.refreshPlaces(placeID)
             this.refreshThings(placeID)
             this.setSelectedThing(thingID)
@@ -207,6 +229,7 @@ export const mainPageComponent = {
             this.$refs.modalUpdateThing.init()
         },
         afterUpdateThing() {
+            this.resetTags()
             this.refreshPlaces(this.selectedPlace)
             this.refreshThings(this.selectedPlace)
         },
@@ -214,15 +237,21 @@ export const mainPageComponent = {
             this.$refs.modalDeleteThing.init()
         },
         afterDeleteThing() {
+            this.resetTags()
             this.refreshThings(this.selectedPlace)
         },
         searchThing() {
             this.$refs.modalSearchThing.init()
         },
         afterSearchThing(placeID, thingID) {
+            this.resetTags()
             this.refreshPlaces(placeID)
             this.refreshThings(placeID)
             this.setSelectedThing(thingID)
+        },
+        afterFilterTag(tagID) {
+            this.selectedTag = tagID
+            this.refreshThings(this.selectedPlace)
         },
         addImage() {
             this.$refs.modalAddImage.init()
@@ -395,6 +424,14 @@ export const mainPageComponent = {
                                 :class="{ selected : selectedThing == thing.id }">
                                 <div class="title">{{ thing.title }}</div>    
                                 <div class="desc" v-if="thing.desc">{{ thing.desc }}</div>
+                                <div class="tags" v-if="thing.tags">  
+                                    <span 
+                                        class="badge rounded-pill"
+                                        v-for="tag in thing.tags"
+                                        v-bind:style="{ 'background-color': tag.style }">
+                                        {{ tag.title }}    
+                                    </span>
+                                </div>
                                 <div class="date">{{ thing.date }}</div>
                             </button>
                         </div>
@@ -447,7 +484,7 @@ export const mainPageComponent = {
         <modal-delete-thing ref="modalDeleteThing" :selected-thing="selectedThing" @after-delete-thing="afterDeleteThing"></modal-delete-thing>
         <modal-add-image ref="modalAddImage" :selected-place="selectedPlace" :selected-thing="selectedThing" @after-add-image="afterAddImage"></modal-add-image>
         <modal-show-images ref="modalShowImages" :images="imagesList"></modal-show-images>
-        <modal-search-thing ref="modalSearchThing" @after-search-thing="afterSearchThing"></modal-search-thing>
+        <modal-search-thing ref="modalSearchThing" @after-search-thing="afterSearchThing" @after-filter-tag="afterFilterTag"></modal-search-thing>
         <modal-add-user ref="modalAddUser" @after-add-user="afterAddUser"></modal-add-user>
         <modal-update-username ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></modal-update-username>
         <modal-update-password ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></modal-update-password>
