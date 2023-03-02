@@ -64,6 +64,27 @@ type UserRepository interface {
 	Update(ctx context.Context, req models.UpdateUserRequest) error
 }
 
+type TagRepository interface {
+	GetAll(ctx context.Context) ([]models.Tag, error)
+	Get(ctx context.Context, tagID int) (*models.Tag, error)
+	GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error)
+	Add(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) (int, error)
+	Update(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) error
+	Delete(ctx context.Context, tagID int, tx *sql.Tx) error
+	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+	CommitTx(tx *sql.Tx) error
+}
+
+type ThingTagRepository interface {
+	GetByPlaceID(ctx context.Context, placeID int) ([]models.ThingTag, error)
+	Add(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) error
+	Delete(ctx context.Context, req models.DeleteThingTagRequest, tx *sql.Tx) error
+	DeleteByTagID(ctx context.Context, tagID int, tx *sql.Tx) error
+	DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) error
+	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+	CommitTx(tx *sql.Tx) error
+}
+
 type FileRepository interface {
 	Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error
 	Delete(path string) error

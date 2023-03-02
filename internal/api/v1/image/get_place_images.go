@@ -9,8 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/images/place/{id} [get]
-// @Param       id path int true "Place ID"
+// @Router 		/api/v1/images/place/{placeId} [get]
+// @Param       placeId path int true "Place ID"
 // @Success     200 {object} dto.ImagesResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
@@ -23,7 +23,7 @@ func GetPlaceImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var res []models.Image
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("id")
+		id, err := fctx.ParamsInt("placeId")
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}

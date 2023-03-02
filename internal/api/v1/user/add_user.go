@@ -16,7 +16,7 @@ import (
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Add user
-// @Tags  		User
+// @Tags  		Users
 // @security 	APIKey
 // @Accept      json
 // @Produce     json

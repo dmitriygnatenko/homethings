@@ -1,7 +1,11 @@
 package tag
 
 import (
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,6 +21,27 @@ import (
 // @Produce     json
 func AddTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
-		return fctx.JSON(nil)
+		ctx := fctx.Context()
+		req := dto.AddTagRequest{}
+		if err := fctx.BodyParser(&req); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+
+		var validate = validator.New()
+		if err := validate.Struct(req); err != nil {
+			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
+		}
+
+		id, err := sp.GetTagRepository().Add(ctx, mappers.ConvertToAddTagRequestModel(req), nil)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		res, err := sp.GetTagRepository().Get(ctx, id)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		return fctx.JSON(mappers.ConvertToTagResponseDTO(*res))
 	}
 }

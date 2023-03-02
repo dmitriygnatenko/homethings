@@ -154,6 +154,14 @@ body {
     font-size: 12px;
     margin-top: 3px;
 }
+.things .list .tags {
+    margin-top: 3px;
+    font-size: 13px;
+}
+.things .list .tags span {
+    font-weight: normal;
+    margin-right: 3px;
+}
 .things .list .date {
     color: gray;
     font-size: 12px;

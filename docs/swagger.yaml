@@ -8,6 +8,16 @@ definitions:
     required:
     - title
     type: object
+  dto.AddTagRequest:
+    properties:
+      style:
+        type: string
+      title:
+        type: string
+    required:
+    - style
+    - title
+    type: object
   dto.AddThingRequest:
     properties:
       description:
@@ -108,6 +118,45 @@ definitions:
           $ref: '#/definitions/dto.PlaceResponse'
         type: array
     type: object
+  dto.TagResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      style:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.TagsResponse:
+    properties:
+      tags:
+        items:
+          $ref: '#/definitions/dto.TagResponse'
+        type: array
+    type: object
+  dto.ThingExtResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      place_id:
+        type: integer
+      tags:
+        items:
+          $ref: '#/definitions/dto.TagResponse'
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   dto.ThingResponse:
     properties:
       created_at:
@@ -123,11 +172,11 @@ definitions:
       updated_at:
         type: string
     type: object
-  dto.ThingsResponse:
+  dto.ThingsExtResponse:
     properties:
       things:
         items:
-          $ref: '#/definitions/dto.ThingResponse'
+          $ref: '#/definitions/dto.ThingExtResponse'
         type: array
     type: object
   dto.UpdatePlaceRequest:
@@ -137,6 +186,16 @@ definitions:
       title:
         type: string
     required:
+    - title
+    type: object
+  dto.UpdateTagRequest:
+    properties:
+      style:
+        type: string
+      title:
+        type: string
+    required:
+    - style
     - title
     type: object
   dto.UpdateThingRequest:
@@ -220,7 +279,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Login user
+      summary: Log in user
       tags:
       - Auth
   /api/v1/images:
@@ -263,14 +322,14 @@ paths:
       summary: Add images
       tags:
       - Images
-  /api/v1/images/place/{id}:
+  /api/v1/images/place/{imageId}:
     delete:
       consumes:
       - application/json
       parameters:
       - description: Image ID
         in: path
-        name: id
+        name: imageId
         required: true
         type: integer
       produces:
@@ -293,13 +352,14 @@ paths:
       summary: Delete image
       tags:
       - Images
+  /api/v1/images/place/{placeId}:
     get:
       consumes:
       - application/json
       parameters:
       - description: Place ID
         in: path
-        name: id
+        name: placeId
         required: true
         type: integer
       produces:
@@ -322,14 +382,14 @@ paths:
       summary: Get images by place ID (with child places)
       tags:
       - Images
-  /api/v1/images/thing/{id}:
+  /api/v1/images/thing/{imageId}:
     delete:
       consumes:
       - application/json
       parameters:
       - description: Image ID
         in: path
-        name: id
+        name: imageId
         required: true
         type: integer
       produces:
@@ -352,13 +412,14 @@ paths:
       summary: Delete image
       tags:
       - Images
+  /api/v1/images/thing/{thingId}:
     get:
       consumes:
       - application/json
       parameters:
       - description: Thing ID
         in: path
-        name: id
+        name: thingId
         required: true
         type: integer
       produces:
@@ -398,7 +459,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - APIKey: []
-      summary: Get places
+      summary: Get places list
       tags:
       - Places
     post:
@@ -431,14 +492,44 @@ paths:
       summary: Add place
       tags:
       - Places
-  /api/v1/places/{id}:
+  /api/v1/places/{parentPlaceId}/nested:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Place ID
+        in: path
+        name: parentPlaceId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PlacesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get nested places by parent ID
+      tags:
+      - Places
+  /api/v1/places/{placeId}:
     delete:
       consumes:
       - application/json
       parameters:
       - description: Place ID
         in: path
-        name: id
+        name: placeId
         required: true
         type: integer
       produces:
@@ -467,7 +558,7 @@ paths:
       parameters:
       - description: Place ID
         in: path
-        name: id
+        name: placeId
         required: true
         type: integer
       produces:
@@ -491,7 +582,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - APIKey: []
-      summary: Get one place by ID
+      summary: Get one place
       tags:
       - Places
     put:
@@ -500,7 +591,7 @@ paths:
       parameters:
       - description: Place ID
         in: path
-        name: id
+        name: placeId
         required: true
         type: integer
       - description: Request body
@@ -529,66 +620,6 @@ paths:
       summary: Update place
       tags:
       - Places
-  /api/v1/places/{id}/nested:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Place ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.PlacesResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      security:
-      - APIKey: []
-      summary: Get nested places by parent ID
-      tags:
-      - Places
-  /api/v1/places/{id}/things:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Place ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.ThingsResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      security:
-      - APIKey: []
-      summary: Get things by place ID
-      tags:
-      - Places
   /api/v1/places/tree:
     get:
       consumes:
@@ -609,6 +640,257 @@ paths:
       summary: Get places tree
       tags:
       - Places
+  /api/v1/tags:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get tags
+      tags:
+      - Tags
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Add tag
+      tags:
+      - Tags
+  /api/v1/tags/{tagId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Delete tag
+      tags:
+      - Tags
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get one tag
+      tags:
+      - Tags
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Update tag
+      tags:
+      - Tags
+  /api/v1/tags/{tagId}/thing/{thingId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      - description: Thing ID
+        in: path
+        name: thingId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Delete thing tag
+      tags:
+      - Tags
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Tag ID
+        in: path
+        name: tagId
+        required: true
+        type: integer
+      - description: Thing ID
+        in: path
+        name: thingId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Add thing tag
+      tags:
+      - Tags
+  /api/v1/tags/thing/{thingId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thing ID
+        in: path
+        name: thingId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TagsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get thing tags
+      tags:
+      - Tags
   /api/v1/things:
     post:
       consumes:
@@ -640,14 +922,14 @@ paths:
       summary: Add thing
       tags:
       - Things
-  /api/v1/things/{id}:
+  /api/v1/things/{thingId}:
     delete:
       consumes:
       - application/json
       parameters:
       - description: Thing ID
         in: path
-        name: id
+        name: thingId
         required: true
         type: integer
       produces:
@@ -676,7 +958,7 @@ paths:
       parameters:
       - description: Thing ID
         in: path
-        name: id
+        name: thingId
         required: true
         type: integer
       produces:
@@ -700,7 +982,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       security:
       - APIKey: []
-      summary: Get one thing by ID
+      summary: Get one thing
       tags:
       - Things
     put:
@@ -709,7 +991,7 @@ paths:
       parameters:
       - description: Thing ID
         in: path
-        name: id
+        name: thingId
         required: true
         type: integer
       - description: Request body
@@ -736,6 +1018,36 @@ paths:
       security:
       - APIKey: []
       summary: Update thing
+      tags:
+      - Things
+  /api/v1/things/place/{placeId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Place ID
+        in: path
+        name: placeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ThingsExtResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get things by place ID
       tags:
       - Things
   /api/v1/things/search/{search}:
@@ -798,7 +1110,7 @@ paths:
       - APIKey: []
       summary: Add user
       tags:
-      - User
+      - Users
     put:
       consumes:
       - application/json
@@ -828,7 +1140,7 @@ paths:
       - APIKey: []
       summary: Update user
       tags:
-      - User
+      - Users
 securityDefinitions:
   APIKey:
     in: header

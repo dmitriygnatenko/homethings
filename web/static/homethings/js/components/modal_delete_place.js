@@ -23,12 +23,12 @@ export const modalDeletePlaceComponent = {
             this.form.title = ""
             this.form.error = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{id}", this.selectedPlace))
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.selectedPlace))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
             }
 
-            let nestedRes = client.jsonRequest(client.methodGet, client.routeGetNestedPlaces.replace("{id}", this.selectedPlace))
+            let nestedRes = client.jsonRequest(client.methodGet, client.routeGetNestedPlaces.replace("{parentPlaceId}", this.selectedPlace))
             if (nestedRes.status === client.statusOK) {
                 if (Array.isArray(nestedRes.data.places) && nestedRes.data.places.length) {
                     this.form.error = "Необходимо вначале удалить вложенные места."
@@ -39,7 +39,7 @@ export const modalDeletePlaceComponent = {
             this.modal.show()
         },
         submitForm() {
-            let res = client.jsonRequest(client.methodDelete, client.routeDeletePlace.replace("{id}", this.selectedPlace))
+            let res = client.jsonRequest(client.methodDelete, client.routeDeletePlace.replace("{placeId}", this.selectedPlace))
             if (res.status === client.statusOK) {
                 this.$emit("after-delete-place");
             }

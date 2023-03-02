@@ -160,7 +160,7 @@ func Test_DeletePlaceImageHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.placeImageRepoMock(mc), tt.fileRepoMock(mc))
 
-			fiberApp.Delete("/v1/images/place/:id", DeletePlaceImageHandler(serviceProvider))
+			fiberApp.Delete("/v1/images/place/:imageId", DeletePlaceImageHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 

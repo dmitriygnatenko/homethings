@@ -1,4 +1,4 @@
-package place
+package tag
 
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
@@ -6,29 +6,29 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/places/{id}/things [get]
-// @Param       id path int true "Place ID"
-// @Success     200 {object} dto.ThingsResponse
+// @Router 		/api/v1/tags/thing/{thingId} [get]
+// @Param       thingId path int true "Thing ID"
+// @Success     200 {object} dto.TagsResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
-// @Summary     Get things by place ID
-// @Tags  		Places
+// @Summary     Get thing tags
+// @Tags  		Tags
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetThingTagsHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("id")
+		id, err := fctx.ParamsInt("thingId")
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		res, err := sp.GetThingRepository().GetAllByPlaceID(ctx, id)
+		res, err := sp.GetTagRepository().GetByThingID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(mappers.ConvertToThingsResponseDTO(res))
+		return fctx.JSON(mappers.ConvertToTagsResponseDTO(res))
 	}
 }

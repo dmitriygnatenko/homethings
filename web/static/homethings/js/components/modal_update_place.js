@@ -28,28 +28,31 @@ export const modalUpdatePlaceComponent = {
             this.errors.title = ""
             this.form.title = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetPlaces)
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.selectedPlace))
             if (res.status === client.statusOK) {
-                this.form.placesList = []
-                if (Array.isArray(res.data.places) && res.data.places.length) {
-                    let obj = this
+                this.form.title = res.data.title
+                this.form.parentID = res.data.parent_id
 
-                    obj.form.placesList.push({
-                        "id": 0,
-                        "title": "",
-                    })
+                let placesRes = client.jsonRequest(client.methodGet, client.routeGetPlaces)
+                if (placesRes.status === client.statusOK) {
+                    this.form.placesList = []
+                    if (Array.isArray(placesRes.data.places) && placesRes.data.places.length) {
+                        let obj = this
 
-                    getPlacesListWithNestedTitles(res.data.places).forEach(place => {
-                        if (place.id !== obj.selectedPlace) {
-                            obj.form.placesList.push({
-                                "id": place.id,
-                                "title": place.title,
-                            })
-                        } else {
-                            obj.form.parentID = place.parent_id
-                            obj.form.title = place.title
-                        }
-                    });
+                        obj.form.placesList.push({
+                            "id": 0,
+                            "title": "",
+                        })
+
+                        getPlacesListWithNestedTitles(placesRes.data.places).forEach(place => {
+                            if (place.id !== obj.selectedPlace) {
+                                obj.form.placesList.push({
+                                    "id": place.id,
+                                    "title": place.title,
+                                })
+                            }
+                        });
+                    }
                 }
             }
 
@@ -70,7 +73,7 @@ export const modalUpdatePlaceComponent = {
                 data['parent_id'] = this.form.parentID
             }
 
-            let res = client.jsonRequest(client.methodPut, client.routeUpdatePlace.replace("{id}", this.selectedPlace), data)
+            let res = client.jsonRequest(client.methodPut, client.routeUpdatePlace.replace("{placeId}", this.selectedPlace), data)
             if (res.status === client.statusOK) {
                 this.$emit("after-update-place");
             }

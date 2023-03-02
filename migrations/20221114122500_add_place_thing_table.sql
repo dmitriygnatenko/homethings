@@ -4,7 +4,6 @@ CREATE TABLE place_thing
     place_id   INT       NOT NULL,
     thing_id   INT       NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_place_thing_place_id FOREIGN KEY (place_id) REFERENCES place (id),
     CONSTRAINT fk_place_thing_thing_id FOREIGN KEY (thing_id) REFERENCES thing (id)
 );

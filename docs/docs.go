@@ -61,7 +61,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Login user",
+                "summary": "Log in user",
                 "parameters": [
                     {
                         "description": "Request body",
@@ -164,53 +164,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/images/place/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "APIKey": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Images"
-                ],
-                "summary": "Get images by place ID (with child places)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Place ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ImagesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            },
+        "/api/v1/images/place/{imageId}": {
             "delete": {
                 "security": [
                     {
@@ -231,7 +185,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Image ID",
-                        "name": "id",
+                        "name": "imageId",
                         "in": "path",
                         "required": true
                     }
@@ -258,7 +212,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/images/thing/{id}": {
+        "/api/v1/images/place/{placeId}": {
             "get": {
                 "security": [
                     {
@@ -274,12 +228,12 @@ const docTemplate = `{
                 "tags": [
                     "Images"
                 ],
-                "summary": "Get images by thing ID",
+                "summary": "Get images by place ID (with child places)",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Thing ID",
-                        "name": "id",
+                        "description": "Place ID",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     }
@@ -304,7 +258,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/api/v1/images/thing/{imageId}": {
             "delete": {
                 "security": [
                     {
@@ -325,7 +281,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Image ID",
-                        "name": "id",
+                        "name": "imageId",
                         "in": "path",
                         "required": true
                     }
@@ -335,6 +291,54 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/images/thing/{thingId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Images"
+                ],
+                "summary": "Get images by thing ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ImagesResponse"
                         }
                     },
                     "400": {
@@ -368,7 +372,7 @@ const docTemplate = `{
                 "tags": [
                     "Places"
                 ],
-                "summary": "Get places",
+                "summary": "Get places list",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -466,7 +470,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/places/{id}": {
+        "/api/v1/places/{parentPlaceId}/nested": {
             "get": {
                 "security": [
                     {
@@ -482,12 +486,60 @@ const docTemplate = `{
                 "tags": [
                     "Places"
                 ],
-                "summary": "Get one place by ID",
+                "summary": "Get nested places by parent ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Place ID",
-                        "name": "id",
+                        "name": "parentPlaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PlacesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/places/{placeId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Places"
+                ],
+                "summary": "Get one place",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     }
@@ -539,7 +591,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Place ID",
-                        "name": "id",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     },
@@ -594,7 +646,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Place ID",
-                        "name": "id",
+                        "name": "placeId",
                         "in": "path",
                         "required": true
                     }
@@ -621,7 +673,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/places/{id}/nested": {
+        "/api/v1/tags": {
             "get": {
                 "security": [
                     {
@@ -635,23 +687,62 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Places"
+                    "Tags"
                 ],
-                "summary": "Get nested places by parent ID",
+                "summary": "Get tags",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TagsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Add tag",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Place ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddTagRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PlacesResponse"
+                            "$ref": "#/definitions/dto.TagResponse"
                         }
                     },
                     "400": {
@@ -669,7 +760,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/places/{id}/things": {
+        "/api/v1/tags/thing/{thingId}": {
             "get": {
                 "security": [
                     {
@@ -683,14 +774,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Places"
+                    "Tags"
                 ],
-                "summary": "Get things by place ID",
+                "summary": "Get thing tags",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Place ID",
-                        "name": "id",
+                        "description": "Thing ID",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -699,7 +790,270 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ThingsResponse"
+                            "$ref": "#/definitions/dto.TagsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tags/{tagId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Get one tag",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Update tag",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateTagRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Delete tag",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tags/{tagId}/thing/{thingId}": {
+            "post": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Add thing tag",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TagResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Delete thing tag",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Tag ID",
+                        "name": "tagId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
                         }
                     },
                     "400": {
@@ -767,6 +1121,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/things/place/{placeId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Things"
+                ],
+                "summary": "Get things by place ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Place ID",
+                        "name": "placeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ThingsExtResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/things/search/{search}": {
             "get": {
                 "security": [
@@ -815,7 +1217,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/things/{id}": {
+        "/api/v1/things/{thingId}": {
             "get": {
                 "security": [
                     {
@@ -831,12 +1233,12 @@ const docTemplate = `{
                 "tags": [
                     "Things"
                 ],
-                "summary": "Get one thing by ID",
+                "summary": "Get one thing",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -888,7 +1290,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     },
@@ -943,7 +1345,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Thing ID",
-                        "name": "id",
+                        "name": "thingId",
                         "in": "path",
                         "required": true
                     }
@@ -984,7 +1386,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
                 "summary": "Update user",
                 "parameters": [
@@ -1032,7 +1434,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
                 "summary": "Add user",
                 "parameters": [
@@ -1078,6 +1480,21 @@ const docTemplate = `{
             "properties": {
                 "parent_id": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AddTagRequest": {
+            "type": "object",
+            "required": [
+                "style",
+                "title"
+            ],
+            "properties": {
+                "style": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -1238,6 +1655,66 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.TagResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "style": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.TagsResponse": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TagResponse"
+                    }
+                }
+            }
+        },
+        "dto.ThingExtResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "place_id": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TagResponse"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ThingResponse": {
             "type": "object",
             "properties": {
@@ -1261,13 +1738,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ThingsResponse": {
+        "dto.ThingsExtResponse": {
             "type": "object",
             "properties": {
                 "things": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ThingResponse"
+                        "$ref": "#/definitions/dto.ThingExtResponse"
                     }
                 }
             }
@@ -1280,6 +1757,21 @@ const docTemplate = `{
             "properties": {
                 "parent_id": {
                     "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateTagRequest": {
+            "type": "object",
+            "required": [
+                "style",
+                "title"
+            ],
+            "properties": {
+                "style": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"

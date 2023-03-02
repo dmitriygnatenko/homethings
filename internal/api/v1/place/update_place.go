@@ -9,8 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/places/{id} [put]
-// @Param       id path int true "Place ID"
+// @Router 		/api/v1/places/{placeId} [put]
+// @Param       placeId path int true "Place ID"
 // @Param       data body dto.UpdatePlaceRequest true "Request body"
 // @Success     200 {object} dto.PlaceResponse
 // @Failure     400 {object} dto.ErrorResponse
@@ -23,7 +23,7 @@ import (
 func UpdatePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("id")
+		id, err := fctx.ParamsInt("placeId")
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}

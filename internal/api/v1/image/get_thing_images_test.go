@@ -130,7 +130,7 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			serviceProvider := sp.InitMock(tt.thingImageRepoMock(mc))
 
-			fiberApp.Get("/v1/images/thing/:id", GetThingImagesHandler(serviceProvider))
+			fiberApp.Get("/v1/images/thing/:thingId", GetThingImagesHandler(serviceProvider))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 
