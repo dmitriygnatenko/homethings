@@ -66,6 +66,7 @@ export const loginPageComponent = {
                         id="formUsername" 
                         placeholder="Имя пользователя"
                         v-model.trim="form.username"
+                        v-on:keyup.enter="submitForm"
                         :class="{'is-invalid': errors.username}">
                     <label for="formUsername">Имя пользователя</label>
                 </div>
@@ -76,6 +77,7 @@ export const loginPageComponent = {
                         id="formPassword"
                         placeholder="Пароль"
                         v-model.trim="form.password"
+                        v-on:keyup.enter="submitForm"
                         :class="{'is-invalid': errors.password}">
                     <label for="formPassword">Пароль</label>
                 </div>
