@@ -13,6 +13,7 @@ import {modalSearchThingComponent} from "./modal_search_thing.js"
 import {modalAddUserComponent} from "./modal_add_user.js";
 import {modalUpdateUsernameComponent} from "./modal_update_username.js";
 import {modalUpdatePasswordComponent} from "./modal_update_password.js";
+import {modalTagsComponent} from "./modal_tags.js";
 import {toastComponent} from "./toast.js";
 
 import * as client from "../client/client.js";
@@ -34,6 +35,7 @@ export const mainPageComponent = {
         "modal-add-user": modalAddUserComponent,
         "modal-update-username": modalUpdateUsernameComponent,
         "modal-update-password": modalUpdatePasswordComponent,
+        "modal-tags": modalTagsComponent,
         "toast": toastComponent,
     },
     emits: ["set-auth"],
@@ -285,6 +287,13 @@ export const mainPageComponent = {
         showImage(imageID, placeID, thingID) {
             this.$refs.modalShowImages.init(imageID, placeID, thingID)
         },
+        showTags() {
+            this.$refs.modalTags.init();
+        },
+        afterTags() {
+            this.resetTags()
+            this.refreshThings(this.selectedPlace)
+        },
         // Auth
         logout() {
             auth.clearToken()
@@ -337,6 +346,8 @@ export const mainPageComponent = {
                         <li><button class="dropdown-item" @click="addUser">Добавить пользователя</button></li>
                         <li><a class="dropdown-item" @click="updateUsername">Изменить свой логин</a></li>
                         <li><a class="dropdown-item" @click="updatePassword">Изменить свой пароль</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item" @click="showTags">Теги</button></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><button class="dropdown-item" @click="logout">Выход</button></li>
                     </ul>
@@ -488,6 +499,7 @@ export const mainPageComponent = {
         <modal-add-user ref="modalAddUser" @after-add-user="afterAddUser"></modal-add-user>
         <modal-update-username ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></modal-update-username>
         <modal-update-password ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></modal-update-password>
+        <modal-tags ref="modalTags" @after-tags="afterTags"></modal-tags>
         <toast ref="toast"></toast>
     </template>
     `

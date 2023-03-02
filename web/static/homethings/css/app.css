@@ -242,3 +242,22 @@ body {
 .search-results {
     font-size: 14px;
 }
+#tags-modal .btn.add {
+    color: green;
+    padding-top: 2px;
+}
+#tags-modal .btn.delete {
+    color: #cf0000;
+    padding-top: 2px;
+}
+#tags-modal .btn.edit {
+    color: #003bcf;
+    padding-top: 2px;
+}
+#tags-modal .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
