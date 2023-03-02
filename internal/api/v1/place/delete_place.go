@@ -97,6 +97,10 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
+			if err = sp.GetThingTagRepository().DeleteByThingID(ctx, thingID, tx); err != nil {
+				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+			}
+
 			if err = sp.GetThingRepository().Delete(ctx, thingID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}

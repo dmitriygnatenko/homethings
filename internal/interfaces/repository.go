@@ -79,6 +79,7 @@ type ThingTagRepository interface {
 	Add(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) error
 	Delete(ctx context.Context, req models.DeleteThingTagRequest, tx *sql.Tx) error
 	DeleteByTagID(ctx context.Context, tagID int, tx *sql.Tx) error
+	DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) error
 	BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
 	CommitTx(tx *sql.Tx) error
 }

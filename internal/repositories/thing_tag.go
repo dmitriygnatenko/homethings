@@ -97,6 +97,25 @@ func (r thingTagRepository) DeleteByTagID(ctx context.Context, tagID int, tx *sq
 	return err
 }
 
+func (r thingTagRepository) DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) error {
+	query, args, err := sq.Delete(thingTagTableName).
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"thing_id": thingID}).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	if tx == nil {
+		_, err = r.db.ExecContext(ctx, query, args...)
+	} else {
+		_, err = tx.ExecContext(ctx, query, args...)
+	}
+
+	return err
+}
+
 func (r thingTagRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.ThingTag, error) {
 	var res []models.ThingTag
 
