@@ -39,6 +39,7 @@ export const routeAddImage = "/api/v1/images"
 // Tags
 export const routeGetTags = "/api/v1/tags"
 export const routeGetTag = "/api/v1/tags/{tagId}"
+export const routeGetThingTags = "/api/v1/tags/thing/{thingId}"
 export const routeAddTag = "/api/v1/tags"
 export const routeUpdateTag = "/api/v1/tags/{tagId}"
 export const routeDeleteTag = "/api/v1/tags/{tagId}"

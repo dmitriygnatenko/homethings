@@ -15,6 +15,9 @@ export const modalUpdateThingComponent = {
                 desc: "",
                 placeID: 0,
                 placesList: [],
+                tagsList: [],
+                selectedTags: [],
+                initialTags: [],
             },
             errors: {
                 title: "",
@@ -41,17 +44,46 @@ export const modalUpdateThingComponent = {
                 return
             }
 
-            let pres = client.jsonRequest(client.methodGet, client.routeGetPlaces)
-            if (pres.status === client.statusOK) {
+            let placesRes = client.jsonRequest(client.methodGet, client.routeGetPlaces)
+            if (placesRes.status === client.statusOK) {
                 this.form.placesList = []
-                if (Array.isArray(pres.data.places) && pres.data.places.length) {
+                if (Array.isArray(placesRes.data.places) && placesRes.data.places.length) {
                     let obj = this
 
-                    getPlacesListWithNestedTitles(pres.data.places).forEach(place => {
+                    getPlacesListWithNestedTitles(placesRes.data.places).forEach(place => {
                         obj.form.placesList.push({
                             "id": place.id,
                             "title": place.title,
                         })
+                    });
+                }
+            }
+
+            let tagsRes = client.jsonRequest(client.methodGet, client.routeGetTags)
+            if (tagsRes.status === client.statusOK) {
+                this.form.tagsList = []
+                if (Array.isArray(tagsRes.data.tags) && tagsRes.data.tags.length) {
+                    let obj = this
+
+                    tagsRes.data.tags.forEach(tag => {
+                        obj.form.tagsList.push({
+                            "id": tag.id,
+                            "title": tag.title,
+                        })
+                    });
+                }
+            }
+
+            this.form.initialTags = []
+            this.form.selectedTags = []
+            let thingTagsRes = client.jsonRequest(client.methodGet, client.routeGetThingTags.replace("{thingId}", this.selectedThing))
+            if (thingTagsRes.status === client.statusOK) {
+                if (Array.isArray(thingTagsRes.data.tags) && thingTagsRes.data.tags.length) {
+                    let obj = this
+
+                    thingTagsRes.data.tags.forEach(tag => {
+                        obj.form.selectedTags.push(tag.id)
+                        obj.form.initialTags.push(tag.id)
                     });
                 }
             }
@@ -64,6 +96,20 @@ export const modalUpdateThingComponent = {
                 this.errors.title = "Название должно быть заполнено"
                 return
             }
+
+            // Delete
+            this.form.initialTags.forEach(tagID => {
+                if (this.form.selectedTags.indexOf(tagID) < 0) {
+                    client.jsonRequest(client.methodDelete, client.routeDeleteThingTag.replace("{thingId}", this.selectedThing).replace("{tagId}", tagID))
+                }
+            });
+
+            // Add
+            this.form.selectedTags.forEach(tagID => {
+                if (this.form.initialTags.indexOf(tagID) < 0) {
+                    client.jsonRequest(client.methodPost, client.routeAddThingTag.replace("{thingId}", this.selectedThing).replace("{tagId}", tagID))
+                }
+            });
 
             let data = {
                 title: this.form.title,
@@ -111,7 +157,7 @@ export const modalUpdateThingComponent = {
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
                             <b>Описание</b>
                         </label>
@@ -120,6 +166,26 @@ export const modalUpdateThingComponent = {
                                 class="form-control form-control-sm"
                                 v-model.trim="form.desc">
                              </textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-3 col-form-label col-form-label-sm">
+                            <b>Теги</b>
+                        </label>
+                        <div class="col-sm-9">
+                            <div 
+                                class="form-check form-check-inline form-control-sm"
+                                v-for="tag in form.tagsList" :key="tag.id">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    v-model="form.selectedTags"
+                                    :id="'tag-' + tag.id"
+                                    :value="tag.id">
+                                <label class="form-check-label" :for="'tag-' + tag.id">
+                                    {{ tag.title }}
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
