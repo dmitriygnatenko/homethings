@@ -39,4 +39,8 @@
         padding-top: 1px;
         padding-left: 0;
     }
+    #tags-modal .btn.edit, #tags-modal .btn.delete {
+        padding-top: 1px;
+        padding-left: 0;
+    }
 }
