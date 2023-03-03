@@ -147,14 +147,14 @@ export const modalTagsComponent = {
                         class="row mt-2"
                         v-for="tag in form.tagsList"
                         :key="index">
-                        <div class="col-9">
+                        <div class="col-8">
                             <span 
                                 class="badge rounded-pill"
                                 v-bind:style="{ 'background-color': tag.style }">
                                 {{ tag.title }}
                             </span>
                         </div>
-                        <div class="col-3 text-end">
+                        <div class="col-4 text-end">
                             <button 
                                 class="btn edit"
                                 title="Редактировать"
