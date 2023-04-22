@@ -10,18 +10,19 @@ import (
 )
 
 type ServiceProvider struct {
-	env                  interfaces.Env
-	auth                 interfaces.Auth
-	mailer               interfaces.Mailer
-	placeRepository      interfaces.PlaceRepository
-	thingRepository      interfaces.ThingRepository
-	tagRepository        interfaces.TagRepository
-	placeThingRepository interfaces.PlaceThingRepository
-	placeImageRepository interfaces.PlaceImageRepository
-	thingImageRepository interfaces.ThingImageRepository
-	thingTagRepository   interfaces.ThingTagRepository
-	userRepository       interfaces.UserRepository
-	fileRepository       interfaces.FileRepository
+	env                         interfaces.Env
+	auth                        interfaces.Auth
+	mailer                      interfaces.Mailer
+	placeRepository             interfaces.PlaceRepository
+	thingRepository             interfaces.ThingRepository
+	tagRepository               interfaces.TagRepository
+	placeThingRepository        interfaces.PlaceThingRepository
+	placeImageRepository        interfaces.PlaceImageRepository
+	thingImageRepository        interfaces.ThingImageRepository
+	thingTagRepository          interfaces.ThingTagRepository
+	userRepository              interfaces.UserRepository
+	thingNotificationRepository interfaces.ThingNotificationRepository
+	fileRepository              interfaces.FileRepository
 }
 
 func Init() (interfaces.ServiceProvider, error) {
@@ -59,6 +60,7 @@ func Init() (interfaces.ServiceProvider, error) {
 	sp.tagRepository = repositories.InitTagRepository(db)
 	sp.thingTagRepository = repositories.InitThingTagRepository(db)
 	sp.userRepository = repositories.InitUserRepository(db)
+	sp.thingNotificationRepository = repositories.InitThingNotificationRepository(db)
 	sp.fileRepository = repositories.InitFileRepository()
 
 	return sp, nil
@@ -104,6 +106,10 @@ func (sp *ServiceProvider) GetThingTagRepository() interfaces.ThingTagRepository
 	return sp.thingTagRepository
 }
 
+func (sp *ServiceProvider) GetThingNotificationRepository() interfaces.ThingNotificationRepository {
+	return sp.thingNotificationRepository
+}
+
 func (sp *ServiceProvider) GetUserRepository() interfaces.UserRepository {
 	return sp.userRepository
 }
@@ -135,6 +141,8 @@ func InitMock(deps ...interface{}) interfaces.ServiceProvider {
 			sp.tagRepository = s
 		case interfaces.ThingTagRepository:
 			sp.thingTagRepository = s
+		case interfaces.ThingNotificationRepository:
+			sp.thingNotificationRepository = s
 		case interfaces.UserRepository:
 			sp.userRepository = s
 		case interfaces.FileRepository:

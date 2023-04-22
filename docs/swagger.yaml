@@ -18,6 +18,16 @@ definitions:
     - style
     - title
     type: object
+  dto.AddThingNotificationRequest:
+    properties:
+      notification_date:
+        type: string
+      thing_id:
+        type: integer
+    required:
+    - notification_date
+    - thing_id
+    type: object
   dto.AddThingRequest:
     properties:
       description:
@@ -197,6 +207,16 @@ definitions:
     required:
     - style
     - title
+    type: object
+  dto.UpdateThingNotificationRequest:
+    properties:
+      notification_date:
+        type: string
+      thing_id:
+        type: integer
+    required:
+    - notification_date
+    - thing_id
     type: object
   dto.UpdateThingRequest:
     properties:
@@ -1020,6 +1040,102 @@ paths:
       summary: Update thing
       tags:
       - Things
+  /api/v1/things/notification:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddThingNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Add thing notification
+      tags:
+      - Notifications
+  /api/v1/things/notification/{thingId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thing ID
+        in: path
+        name: thingId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Delete thing notification
+      tags:
+      - Notifications
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thing ID
+        in: path
+        name: thingId
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateThingNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Update thing notification
+      tags:
+      - Notifications
   /api/v1/things/place/{placeId}:
     get:
       consumes:

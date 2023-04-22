@@ -1121,6 +1121,159 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/things/notification": {
+            "post": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Add thing notification",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddThingNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/things/notification/{thingId}": {
+            "put": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Update thing notification",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateThingNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Delete thing notification",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EmptyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/things/place/{placeId}": {
             "get": {
                 "security": [
@@ -1501,6 +1654,21 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AddThingNotificationRequest": {
+            "type": "object",
+            "required": [
+                "notification_date",
+                "thing_id"
+            ],
+            "properties": {
+                "notification_date": {
+                    "type": "string"
+                },
+                "thing_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.AddThingRequest": {
             "type": "object",
             "required": [
@@ -1775,6 +1943,21 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.UpdateThingNotificationRequest": {
+            "type": "object",
+            "required": [
+                "notification_date",
+                "thing_id"
+            ],
+            "properties": {
+                "notification_date": {
+                    "type": "string"
+                },
+                "thing_id": {
+                    "type": "integer"
                 }
             }
         },

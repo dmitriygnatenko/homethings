@@ -6,6 +6,7 @@ import (
 	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
+	notificationAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification"
 	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
 	tagAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag"
 	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
@@ -176,6 +177,10 @@ func registerHandlers(r fiber.Router, sp interfaces.ServiceProvider) {
 	r.Post("/v1/tags", tagAPI.AddTagHandler(sp))
 	r.Put("/v1/tags/:id<int>", tagAPI.UpdateTagHandler(sp))
 	r.Delete("/v1/tags/:id<int>", tagAPI.DeleteTagHandler(sp))
+
+	r.Post("/v1/things/notificationAPI", notificationAPI.AddThingNotificationHandler(sp))
+	r.Put("/v1/things/notificationAPI/:thingId<int>", notificationAPI.UpdateThingNotificationHandler(sp))
+	r.Delete("/v1/things/notificationAPI/:thingId<int>", notificationAPI.DeletePlaceHandler(sp))
 
 	r.Post("/v1/users", userAPI.AddUserHandler(sp))
 	r.Put("/v1/users", userAPI.UpdateUserHandler(sp))

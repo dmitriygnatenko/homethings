@@ -11,6 +11,7 @@ type ServiceProvider interface {
 	GetPlaceImageRepository() PlaceImageRepository
 	GetThingImageRepository() ThingImageRepository
 	GetThingTagRepository() ThingTagRepository
+	GetThingNotificationRepository() ThingNotificationRepository
 	GetUserRepository() UserRepository
 	GetFileRepository() FileRepository
 }

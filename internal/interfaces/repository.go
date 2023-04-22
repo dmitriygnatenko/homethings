@@ -85,6 +85,14 @@ type ThingTagRepository interface {
 	CommitTx(tx *sql.Tx) error
 }
 
+type ThingNotificationRepository interface {
+	Add(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) error
+	Update(ctx context.Context, req models.UpdateThingNotificationRequest, tx *sql.Tx) error
+	Delete(ctx context.Context, thingID int, tx *sql.Tx) error
+	Get(ctx context.Context, thingID int) (*models.ThingNotification, error)
+	GetExpired(ctx context.Context) ([]models.ExtThingNotification, error)
+}
+
 type FileRepository interface {
 	Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error
 	Delete(path string) error
