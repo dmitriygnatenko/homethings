@@ -1172,6 +1172,52 @@ const docTemplate = `{
             }
         },
         "/api/v1/things/notification/{thingId}": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get thing notification",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thing ID",
+                        "name": "thingId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ThingNotificationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -1662,7 +1708,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "notification_date": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "thing_id": {
                     "type": "integer"
@@ -1883,6 +1930,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ThingNotificationResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "notification_date": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ThingResponse": {
             "type": "object",
             "properties": {
@@ -1949,15 +2013,12 @@ const docTemplate = `{
         "dto.UpdateThingNotificationRequest": {
             "type": "object",
             "required": [
-                "notification_date",
-                "thing_id"
+                "notification_date"
             ],
             "properties": {
                 "notification_date": {
-                    "type": "string"
-                },
-                "thing_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },

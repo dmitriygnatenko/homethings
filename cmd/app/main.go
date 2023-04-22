@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/fiber"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
@@ -27,4 +28,8 @@ func main() {
 	if err = fiberApp.Listen(":" + serviceProvider.GetEnvService().GetAppPort()); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func init() {
+	time.Local = time.UTC
 }

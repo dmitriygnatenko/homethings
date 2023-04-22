@@ -4,6 +4,8 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -20,7 +22,7 @@ import (
 // @Produce     json
 func AddThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
-		//ctx := fctx.Context()
+		ctx := fctx.Context()
 
 		req := dto.AddThingNotificationRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
@@ -32,15 +34,18 @@ func AddThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		//id, err := sp.GetPlaceRepository().Add(ctx, mappers.ConvertToAddPlaceRequestModel(req), nil)
-		//if err != nil {
-		//	return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		//}
-		//
-		//res, err := sp.GetPlaceRepository().Get(ctx, id)
-		//if err != nil {
-		//	return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		//}
+		dbReq, err := mappers.ConvertToAddThingNotificationRequestModel(req)
+		if err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+
+		if err = sp.GetThingNotificationRepository().Add(ctx, *dbReq, nil); err != nil {
+			if repositories.IsFKViolationError(err) || repositories.IsDuplicateKeyError(err) {
+				return fiber.NewError(fiber.StatusBadRequest, "")
+			}
+
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
 
 		return fctx.JSON(dto.EmptyResponse{})
 	}
