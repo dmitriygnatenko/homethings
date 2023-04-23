@@ -1,6 +1,7 @@
 package thing
 
 import (
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
@@ -33,6 +34,9 @@ func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
+
+		things = helpers.ApplyLocation(fctx, things)
+		tags = helpers.ApplyLocation(fctx, tags)
 
 		return fctx.JSON(mappers.ConvertToThingsExtResponseDTO(things, tags))
 	}

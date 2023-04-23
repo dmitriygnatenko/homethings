@@ -13,6 +13,7 @@ import (
 	userAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/user"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/middleware/timezone"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -39,6 +40,9 @@ func Init(sp interfaces.ServiceProvider) (*fiber.App, error) {
 
 	// Configure recover middleware
 	fiberApp.Use(recover.New())
+
+	// Configure client timezone middleware
+	fiberApp.Use(timezone.New())
 
 	// Configure JWT middleware
 	jwtAuth := jwt.New(getJWTConfig(sp))

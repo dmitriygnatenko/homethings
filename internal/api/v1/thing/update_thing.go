@@ -4,6 +4,7 @@ import (
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/go-playground/validator/v10"
@@ -76,6 +77,8 @@ func UpdateThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
+
+		res = helpers.ApplyLocation(fctx, res)
 
 		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))
 	}

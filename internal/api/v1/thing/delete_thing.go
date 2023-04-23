@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 )
@@ -77,6 +77,6 @@ func DeleteThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			}
 		}
 
-		return fctx.JSON(dto.EmptyResponse{})
+		return fctx.JSON(factory.CreateEmptyResponse())
 	}
 }
