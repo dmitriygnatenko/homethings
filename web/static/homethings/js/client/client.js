@@ -48,12 +48,14 @@ export const routeDeleteThingTag = "/api/v1/tags/{tagId}/thing/{thingId}"
 
 export function jsonRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
-    let token = getToken()
+    const token = getToken()
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     xhr.open(method, url, false);
 
     xhr.setRequestHeader("Accept", "application/json")
     xhr.setRequestHeader("Content-Type", "application/json")
+    xhr.setRequestHeader("Timezone", timezone)
 
     if (token !== "") {
         xhr.setRequestHeader("Authorization", "Bearer " + token)
@@ -73,11 +75,13 @@ export function jsonRequest(method, url, data) {
 
 export function formDataRequest(method, url, data) {
     let xhr = new XMLHttpRequest();
-    let token = getToken()
+    const token = getToken()
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     xhr.open(method, url, false);
 
     xhr.setRequestHeader("Accept", "application/json")
+    xhr.setRequestHeader("Timezone", timezone)
 
     if (token !== "") {
         xhr.setRequestHeader("Authorization", "Bearer " + token)
