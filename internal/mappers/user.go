@@ -31,3 +31,11 @@ func ConvertToUpdateUserRequestModel(id int, req dto.UpdateUserRequest) models.U
 
 	return res
 }
+
+func ConvertToUserResponseDTO(req models.User) dto.UserResponse {
+	return dto.UserResponse{Username: req.Username}
+}
+
+func ConvertToLoginResponseDTO(token string) dto.LoginResponse {
+	return dto.LoginResponse{Token: token}
+}

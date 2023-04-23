@@ -3,8 +3,8 @@ package auth
 import (
 	"database/sql"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -30,6 +30,6 @@ func CheckAuthHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(dto.UserResponse{Username: user.Username})
+		return fctx.JSON(mappers.ConvertToUserResponseDTO(*user))
 	}
 }
