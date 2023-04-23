@@ -8,7 +8,7 @@ import (
 	"time"
 
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
@@ -104,6 +104,6 @@ func AddImageHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			}
 		}
 
-		return fctx.JSON(dto.EmptyResponse{})
+		return fctx.JSON(factory.CreateEmptyResponse())
 	}
 }

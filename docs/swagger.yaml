@@ -1067,7 +1067,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.EmptyResponse'
+            $ref: '#/definitions/dto.ThingNotificationResponse'
         "400":
           description: Bad Request
           schema:
@@ -1161,7 +1161,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.EmptyResponse'
+            $ref: '#/definitions/dto.ThingNotificationResponse'
         "400":
           description: Bad Request
           schema:

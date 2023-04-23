@@ -30,6 +30,15 @@ func ApplyLocation[T interface{}](fctx *fiber.Ctx, req T) T {
 			v[i].CreatedAt = v[i].CreatedAt.In(loc)
 			v[i].UpdatedAt = v[i].UpdatedAt.In(loc)
 		}
+	case []models.Tag:
+		for i := range v {
+			v[i].CreatedAt = v[i].CreatedAt.In(loc)
+			v[i].UpdatedAt = v[i].UpdatedAt.In(loc)
+		}
+	case []models.Image:
+		for i := range v {
+			v[i].CreatedAt = v[i].CreatedAt.In(loc)
+		}
 
 	case *models.Thing:
 		v.CreatedAt = v.CreatedAt.In(loc)
@@ -40,7 +49,11 @@ func ApplyLocation[T interface{}](fctx *fiber.Ctx, req T) T {
 	case *models.ThingTag:
 		v.CreatedAt = v.CreatedAt.In(loc)
 		v.UpdatedAt = v.UpdatedAt.In(loc)
-
+	case *models.Tag:
+		v.CreatedAt = v.CreatedAt.In(loc)
+		v.UpdatedAt = v.UpdatedAt.In(loc)
+	case *models.Image:
+		v.CreatedAt = v.CreatedAt.In(loc)
 	case *models.ThingNotification:
 		v.CreatedAt = v.CreatedAt.In(loc)
 		v.UpdatedAt = v.UpdatedAt.In(loc)

@@ -3,7 +3,7 @@ package image
 import (
 	"database/sql"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 )
@@ -43,6 +43,6 @@ func DeleteThingImageHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(dto.EmptyResponse{})
+		return fctx.JSON(factory.CreateEmptyResponse())
 	}
 }

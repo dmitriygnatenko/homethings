@@ -2,8 +2,10 @@ package notification
 
 import (
 	"database/sql"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/go-playground/validator/v10"
@@ -13,7 +15,7 @@ import (
 // @Router 		/api/v1/things/notification/{thingId} [put]
 // @Param       thingId path int true "Thing ID"
 // @Param       data body dto.UpdateThingNotificationRequest true "Request body"
-// @Success     200 {object} dto.EmptyResponse
+// @Success     200 {object} dto.ThingNotificationResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Update thing notification
@@ -57,6 +59,13 @@ func UpdateThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(dto.EmptyResponse{})
+		res, err := sp.GetThingNotificationRepository().Get(ctx, id)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		res = helpers.ApplyLocation(fctx, res)
+
+		return fctx.JSON(mappers.ConvertToThingNotificationResponseDTO(*res))
 	}
 }

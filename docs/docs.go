@@ -1153,7 +1153,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EmptyResponse"
+                            "$ref": "#/definitions/dto.ThingNotificationResponse"
                         }
                     },
                     "400": {
@@ -1256,7 +1256,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EmptyResponse"
+                            "$ref": "#/definitions/dto.ThingNotificationResponse"
                         }
                     },
                     "400": {

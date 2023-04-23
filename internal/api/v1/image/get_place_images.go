@@ -3,6 +3,7 @@ package image
 import (
 	"sort"
 
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
@@ -43,6 +44,8 @@ func GetPlaceImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		sort.Slice(res, func(i, j int) bool {
 			return res[i].CreatedAt.After(res[j].CreatedAt)
 		})
+
+		res = helpers.ApplyLocation(fctx, res)
 
 		return fctx.JSON(mappers.ConvertToImagesResponseDTO(res))
 	}

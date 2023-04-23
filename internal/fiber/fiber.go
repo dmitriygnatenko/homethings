@@ -110,7 +110,6 @@ func getJWTConfig(sp interfaces.ServiceProvider) jwt.Config {
 			return fiber.NewError(fiber.StatusForbidden, err.Error())
 		},
 		Filter: func(fctx *fiber.Ctx) bool {
-			return true
 			method := fctx.Method()
 			path := fctx.Path()
 
@@ -186,7 +185,7 @@ func registerHandlers(r fiber.Router, sp interfaces.ServiceProvider) {
 	r.Get("/v1/things/notification/:thingId<int>", notificationAPI.GetThingNotificationHandler(sp))
 	r.Post("/v1/things/notification", notificationAPI.AddThingNotificationHandler(sp))
 	r.Put("/v1/things/notification/:thingId<int>", notificationAPI.UpdateThingNotificationHandler(sp))
-	r.Delete("/v1/things/notification/:thingId<int>", notificationAPI.DeletePlaceHandler(sp))
+	r.Delete("/v1/things/notification/:thingId<int>", notificationAPI.DeleteThingNotificationHandler(sp))
 
 	r.Post("/v1/users", userAPI.AddUserHandler(sp))
 	r.Put("/v1/users", userAPI.UpdateUserHandler(sp))

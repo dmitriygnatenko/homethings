@@ -3,7 +3,7 @@ package notification
 import (
 	"database/sql"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,7 +18,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func DeleteThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("thingId")
@@ -39,6 +39,6 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(dto.EmptyResponse{})
+		return fctx.JSON(factory.CreateEmptyResponse())
 	}
 }

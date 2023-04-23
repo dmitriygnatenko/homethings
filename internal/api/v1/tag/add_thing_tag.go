@@ -3,6 +3,7 @@ package tag
 import (
 	"database/sql"
 
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
@@ -50,6 +51,8 @@ func AddThingTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		if err = sp.GetThingTagRepository().Add(ctx, mappers.ConvertToAddThingTagRequestModel(tagID, thingID), nil); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
+
+		tag = helpers.ApplyLocation(fctx, tag)
 
 		return fctx.JSON(mappers.ConvertToTagResponseDTO(*tag))
 	}

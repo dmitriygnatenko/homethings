@@ -3,6 +3,7 @@ package notification
 import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
@@ -12,7 +13,7 @@ import (
 
 // @Router 		/api/v1/things/notification [post]
 // @Param       data body dto.AddThingNotificationRequest true "Request body"
-// @Success     200 {object} dto.EmptyResponse
+// @Success     200 {object} dto.ThingNotificationResponse
 // @Failure     400 {object} dto.ErrorResponse
 // @Failure     500 {object} dto.ErrorResponse
 // @Summary     Add thing notification
@@ -47,6 +48,13 @@ func AddThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(dto.EmptyResponse{})
+		res, err := sp.GetThingNotificationRepository().Get(ctx, req.ThingID)
+		if err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		res = helpers.ApplyLocation(fctx, res)
+
+		return fctx.JSON(mappers.ConvertToThingNotificationResponseDTO(*res))
 	}
 }
