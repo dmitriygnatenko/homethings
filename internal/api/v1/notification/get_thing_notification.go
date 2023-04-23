@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/things/notification/{thingId} [get]
+// @Router 		/api/v1/things/notifications/{thingId} [get]
 // @Param       thingId path int true "Thing ID"
 // @Success     200 {object} dto.ThingNotificationResponse
 // @Failure     400 {object} dto.ErrorResponse

@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/things/notification/{thingId} [delete]
+// @Router 		/api/v1/things/notifications/{thingId} [delete]
 // @Param       thingId path int true "Thing ID"
 // @Success     200 {object} dto.EmptyResponse
 // @Failure     400 {object} dto.ErrorResponse

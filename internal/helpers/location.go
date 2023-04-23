@@ -39,6 +39,12 @@ func ApplyLocation[T interface{}](fctx *fiber.Ctx, req T) T {
 		for i := range v {
 			v[i].CreatedAt = v[i].CreatedAt.In(loc)
 		}
+	case []models.ExtThingNotification:
+		for i := range v {
+			v[i].CreatedAt = v[i].CreatedAt.In(loc)
+			v[i].UpdatedAt = v[i].UpdatedAt.In(loc)
+			v[i].NotificationDate = v[i].NotificationDate.In(loc)
+		}
 
 	case *models.Thing:
 		v.CreatedAt = v.CreatedAt.In(loc)

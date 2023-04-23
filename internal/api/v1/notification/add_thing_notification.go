@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @Router 		/api/v1/things/notification [post]
+// @Router 		/api/v1/things/notifications [post]
 // @Param       data body dto.AddThingNotificationRequest true "Request body"
 // @Success     200 {object} dto.ThingNotificationResponse
 // @Failure     400 {object} dto.ErrorResponse

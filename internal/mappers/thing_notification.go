@@ -36,6 +36,28 @@ func ConvertToThingNotificationResponseDTO(req models.ThingNotification) dto.Thi
 		ThingID:          req.ThingID,
 		NotificationDate: req.NotificationDate.Format(defaultDateTimeLayout),
 		CreatedAt:        req.CreatedAt.Format(defaultDateTimeLayout),
-		UpdatedAt:        req.CreatedAt.Format(defaultDateTimeLayout),
+		UpdatedAt:        req.UpdatedAt.Format(defaultDateTimeLayout),
 	}
+}
+
+func ConvertToThingNotificationExtResponseDTO(req models.ExtThingNotification) dto.ThingNotificationExtResponse {
+	return dto.ThingNotificationExtResponse{
+		ThingID:          req.ThingID,
+		PlaceID:          req.PlaceID,
+		ThingTitle:       req.ThingTitle,
+		PlaceTitle:       req.PlaceTitle,
+		NotificationDate: req.NotificationDate.Format(defaultDateTimeLayout),
+		CreatedAt:        req.CreatedAt.Format(defaultDateTimeLayout),
+		UpdatedAt:        req.UpdatedAt.Format(defaultDateTimeLayout),
+	}
+}
+
+func ConvertToThingNotificationsExtResponseDTO(req []models.ExtThingNotification) dto.ThingNotificationsExtResponse {
+	res := make([]dto.ThingNotificationExtResponse, 0, len(req))
+
+	for _, notification := range req {
+		res = append(res, ConvertToThingNotificationExtResponseDTO(notification))
+	}
+
+	return dto.ThingNotificationsExtResponse{Notifications: res}
 }

@@ -168,6 +168,23 @@ definitions:
       updated_at:
         type: string
     type: object
+  dto.ThingNotificationExtResponse:
+    properties:
+      created_at:
+        type: string
+      notification_date:
+        type: string
+      place_id:
+        type: integer
+      place_title:
+        type: string
+      thing_id:
+        type: integer
+      thing_title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   dto.ThingNotificationResponse:
     properties:
       created_at:
@@ -178,6 +195,13 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  dto.ThingNotificationsExtResponse:
+    properties:
+      notifications:
+        items:
+          $ref: '#/definitions/dto.ThingNotificationExtResponse'
+        type: array
     type: object
   dto.ThingResponse:
     properties:
@@ -1050,7 +1074,7 @@ paths:
       summary: Update thing
       tags:
       - Things
-  /api/v1/things/notification:
+  /api/v1/things/notifications:
     post:
       consumes:
       - application/json
@@ -1081,7 +1105,7 @@ paths:
       summary: Add thing notification
       tags:
       - Notifications
-  /api/v1/things/notification/{thingId}:
+  /api/v1/things/notifications/{thingId}:
     delete:
       consumes:
       - application/json
@@ -1173,6 +1197,30 @@ paths:
       security:
       - APIKey: []
       summary: Update thing notification
+      tags:
+      - Notifications
+  /api/v1/things/notifications/expired:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ThingNotificationsExtResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - APIKey: []
+      summary: Get expired thing notifications
       tags:
       - Notifications
   /api/v1/things/place/{placeId}:

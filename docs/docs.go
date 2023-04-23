@@ -1121,7 +1121,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/things/notification": {
+        "/api/v1/things/notifications": {
             "post": {
                 "security": [
                     {
@@ -1171,7 +1171,46 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/things/notification/{thingId}": {
+        "/api/v1/things/notifications/expired": {
+            "get": {
+                "security": [
+                    {
+                        "APIKey": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Get expired thing notifications",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ThingNotificationsExtResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/things/notifications/{thingId}": {
             "get": {
                 "security": [
                     {
@@ -1930,6 +1969,32 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ThingNotificationExtResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "notification_date": {
+                    "type": "string"
+                },
+                "place_id": {
+                    "type": "integer"
+                },
+                "place_title": {
+                    "type": "string"
+                },
+                "thing_id": {
+                    "type": "integer"
+                },
+                "thing_title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ThingNotificationResponse": {
             "type": "object",
             "properties": {
@@ -1944,6 +2009,17 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ThingNotificationsExtResponse": {
+            "type": "object",
+            "properties": {
+                "notifications": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ThingNotificationExtResponse"
+                    }
                 }
             }
         },

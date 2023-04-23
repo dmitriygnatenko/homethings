@@ -49,7 +49,52 @@ func (r thingNotificationRepository) Get(ctx context.Context, thingID int) (*mod
 }
 
 func (r thingNotificationRepository) GetExpired(ctx context.Context) ([]models.ExtThingNotification, error) {
-	return nil, nil // TODO
+	var res []models.ExtThingNotification
+
+	query, args, err := sq.Select("n.thing_id", "n.notification_date", "n.created_at", "n.updated_at", "t.title", "p.id", "p.title").
+		From(thingNotificationTableName + " n").
+		Join(thingTableName + " t ON t.id = n.thing_id").
+		LeftJoin(placeThingTableName + " pt ON pt.thing_id = n.thing_id").
+		LeftJoin(placeTableName + " p ON p.id = pt.place_id").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Lt{"n.notification_date": "NOW()"}).
+		OrderBy("n.notification_date DESC").
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		resRow := models.ExtThingNotification{}
+
+		err = rows.Scan(
+			&resRow.ThingID,
+			&resRow.NotificationDate,
+			&resRow.CreatedAt,
+			&resRow.UpdatedAt,
+			&resRow.ThingTitle,
+			&resRow.PlaceID,
+			&resRow.PlaceTitle,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, resRow)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (r thingNotificationRepository) Add(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) error {

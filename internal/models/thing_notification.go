@@ -22,7 +22,9 @@ type UpdateThingNotificationRequest struct {
 type ExtThingNotification struct {
 	ThingID          int
 	PlaceID          int
-	NotificationDate time.Time
 	ThingTitle       string
 	PlaceTitle       string
+	NotificationDate time.Time
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
