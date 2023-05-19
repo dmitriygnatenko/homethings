@@ -32,12 +32,12 @@ func UpdateThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler
 		}
 
 		req := dto.UpdateThingNotificationRequest{}
-		if err := fctx.BodyParser(&req); err != nil {
+		if err = fctx.BodyParser(&req); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
-		if err := validate.Struct(req); err != nil {
+		if err = validate.Struct(req); err != nil {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 

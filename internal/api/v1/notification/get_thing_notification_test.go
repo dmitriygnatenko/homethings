@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
@@ -19,7 +20,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
-	"net/http/httptest"
 )
 
 func Test_GetThingNotificationHandler(t *testing.T) {
