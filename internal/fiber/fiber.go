@@ -182,11 +182,11 @@ func registerHandlers(r fiber.Router, sp interfaces.ServiceProvider) {
 	r.Put("/v1/tags/:id<int>", tagAPI.UpdateTagHandler(sp))
 	r.Delete("/v1/tags/:id<int>", tagAPI.DeleteTagHandler(sp))
 
-	r.Get("/v1/things/notification/:thingId<int>", notificationAPI.GetThingNotificationHandler(sp))
+	r.Get("/v1/things/notifications/:thingId<int>", notificationAPI.GetThingNotificationHandler(sp))
 	r.Get("/v1/things/notifications/expired", notificationAPI.GetExpiredThingNotificationsHandler(sp))
-	r.Post("/v1/things/notification", notificationAPI.AddThingNotificationHandler(sp))
-	r.Put("/v1/things/notification/:thingId<int>", notificationAPI.UpdateThingNotificationHandler(sp))
-	r.Delete("/v1/things/notification/:thingId<int>", notificationAPI.DeleteThingNotificationHandler(sp))
+	r.Post("/v1/things/notifications", notificationAPI.AddThingNotificationHandler(sp))
+	r.Put("/v1/things/notifications/:thingId<int>", notificationAPI.UpdateThingNotificationHandler(sp))
+	r.Delete("/v1/things/notifications/:thingId<int>", notificationAPI.DeleteThingNotificationHandler(sp))
 
 	r.Post("/v1/users", userAPI.AddUserHandler(sp))
 	r.Put("/v1/users", userAPI.UpdateUserHandler(sp))
