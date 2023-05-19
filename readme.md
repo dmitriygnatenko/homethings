@@ -47,7 +47,7 @@ BASIC_AUTH_PASSWORD=pass
 - make docker-up (запуск контейнеров)
 - make docker-down (остановка контейнеров)
 - make install-deps (установка зависимостей)
-- make app-build (компиляция приложения)
+- make build (компиляция приложения)
 
 
 ### Документация по методам API

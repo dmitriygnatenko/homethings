@@ -15,7 +15,7 @@ usage:
 	@echo "make docker-up"
 	@echo "make docker-down"
 	@echo "make install-deps"
-	@echo "make app-build"
+	@echo "make build"
 
 run:
 	cd cmd/app && go run main.go
@@ -62,5 +62,6 @@ install-goose:
 install-swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
 
-app-build:
+.PHONY: build
+build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build/app/app cmd/app/main.go
