@@ -22,14 +22,11 @@ import (
 )
 
 func Test_UpdateThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceThingRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.UpdateThingRequest
 		contentType string
+		body        *dto.UpdateThingRequest
 	}
 
 	var (
@@ -88,8 +85,8 @@ func Test_UpdateThingHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
-		thingRepoMock      thingRepoMockFunc
-		placeThingRepoMock placeThingRepoMockFunc
+		thingRepoMock      func(mc *minimock.Controller) interfaces.ThingRepository
+		placeThingRepoMock func(mc *minimock.Controller) interfaces.PlaceThingRepository
 	}{
 		{
 			name:    "positive case",
@@ -215,7 +212,11 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, sql.ErrNoRows)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
@@ -228,12 +229,20 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(&repoResBeforeUpdate, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&repoResBeforeUpdate, nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(nil, sql.ErrNoRows)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, sql.ErrNoRows)
+
 				return mock
 			},
 		},
@@ -243,13 +252,22 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(&repoResBeforeUpdate, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&repoResBeforeUpdate, nil)
+
 				mock.BeginTxMock.Return(nil, testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&placeThingRepoResBeforeUpdate, nil)
+
 				return mock
 			},
 		},
@@ -259,14 +277,27 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(&repoResBeforeUpdate, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&repoResBeforeUpdate, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.UpdateMock.Return(testError)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&placeThingRepoResBeforeUpdate, nil)
+
 				return mock
 			},
 		},
@@ -276,15 +307,32 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(&repoResBeforeUpdate, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&repoResBeforeUpdate, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.UpdateMock.Return(nil)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
-				mock.UpdatePlaceMock.Return(testError)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&placeThingRepoResBeforeUpdate, nil)
+
+				mock.UpdatePlaceMock.Inspect(func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, placeID, req.PlaceID)
+					assert.Equal(mc, thingID, req.ThingID)
+				}).Return(testError)
+
 				return mock
 			},
 		},
@@ -294,16 +342,34 @@ func Test_UpdateThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(&repoResBeforeUpdate, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&repoResBeforeUpdate, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.UpdateMock.Return(nil)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(nil)
+
 				mock.CommitTxMock.Return(testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
-				mock.UpdatePlaceMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&placeThingRepoResBeforeUpdate, nil)
+
+				mock.UpdatePlaceMock.Inspect(func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, placeID, req.PlaceID)
+					assert.Equal(mc, thingID, req.ThingID)
+				}).Return(nil)
+
 				return mock
 			},
 		},
@@ -322,15 +388,28 @@ func Test_UpdateThingHandler(t *testing.T) {
 				})
 
 				mock.BeginTxMock.Return(nil, nil)
-				mock.UpdateMock.Return(nil)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(nil)
+
 				mock.CommitTxMock.Return(nil)
 
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(&placeThingRepoResBeforeUpdate, nil)
-				mock.UpdatePlaceMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(&placeThingRepoResBeforeUpdate, nil)
+
+				mock.UpdatePlaceMock.Inspect(func(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, placeID, req.PlaceID)
+					assert.Equal(mc, thingID, req.ThingID)
+				}).Return(nil)
+
 				return mock
 			},
 		},

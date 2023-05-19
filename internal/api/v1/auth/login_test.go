@@ -22,14 +22,11 @@ import (
 )
 
 func Test_LoginHandler(t *testing.T) {
-	type authServiceMockFunc func(mc *minimock.Controller) interfaces.Auth
-	type userRepoMockFunc func(mc *minimock.Controller) interfaces.UserRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.LoginRequest
 		contentType string
+		body        *dto.LoginRequest
 	}
 
 	var (
@@ -63,8 +60,8 @@ func Test_LoginHandler(t *testing.T) {
 		req             req
 		resCode         int
 		resBody         interface{}
-		userRepoMock    userRepoMockFunc
-		authServiceMock authServiceMockFunc
+		userRepoMock    func(mc *minimock.Controller) interfaces.UserRepository
+		authServiceMock func(mc *minimock.Controller) interfaces.Auth
 	}{
 		{
 			name:    "positive case",

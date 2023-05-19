@@ -22,10 +22,6 @@ import (
 )
 
 func Test_AddThingTagHandler(t *testing.T) {
-	type tagRepoMockFunc func(mc *minimock.Controller) interfaces.TagRepository
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-	type thingTagRepoMockFunc func(mc *minimock.Controller) interfaces.ThingTagRepository
-
 	type req struct {
 		method      string
 		route       string
@@ -67,9 +63,9 @@ func Test_AddThingTagHandler(t *testing.T) {
 		req              req
 		resCode          int
 		resBody          interface{}
-		tagRepoMock      tagRepoMockFunc
-		thingRepoMock    thingRepoMockFunc
-		thingTagRepoMock thingTagRepoMockFunc
+		tagRepoMock      func(mc *minimock.Controller) interfaces.TagRepository
+		thingRepoMock    func(mc *minimock.Controller) interfaces.ThingRepository
+		thingTagRepoMock func(mc *minimock.Controller) interfaces.ThingTagRepository
 	}{
 		{
 			name:    "positive case",
@@ -257,7 +253,12 @@ func Test_AddThingTagHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.AddMock.Return(testError)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) {
+					assert.Equal(mc, tagID, req.TagID)
+					assert.Equal(mc, thingID, req.ThingID)
+				}).Return(testError)
+
 				return mock
 			},
 		},

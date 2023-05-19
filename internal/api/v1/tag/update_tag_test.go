@@ -22,13 +22,11 @@ import (
 )
 
 func Test_UpdateTagHandler(t *testing.T) {
-	type tagRepoMockFunc func(mc *minimock.Controller) interfaces.TagRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.UpdateTagRequest
 		contentType string
+		body        *dto.UpdateTagRequest
 	}
 
 	var (
@@ -71,7 +69,7 @@ func Test_UpdateTagHandler(t *testing.T) {
 		req         req
 		resCode     int
 		resBody     interface{}
-		tagRepoMock tagRepoMockFunc
+		tagRepoMock func(mc *minimock.Controller) interfaces.TagRepository
 	}{
 		{
 			name:    "positive case",
@@ -164,7 +162,13 @@ func Test_UpdateTagHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
 				mock := repoMocks.NewTagRepositoryMock(mc)
-				mock.UpdateMock.Return(testError)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) {
+					assert.Equal(mc, tagID, req.ID)
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, style, req.Style)
+				}).Return(testError)
+
 				return mock
 			},
 		},
@@ -174,8 +178,17 @@ func Test_UpdateTagHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
 				mock := repoMocks.NewTagRepositoryMock(mc)
-				mock.UpdateMock.Return(nil)
-				mock.GetMock.Return(nil, testError)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) {
+					assert.Equal(mc, tagID, req.ID)
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, style, req.Style)
+				}).Return(nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, tagID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

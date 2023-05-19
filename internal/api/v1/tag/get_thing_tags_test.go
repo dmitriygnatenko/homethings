@@ -21,8 +21,6 @@ import (
 )
 
 func Test_GetThingTagsHandler(t *testing.T) {
-	type tagRepoMockFunc func(mc *minimock.Controller) interfaces.TagRepository
-
 	type req struct {
 		method string
 		route  string
@@ -81,7 +79,7 @@ func Test_GetThingTagsHandler(t *testing.T) {
 		req         req
 		resCode     int
 		resBody     interface{}
-		tagRepoMock tagRepoMockFunc
+		tagRepoMock func(mc *minimock.Controller) interfaces.TagRepository
 	}{
 		{
 			name:    "positive case",
@@ -104,7 +102,11 @@ func Test_GetThingTagsHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
 				mock := repoMocks.NewTagRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(nil, testError)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

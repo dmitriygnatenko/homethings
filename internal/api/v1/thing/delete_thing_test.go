@@ -30,6 +30,7 @@ func Test_DeleteThingHandler(t *testing.T) {
 	var (
 		mc        = minimock.NewController(t)
 		thingID   = gofakeit.Number(1, 1000)
+		imageID   = gofakeit.Number(1, 1000)
 		imageURL  = gofakeit.URL()
 		testError = errors.New(gofakeit.Phrase())
 
@@ -40,6 +41,7 @@ func Test_DeleteThingHandler(t *testing.T) {
 
 		repoImagesRes = []models.Image{
 			{
+				ID:    imageID,
 				Image: imageURL,
 			},
 		}
@@ -65,9 +67,7 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
-				return mock
+				return repoMocks.NewThingRepositoryMock(mc)
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				return repoMocks.NewPlaceThingRepositoryMock(mc)
@@ -91,7 +91,11 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, sql.ErrNoRows)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
@@ -116,7 +120,11 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, testError)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
@@ -141,8 +149,13 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
@@ -167,13 +180,22 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(testError)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(testError)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
@@ -195,18 +217,31 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(nil, testError)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
@@ -225,19 +260,35 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(repoImagesRes, nil)
-				mock.DeleteMock.Return(testError)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(testError)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
@@ -256,28 +307,107 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(repoImagesRes, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByThingIDMock.Return(testError)
+
+				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(testError)
+
 				return mock
 			},
 			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
 				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			},
+			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
+				return repoMocks.NewFileRepositoryMock(mc)
+			},
+		},
+		{
+			name:    "negative case - repository error (delete notification)",
+			req:     correctReq,
+			resCode: fiber.StatusInternalServerError,
+			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
+				mock := repoMocks.NewThingRepositoryMock(mc)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
+				mock.BeginTxMock.Return(nil, nil)
+
+				return mock
+			},
+			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
+				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
+				return mock
+			},
+			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
+				mock := repoMocks.NewThingImageRepositoryMock(mc)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
+				return mock
+			},
+			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
+				mock := repoMocks.NewThingTagRepositoryMock(mc)
+
+				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
+				return mock
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(testError)
+
+				return mock
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
@@ -289,25 +419,48 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Return(testError)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(repoImagesRes, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByThingIDMock.Return(nil)
+
+				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
@@ -329,31 +482,59 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				mock.CommitTxMock.Return(testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(repoImagesRes, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByThingIDMock.Return(nil)
+
+				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
 				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
-				mock.DeleteMock.Return(nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
@@ -366,31 +547,59 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				mock.CommitTxMock.Return(nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(repoImagesRes, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByThingIDMock.Return(nil)
+
+				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
 				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
-				mock.DeleteMock.Return(nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
@@ -406,26 +615,50 @@ func Test_DeleteThingHandler(t *testing.T) {
 			resBody: dto.EmptyResponse{},
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, nil)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				mock.CommitTxMock.Return(nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.DeleteThingMock.Return(nil)
+
+				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(repoImagesRes, nil)
-				mock.DeleteMock.Return(nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(repoImagesRes, nil)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, imageID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByThingIDMock.Return(nil)
+
+				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {

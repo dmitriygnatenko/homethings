@@ -1,6 +1,7 @@
 package image
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http/httptest"
@@ -22,9 +23,6 @@ import (
 )
 
 func Test_GetPlaceImagesHandler(t *testing.T) {
-	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceImageRepository
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
-
 	type req struct {
 		method string
 		route  string
@@ -98,8 +96,8 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
-		thingImageRepoMock thingImageRepoMockFunc
-		placeImageRepoMock placeImageRepoMockFunc
+		thingImageRepoMock func(mc *minimock.Controller) interfaces.ThingImageRepository
+		placeImageRepoMock func(mc *minimock.Controller) interfaces.PlaceImageRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -121,7 +119,11 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
 				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(nil, testError)
+
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
@@ -134,12 +136,20 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
 				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(nil, nil)
+
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(nil, testError)
+
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},
@@ -150,12 +160,20 @@ func Test_GetPlaceImagesHandler(t *testing.T) {
 			resBody: expectedRes,
 			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
 				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(placeImageRepoRes, nil)
+
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(placeImageRepoRes, nil)
+
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(thingImageRepoRes, nil)
+
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(thingImageRepoRes, nil)
+
 				return mock
 			},
 		},

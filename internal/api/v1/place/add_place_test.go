@@ -1,6 +1,7 @@
 package place
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http/httptest"
@@ -20,13 +21,11 @@ import (
 )
 
 func Test_AddPlaceHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.AddPlaceRequest
 		contentType string
+		body        *dto.AddPlaceRequest
 	}
 
 	var (
@@ -69,7 +68,7 @@ func Test_AddPlaceHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		placeRepoMock placeRepoMockFunc
+		placeRepoMock func(mc *minimock.Controller) interfaces.PlaceRepository
 	}{
 		{
 			name:    "positive case",
@@ -78,8 +77,16 @@ func Test_AddPlaceHandler(t *testing.T) {
 			resBody: expectedRes,
 			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
 				mock := repoMocks.NewPlaceRepositoryMock(mc)
-				mock.AddMock.Return(placeID, nil)
-				mock.GetMock.Return(&repoRes, nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, int64(parentID), req.ParentID.Int64)
+				}).Return(placeID, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(&repoRes, nil)
+
 				return mock
 			},
 		},
@@ -119,7 +126,12 @@ func Test_AddPlaceHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
 				mock := repoMocks.NewPlaceRepositoryMock(mc)
-				mock.AddMock.Return(0, testError)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, int64(parentID), req.ParentID.Int64)
+				}).Return(0, testError)
+
 				return mock
 			},
 		},
@@ -129,8 +141,16 @@ func Test_AddPlaceHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
 				mock := repoMocks.NewPlaceRepositoryMock(mc)
-				mock.AddMock.Return(placeID, nil)
-				mock.GetMock.Return(nil, testError)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, int64(parentID), req.ParentID.Int64)
+				}).Return(placeID, nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

@@ -21,9 +21,6 @@ import (
 )
 
 func Test_GetPlaceThingsHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-	type thingTagRepoMockFunc func(mc *minimock.Controller) interfaces.ThingTagRepository
-
 	type req struct {
 		method string
 		route  string
@@ -131,8 +128,8 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 		req              req
 		resCode          int
 		resBody          interface{}
-		thingRepoMock    thingRepoMockFunc
-		thingTagRepoMock thingTagRepoMockFunc
+		thingRepoMock    func(mc *minimock.Controller) interfaces.ThingRepository
+		thingTagRepoMock func(mc *minimock.Controller) interfaces.ThingTagRepository
 	}{
 		{
 			name:    "positive case",
@@ -164,7 +161,11 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetAllByPlaceIDMock.Return(nil, testError)
+
+				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
@@ -186,7 +187,11 @@ func Test_GetPlaceThingsHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.GetByPlaceIDMock.Return(nil, testError)
+
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

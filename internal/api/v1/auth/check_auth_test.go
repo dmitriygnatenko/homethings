@@ -23,9 +23,6 @@ import (
 )
 
 func Test_CheckAuthHandler(t *testing.T) {
-	type authServiceMockFunc func(mc *minimock.Controller) interfaces.Auth
-	type userRepoMockFunc func(mc *minimock.Controller) interfaces.UserRepository
-
 	type req struct {
 		method      string
 		route       string
@@ -59,8 +56,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 		req             req
 		resCode         int
 		resBody         interface{}
-		userRepoMock    userRepoMockFunc
-		authServiceMock authServiceMockFunc
+		userRepoMock    func(mc *minimock.Controller) interfaces.UserRepository
+		authServiceMock func(mc *minimock.Controller) interfaces.Auth
 	}{
 		{
 			name:    "positive case",

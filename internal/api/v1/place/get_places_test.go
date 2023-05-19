@@ -20,8 +20,6 @@ import (
 )
 
 func Test_GetPlacesHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
-
 	type req struct {
 		method string
 		route  string
@@ -96,7 +94,7 @@ func Test_GetPlacesHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		placeRepoMock placeRepoMockFunc
+		placeRepoMock func(mc *minimock.Controller) interfaces.PlaceRepository
 	}{
 		{
 			name:    "positive case",

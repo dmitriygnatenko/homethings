@@ -23,13 +23,11 @@ import (
 )
 
 func Test_UpdateThingNotificationHandler(t *testing.T) {
-	type repoMockFunc func(mc *minimock.Controller) interfaces.ThingNotificationRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.UpdateThingNotificationRequest
 		contentType string
+		body        *dto.UpdateThingNotificationRequest
 	}
 
 	var (
@@ -68,7 +66,7 @@ func Test_UpdateThingNotificationHandler(t *testing.T) {
 		req      req
 		resCode  int
 		resBody  interface{}
-		repoMock repoMockFunc
+		repoMock func(mc *minimock.Controller) interfaces.ThingNotificationRepository
 	}{
 		{
 			name:    "positive case",

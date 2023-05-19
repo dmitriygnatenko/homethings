@@ -1,6 +1,7 @@
 package image
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http/httptest"
@@ -21,8 +22,6 @@ import (
 )
 
 func Test_GetThingImagesHandler(t *testing.T) {
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
-
 	type req struct {
 		method string
 		route  string
@@ -89,7 +88,7 @@ func Test_GetThingImagesHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
-		thingImageRepoMock thingImageRepoMockFunc
+		thingImageRepoMock func(mc *minimock.Controller) interfaces.ThingImageRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -108,7 +107,11 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(nil, testError)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},
@@ -119,7 +122,11 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			resBody: expectedRes,
 			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
 				mock := repoMocks.NewThingImageRepositoryMock(mc)
-				mock.GetByThingIDMock.Return(imageRepoRes, nil)
+
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(imageRepoRes, nil)
+
 				return mock
 			},
 		},

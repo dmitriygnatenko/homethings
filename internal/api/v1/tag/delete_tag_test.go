@@ -21,9 +21,6 @@ import (
 )
 
 func Test_DeleteTagHandler(t *testing.T) {
-	type tagRepoMockFunc func(mc *minimock.Controller) interfaces.TagRepository
-	type thingTagRepoMockFunc func(mc *minimock.Controller) interfaces.ThingTagRepository
-
 	type req struct {
 		method      string
 		route       string
@@ -47,8 +44,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 		req              req
 		resCode          int
 		resBody          interface{}
-		tagRepoMock      tagRepoMockFunc
-		thingTagRepoMock thingTagRepoMockFunc
+		tagRepoMock      func(mc *minimock.Controller) interfaces.TagRepository
+		thingTagRepoMock func(mc *minimock.Controller) interfaces.ThingTagRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -135,7 +132,11 @@ func Test_DeleteTagHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByTagIDMock.Return(testError)
+
+				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, tagID, id)
+				}).Return(testError)
+
 				return mock
 			},
 		},
@@ -152,13 +153,19 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				mock.BeginTxMock.Return(nil, nil)
 
-				mock.DeleteMock.Return(testError)
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, tagID, id)
+				}).Return(testError)
 
 				return mock
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByTagIDMock.Return(nil)
+
+				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, tagID, id)
+				}).Return(nil)
+
 				return mock
 			},
 		},
@@ -175,7 +182,9 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				mock.BeginTxMock.Return(nil, nil)
 
-				mock.DeleteMock.Return(nil)
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, tagID, id)
+				}).Return(nil)
 
 				mock.CommitTxMock.Return(testError)
 
@@ -183,7 +192,11 @@ func Test_DeleteTagHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
-				mock.DeleteByTagIDMock.Return(nil)
+
+				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, tagID, id)
+				}).Return(nil)
+
 				return mock
 			},
 		},

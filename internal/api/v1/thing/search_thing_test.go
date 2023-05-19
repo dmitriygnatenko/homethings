@@ -1,6 +1,7 @@
 package thing
 
 import (
+	"context"
 	"errors"
 	"net/http/httptest"
 	"net/url"
@@ -20,8 +21,6 @@ import (
 )
 
 func Test_SearchThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-
 	type req struct {
 		method string
 		route  string
@@ -30,11 +29,9 @@ func Test_SearchThingHandler(t *testing.T) {
 	var (
 		mc = minimock.NewController(t)
 
-		search           = gofakeit.LetterN(10)
-		incorrectSearch  = gofakeit.LetterN(2)
-		incorrectSearch2 = gofakeit.LetterN(10) + ":"
-		testError        = errors.New(gofakeit.Phrase())
-		layout           = "2006-01-02 15:04:05"
+		search    = gofakeit.LetterN(10)
+		testError = errors.New(gofakeit.Phrase())
+		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -87,13 +84,13 @@ func Test_SearchThingHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		thingRepoMock thingRepoMockFunc
+		thingRepoMock func(mc *minimock.Controller) interfaces.ThingRepository
 	}{
 		{
 			name: "negative case - bad request",
 			req: req{
 				method: fiber.MethodGet,
-				route:  "/v1/things/search/" + url.QueryEscape(incorrectSearch),
+				route:  "/v1/things/search/" + url.QueryEscape(gofakeit.LetterN(2)),
 			},
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
@@ -104,7 +101,7 @@ func Test_SearchThingHandler(t *testing.T) {
 			name: "negative case - bad request",
 			req: req{
 				method: fiber.MethodGet,
-				route:  "/v1/things/search/" + url.QueryEscape(incorrectSearch2),
+				route:  "/v1/things/search/" + url.QueryEscape(gofakeit.LetterN(10)+":"),
 			},
 			resCode: fiber.StatusBadRequest,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
@@ -117,7 +114,11 @@ func Test_SearchThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.SearchMock.Return(nil, testError)
+
+				mock.SearchMock.Inspect(func(ctx context.Context, s string) {
+					assert.Equal(mc, search, s)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},
@@ -128,7 +129,11 @@ func Test_SearchThingHandler(t *testing.T) {
 			resBody: expectedRes,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.SearchMock.Return(thingRepoRes, nil)
+
+				mock.SearchMock.Inspect(func(ctx context.Context, s string) {
+					assert.Equal(mc, search, s)
+				}).Return(thingRepoRes, nil)
+
 				return mock
 			},
 		},

@@ -22,8 +22,6 @@ import (
 )
 
 func Test_GetThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-
 	type req struct {
 		method string
 		route  string
@@ -65,7 +63,7 @@ func Test_GetThingHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		thingRepoMock thingRepoMockFunc
+		thingRepoMock func(mc *minimock.Controller) interfaces.ThingRepository
 	}{
 		{
 			name:    "positive case",
@@ -88,7 +86,11 @@ func Test_GetThingHandler(t *testing.T) {
 			resCode: fiber.StatusNotFound,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, sql.ErrNoRows)
+
 				return mock
 			},
 		},
@@ -98,7 +100,11 @@ func Test_GetThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
-				mock.GetMock.Return(nil, testError)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

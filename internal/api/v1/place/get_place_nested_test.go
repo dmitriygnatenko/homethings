@@ -22,8 +22,6 @@ import (
 )
 
 func Test_GetNestedPlacesHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
-
 	type req struct {
 		method string
 		route  string
@@ -68,7 +66,7 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		placeRepoMock placeRepoMockFunc
+		placeRepoMock func(mc *minimock.Controller) interfaces.PlaceRepository
 	}{
 		{
 			name:    "positive case",
@@ -91,7 +89,11 @@ func Test_GetNestedPlacesHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
 				mock := repoMocks.NewPlaceRepositoryMock(mc)
-				mock.GetNestedPlacesMock.Return(nil, testError)
+
+				mock.GetNestedPlacesMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

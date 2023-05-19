@@ -25,15 +25,11 @@ import (
 
 // nolint:errcheck
 func Test_AddImageHandler(t *testing.T) {
-	type placeImageRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceImageRepository
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
-	type fileRepoMockFunc func(mc *minimock.Controller) interfaces.FileRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        []byte
 		contentType string
+		body        []byte
 	}
 
 	var (
@@ -84,9 +80,9 @@ func Test_AddImageHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
-		fileRepoMock       fileRepoMockFunc
-		placeImageRepoMock placeImageRepoMockFunc
-		thingImageRepoMock thingImageRepoMockFunc
+		fileRepoMock       func(mc *minimock.Controller) interfaces.FileRepository
+		placeImageRepoMock func(mc *minimock.Controller) interfaces.PlaceImageRepository
+		thingImageRepoMock func(mc *minimock.Controller) interfaces.ThingImageRepository
 	}{
 		{
 			name: "negative case - bad request",

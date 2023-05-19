@@ -19,8 +19,6 @@ import (
 )
 
 func Test_GetTagsHandler(t *testing.T) {
-	type tagRepoMockFunc func(mc *minimock.Controller) interfaces.TagRepository
-
 	type req struct {
 		method string
 		route  string
@@ -78,7 +76,7 @@ func Test_GetTagsHandler(t *testing.T) {
 		req         req
 		resCode     int
 		resBody     interface{}
-		tagRepoMock tagRepoMockFunc
+		tagRepoMock func(mc *minimock.Controller) interfaces.TagRepository
 	}{
 		{
 			name:    "positive case",

@@ -21,14 +21,11 @@ import (
 )
 
 func Test_AddThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceThingRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.AddThingRequest
 		contentType string
+		body        *dto.AddThingRequest
 	}
 
 	var (
@@ -75,8 +72,8 @@ func Test_AddThingHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
-		thingRepoMock      thingRepoMockFunc
-		placeThingRepoMock placeThingRepoMockFunc
+		thingRepoMock      func(mc *minimock.Controller) interfaces.ThingRepository
+		placeThingRepoMock func(mc *minimock.Controller) interfaces.PlaceThingRepository
 	}{
 		{
 			name:    "positive case",
@@ -195,8 +192,14 @@ func Test_AddThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.AddMock.Return(0, testError)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(0, testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
@@ -209,13 +212,24 @@ func Test_AddThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.AddMock.Return(thingID, nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(thingID, nil)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.AddMock.Return(testError)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, thingID, req.ThingID)
+					assert.Equal(mc, placeID, req.PlaceID)
+				}).Return(testError)
+
 				return mock
 			},
 		},
@@ -225,14 +239,26 @@ func Test_AddThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.AddMock.Return(thingID, nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(thingID, nil)
+
 				mock.CommitTxMock.Return(testError)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.AddMock.Return(nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, thingID, req.ThingID)
+					assert.Equal(mc, placeID, req.PlaceID)
+				}).Return(nil)
+
 				return mock
 			},
 		},
@@ -242,15 +268,30 @@ func Test_AddThingHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
 				mock := repoMocks.NewThingRepositoryMock(mc)
+
 				mock.BeginTxMock.Return(nil, nil)
-				mock.AddMock.Return(thingID, nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, description, req.Description)
+				}).Return(thingID, nil)
+
 				mock.CommitTxMock.Return(nil)
-				mock.GetMock.Return(nil, sql.ErrNoRows)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil, sql.ErrNoRows)
+
 				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
 				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
-				mock.AddMock.Return(nil)
+
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+					assert.Equal(mc, thingID, req.ThingID)
+					assert.Equal(mc, placeID, req.PlaceID)
+				}).Return(nil)
+
 				return mock
 			},
 		},

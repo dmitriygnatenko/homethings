@@ -22,13 +22,11 @@ import (
 )
 
 func Test_UpdatePlaceHandler(t *testing.T) {
-	type placeRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceRepository
-
 	type req struct {
 		method      string
 		route       string
-		body        *dto.UpdatePlaceRequest
 		contentType string
+		body        *dto.UpdatePlaceRequest
 	}
 
 	var (
@@ -71,7 +69,7 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		placeRepoMock placeRepoMockFunc
+		placeRepoMock func(mc *minimock.Controller) interfaces.PlaceRepository
 	}{
 		{
 			name:    "positive case",
@@ -140,7 +138,12 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
 				mock := repoMocks.NewPlaceRepositoryMock(mc)
-				mock.UpdateMock.Return(testError)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, parentID, int(req.ParentID.Int64))
+				}).Return(testError)
+
 				return mock
 			},
 		},
@@ -150,8 +153,16 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			resCode: fiber.StatusInternalServerError,
 			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
 				mock := repoMocks.NewPlaceRepositoryMock(mc)
-				mock.UpdateMock.Return(nil)
-				mock.GetMock.Return(nil, testError)
+
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
+					assert.Equal(mc, title, req.Title)
+					assert.Equal(mc, parentID, int(req.ParentID.Int64))
+				}).Return(nil)
+
+				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+					assert.Equal(mc, placeID, id)
+				}).Return(nil, testError)
+
 				return mock
 			},
 		},

@@ -24,11 +24,7 @@ import (
 func SearchThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		search, err := url.QueryUnescape(fctx.Params("search", ""))
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-
+		search, _ := url.QueryUnescape(fctx.Params("search", ""))
 		if match, _ := regexp.MatchString("^[A-Za-zА-Яа-я0-9 ]+$", search); !match {
 			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
