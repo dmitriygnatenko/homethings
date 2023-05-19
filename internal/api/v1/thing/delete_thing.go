@@ -61,6 +61,10 @@ func DeleteThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
+		if err = sp.GetThingNotificationRepository().Delete(ctx, id, tx); err != nil {
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
 		if err = sp.GetThingRepository().Delete(ctx, id, tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}

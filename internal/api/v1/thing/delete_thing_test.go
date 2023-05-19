@@ -1,6 +1,7 @@
 package thing
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http/httptest"
@@ -21,12 +22,6 @@ import (
 )
 
 func Test_DeleteThingHandler(t *testing.T) {
-	type thingRepoMockFunc func(mc *minimock.Controller) interfaces.ThingRepository
-	type placeThingRepoMockFunc func(mc *minimock.Controller) interfaces.PlaceThingRepository
-	type thingImageRepoMockFunc func(mc *minimock.Controller) interfaces.ThingImageRepository
-	type thingTagRepoMockFunc func(mc *minimock.Controller) interfaces.ThingTagRepository
-	type fileRepoMockFunc func(mc *minimock.Controller) interfaces.FileRepository
-
 	type req struct {
 		method string
 		route  string
@@ -51,15 +46,16 @@ func Test_DeleteThingHandler(t *testing.T) {
 	)
 
 	tests := []struct {
-		name               string
-		req                req
-		resCode            int
-		resBody            interface{}
-		thingRepoMock      thingRepoMockFunc
-		placeThingRepoMock placeThingRepoMockFunc
-		thingImageRepoMock thingImageRepoMockFunc
-		thingTagRepoMock   thingTagRepoMockFunc
-		fileRepoMock       fileRepoMockFunc
+		name                      string
+		req                       req
+		resCode                   int
+		resBody                   interface{}
+		thingRepoMock             func(mc *minimock.Controller) interfaces.ThingRepository
+		placeThingRepoMock        func(mc *minimock.Controller) interfaces.PlaceThingRepository
+		thingImageRepoMock        func(mc *minimock.Controller) interfaces.ThingImageRepository
+		thingTagRepoMock          func(mc *minimock.Controller) interfaces.ThingTagRepository
+		thingNotificationRepoMock func(mc *minimock.Controller) interfaces.ThingNotificationRepository
+		fileRepoMock              func(mc *minimock.Controller) interfaces.FileRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -81,6 +77,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
@@ -104,6 +103,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
 			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
 			},
@@ -125,6 +127,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
@@ -148,6 +153,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
@@ -173,6 +181,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
@@ -201,6 +212,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
 			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
 			},
@@ -228,6 +242,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 			},
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				return repoMocks.NewThingTagRepositoryMock(mc)
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
@@ -259,6 +276,9 @@ func Test_DeleteThingHandler(t *testing.T) {
 				mock.DeleteByThingIDMock.Return(testError)
 				return mock
 			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
 			},
@@ -288,6 +308,15 @@ func Test_DeleteThingHandler(t *testing.T) {
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
 				mock.DeleteByThingIDMock.Return(nil)
+				return mock
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
 				return mock
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
@@ -322,6 +351,11 @@ func Test_DeleteThingHandler(t *testing.T) {
 				mock.DeleteByThingIDMock.Return(nil)
 				return mock
 			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+				mock.DeleteMock.Return(nil)
+				return mock
+			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				return repoMocks.NewFileRepositoryMock(mc)
 			},
@@ -352,6 +386,11 @@ func Test_DeleteThingHandler(t *testing.T) {
 			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
 				mock := repoMocks.NewThingTagRepositoryMock(mc)
 				mock.DeleteByThingIDMock.Return(nil)
+				return mock
+			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+				mock.DeleteMock.Return(nil)
 				return mock
 			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
@@ -389,6 +428,15 @@ func Test_DeleteThingHandler(t *testing.T) {
 				mock.DeleteByThingIDMock.Return(nil)
 				return mock
 			},
+			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
+				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+
+				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
+					assert.Equal(mc, thingID, id)
+				}).Return(nil)
+
+				return mock
+			},
 			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
 				mock := repoMocks.NewFileRepositoryMock(mc)
 				mock.DeleteMock.Return(nil)
@@ -405,6 +453,7 @@ func Test_DeleteThingHandler(t *testing.T) {
 				tt.placeThingRepoMock(mc),
 				tt.thingImageRepoMock(mc),
 				tt.thingTagRepoMock(mc),
+				tt.thingNotificationRepoMock(mc),
 				tt.fileRepoMock(mc),
 			)
 
