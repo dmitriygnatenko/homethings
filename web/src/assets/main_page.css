@@ -1,0 +1,274 @@
+.container-fluid {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: #f7f7f7;
+}
+
+.dropdown.logout {
+    position: absolute;
+    right: 10px;
+}
+
+.dropdown.logout .btn.dropdown-toggle {
+    font-size: 12px;
+    color: #7e7e7e;
+}
+
+.dropdown.logout .btn.dropdown-toggle:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.dropdown.logout .btn.dropdown-toggle:hover {
+    color: #306ae4;
+}
+
+.dropdown.logout .dropdown-item {
+    font-size: 12px;
+}
+
+.col-l {
+    width: 34%;
+    padding-top: 30px;
+    padding-bottom: 25px;
+}
+
+.col-c, .col-r {
+    width: 33%;
+    padding-top: 30px;
+    padding-bottom: 25px;
+}
+
+.list {
+    overflow: auto;
+}
+
+.places .header, .things .header, .info .header {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 8px 0 5px 14px;
+}
+
+.header .buttons {
+    margin: 0;
+    position: relative;
+    padding: 0 10px 0 0;
+}
+
+.header .buttons .btn {
+    color: white;
+    padding: 0 5px 2px 5px;
+    margin-left: 3px;
+}
+
+.header .buttons .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.places {
+    background-color: #ffffff;
+    height: 100%;
+    margin: 0 8px 0 15px;
+}
+
+.places .header {
+    background-color: #3082c2;
+    color: #ffffff;
+}
+
+.places .list ul {
+    list-style-type: none;
+    padding-left: 15px;
+    font-size: 14px;
+}
+
+.places .list > ul {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.places .list div {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.places .list div.selected {
+    font-weight: bold;
+}
+
+.places .buttons .btn:hover {
+    background-color: #215d8c;
+    border-color: #215d8c;
+}
+
+.things {
+    background-color: #ffffff;
+    height: 100%;
+    margin: 0 8px;
+}
+
+.things .header {
+    background-color: #2aad55;
+    color: #ffffff;
+}
+
+.things .list .btn {
+    width: 100%;
+    text-align: left;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 1px dashed #b6b6b6;
+    border-radius: 0;
+}
+
+.things .list .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.things .list .title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.things .list .desc {
+    color: gray;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.things .list .tags {
+    margin-top: 3px;
+    font-size: 13px;
+}
+
+.things .list .tags span {
+    font-weight: normal;
+    margin-right: 3px;
+}
+
+.things .list .date {
+    color: gray;
+    font-size: 12px;
+    text-align: right;
+    margin-top: 3px;
+}
+
+.things .list .btn:hover {
+    background-color: #f8f8f8;
+}
+
+.things .list .btn.selected {
+    background-color: #f3fff7;
+}
+
+.things .buttons .btn:hover {
+    background-color: #229346;
+    border-color: #229346;
+}
+
+.info {
+    background-color: #ffffff;
+    height: 100%;
+    margin: 0 15px 0 8px;
+}
+
+.info .header {
+    background-color: #dfc00c;
+    color: #ffffff;
+}
+
+.info .buttons .btn:hover {
+    background-color: #bfa616;
+    border-color: #bfa616;
+}
+
+.info .list .btn {
+    width: 100%;
+    text-align: left;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 1px dashed #b6b6b6;
+    border-radius: 0;
+}
+
+.info .list .btn:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.info .list .btn:hover {
+    background-color: #f8f8f8;
+}
+
+.info .list .btn.selected {
+    background-color: #fffef3;
+}
+
+.info .list .date {
+    color: gray;
+    font-size: 12px;
+    text-align: right;
+    margin-top: 3px;
+}
+
+.info .list .btn img {
+    border: 1px solid #e3e3e3;
+    margin-top: 7px;
+}
+
+@media (max-width: 767px) {
+    .container-fluid .d-flex {
+        display: block !important;
+    }
+
+    .col-l, .col-c, .col-r {
+        width: 100%;
+        padding-bottom: 0;
+    }
+
+    .places {
+        margin-right: 15px;
+        height: 250px;
+    }
+
+    .places .list {
+        height: 200px;
+    }
+
+    .things {
+        margin-right: 15px;
+        margin-left: 15px;
+        height: 250px;
+    }
+
+    .things .list {
+        height: 200px;
+    }
+
+    .info {
+        margin-left: 15px;
+        height: 350px;
+    }
+
+    .info .list {
+        height: 300px;
+    }
+}

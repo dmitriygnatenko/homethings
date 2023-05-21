@@ -54,14 +54,14 @@ export default {
       this.errors.password = true
 
       auth.clearToken()
-      this.authStore.clearAuth()
+      this.authStore.resetAuth()
     },
   }
 }
 </script>
 
 <style scoped>
-@import "../assets/login_page_component.css";
+@import "../assets/login_page.css";
 </style>
 
 <template>

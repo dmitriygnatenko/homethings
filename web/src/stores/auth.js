@@ -11,7 +11,7 @@ export const useAuthStore = defineStore({
             this.isAuth = true
             this.username = username
         },
-        clearAuth() {
+        resetAuth() {
             this.isAuth = false
             this.username = ""
         }

@@ -1,5 +1,6 @@
 <script setup>
 import LoginPage from './components/LoginPage.vue'
+import MainPage from './components/MainPage.vue'
 import {useAuthStore} from './stores/auth.js'
 </script>
 
@@ -16,6 +17,8 @@ export default {
     let res = client.jsonRequest(client.methodGet, client.routeCheckAuth)
     if (res.status === client.statusOK) {
       this.authStore.setAuth(res.data.username)
+    } else {
+      this.authStore.resetAuth()
     }
   },
 }
@@ -23,4 +26,5 @@ export default {
 
 <template>
   <LoginPage></LoginPage>
+  <MainPage></MainPage>
 </template>
