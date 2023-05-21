@@ -1,0 +1,21 @@
+.login-form {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px 15px 50px 15px;
+    margin: auto;
+}
+
+.login-form .form-floating:focus-within {
+    z-index: 2;
+}
+
+.login-form input[type="text"] {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.login-form input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
