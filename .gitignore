@@ -3,3 +3,4 @@
 /.env
 /web/files/
 /coverage.out
+/node_modules/

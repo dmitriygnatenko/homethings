@@ -20,6 +20,9 @@ usage:
 run:
 	cd cmd/app && go run main.go
 
+run-frontend:
+	npm run dev
+
 test:
 	go test ./...
 
@@ -62,6 +65,12 @@ install-goose:
 install-swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest
 
+install-frontend:
+	npm install
+
 .PHONY: build
 build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build/app/app cmd/app/main.go
+
+build-frontend:
+	npm run build
