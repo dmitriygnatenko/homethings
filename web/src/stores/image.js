@@ -1,3 +1,5 @@
+"use strict"
+
 import {defineStore} from 'pinia'
 
 export const useImageStore = defineStore({
@@ -8,23 +10,10 @@ export const useImageStore = defineStore({
         selectedImageThing: 0,
     }),
     actions: {
-        setSelectedImage(id) {
+        setSelectedImage(id, placeID, thingID) {
             this.selectedImage = id
-        },
-        setSelectedImagePlace(id) {
-            this.selectedImagePlace = id
-        },
-        setSelectedImageThing(id) {
-            this.selectedImageThing = id
-        },
-        resetSelectedImage() {
-            this.selectedImage = 0
-        },
-        resetSelectedImagePlace() {
-            this.selectedImagePlace = 0
-        },
-        resetSelectedImageThing() {
-            this.selectedImageThing = 0
+            this.selectedImagePlace = placeID
+            this.selectedImageThing = thingID
         },
         reset() {
             this.selectedImage = 0

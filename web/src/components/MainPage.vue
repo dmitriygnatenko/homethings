@@ -1,4 +1,5 @@
 <script setup>
+import PlaceTreeItem from './PlaceTreeItem.vue'
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
 import {useThingStore} from '../stores/thing.js'
@@ -8,6 +9,7 @@ import {useTagStore} from '../stores/tag.js'
 
 <script>
 import * as client from "../client/client.js";
+import {formatDate} from "../helpers/date.js";
 
 export default {
   data() {
@@ -15,7 +17,7 @@ export default {
       authStore: useAuthStore(),
       placeStore: usePlaceStore(),
       thingStore: useThingStore(),
-      imageStore: useImageStore()
+      imageStore: useImageStore(),
       tagStore: useTagStore(),
       placeTree: [],
       thingList: [],
@@ -28,26 +30,68 @@ export default {
     }
   },
   created() {
+    this.placeStore.$onAction(
+      ({name, store, args, after, onError}) => {
+        if (name === "setSelectedPlace" && args.length) {
+          if (args[0] !== this.placeStore.selectedPlace) {
+            after(() => {
+              let placeID = this.placeStore.selectedPlace
+
+              this.resetTags()
+
+              if (placeID === 0) {
+                this.resetThings()
+                return
+              }
+
+              this.refreshThings(placeID)
+              this.refreshPlaceImages(placeID)
+            })
+          }
+        }
+      }
+    )
+
+    this.thingStore.$onAction(
+      ({name, store, args, after, onError}) => {
+        if (name === "setSelectedThing" && args.length) {
+          if (args[0] !== this.thingStore.selectedThing) {
+            after(() => {
+              let thingID = this.thingStore.selectedThing
+
+              this.refreshThingImages(thingID)
+            })
+          }
+        }
+      }
+    )
+
+    this.imageStore.$onAction(
+        ({name, store, args, after, onError}) => {
+          if (name === "setSelectedImage" && args.length === 3) {
+            // TODO
+          }
+        }
+    )
+
+    // Refresh places after start
     if (this.authStore.isAuth) {
       this.refreshPlaces()
     }
   },
   methods: {
-    // Refresh
-    refreshPlaces(id) {
-      this.resetPlaces()
+    // Request
 
-      if (id > 0) {
-        this.placeStore.setSelectedPlace(id)
+    request(method, route) {
+      let res = client.jsonRequest(method, route)
+      if (res.status !== client.statusOK) {
+        this.authStore.resetAuth()
       }
-
-      let res = this.request(client.methodGet, client.routeGetPlacesTree)
-      if (Array.isArray(res.data.places) && res.data.places.length) {
-        this.placeTree[0].nested = res.data.places
-      }
+      return res
     },
 
     // Reset
+
     resetPlaces() {
       this.placeTree = [{
         place: {"title": "Все", id: 0},
@@ -56,23 +100,107 @@ export default {
       this.placeStore.resetSelectedPlace()
       this.resetThings()
     },
+
     resetThings() {
       this.thingList = []
       this.thingStore.resetSelectedThing()
       this.resetImages()
     },
+
     resetImages() {
       this.imageList = []
       this.imageStore.reset()
     },
+
     resetTags() {
       this.tagStore.resetSelectedTag()
+    },
+
+    // Refresh
+
+    refreshPlaces(placeID) {
+      this.resetPlaces()
+
+      if (placeID > 0) {
+        this.placeStore.setSelectedPlace(placeID)
+      }
+
+      let res = this.request(client.methodGet, client.routeGetPlacesTree)
+      if (Array.isArray(res.data.places) && res.data.places.length) {
+        this.placeTree[0].nested = res.data.places
+      }
+    },
+
+    refreshThings(placeID) {
+      this.resetThings()
+      let obj = this
+
+      let res = this.request(client.methodGet, client.routeGetPlaceThings.replace("{placeId}", placeID))
+      if (Array.isArray(res.data.things) && res.data.things.length) {
+        res.data.things.forEach(thing => {
+          let show = false
+
+          if (obj.tagStore.selectedTag === 0) {
+            show = true
+          } else if (obj.tagStore.selectedTag > 0 && thing.tags) {
+            thing.tags.forEach(tag => {
+              if (tag.id === obj.tagStore.selectedTag) {
+                show = true
+              }
+            })
+          }
+
+          if (show) {
+            obj.thingList.push({
+              "id": thing.id,
+              "title": thing.title,
+              "desc": thing.description,
+              "date": formatDate(thing.updated_at),
+              "tags": thing.tags
+            })
+          }
+        });
+      }
+    },
+
+    refreshPlaceImages(placeID) {
+      this.resetImages()
+
+      let res = this.request(client.methodGet, client.routeGetPlaceImages.replace("{placeId}", placeID))
+      if (Array.isArray(res.data.images) && res.data.images.length) {
+        res.data.images.forEach(image => {
+          this.imageList.push({
+            "id": image.id,
+            "image": image.image,
+            "place_id": image.place_id,
+            "thing_id": image.thing_id,
+            "date": formatDate(image.created_at),
+          })
+        });
+      }
+    },
+
+    refreshThingImages(thingID) {
+      this.resetImages()
+
+      let res = this.request(client.methodGet, client.routeGetThingImages.replace("{thingId}", thingID))
+      if (Array.isArray(res.data.images) && res.data.images.length) {
+        res.data.images.forEach(image => {
+          this.imageList.push({
+            "id": image.id,
+            "image": image.image,
+            "place_id": image.place_id,
+            "thing_id": image.thing_id,
+            "date": formatDate(image.created_at),
+          })
+        });
+      }
     },
   }
 }
 </script>
 
-<style scoped>
+<style>
 @import "../assets/main_page.css";
 </style>
 
@@ -112,14 +240,14 @@ export default {
               <button
                   class="btn edit"
                   title="Редактировать место"
-                  v-if="selectedPlace > 0"
+                  v-if="placeStore.selectedPlace > 0"
                   @click="updatePlace">
                 <i class="bi bi-pencil-fill"></i>
               </button>
               <button
                   class="btn delete"
                   title="Удалить место"
-                  v-if="selectedPlace > 0"
+                  v-if="placeStore.selectedPlace > 0"
                   @click="deletePlace">
                 <i class="bi bi-trash-fill"></i>
               </button>
@@ -127,12 +255,7 @@ export default {
           </div>
           <div class="list">
             <ul>
-              <place-tree-item
-                  v-for="item in placesTree"
-                  :item="item"
-                  :selected-place="selectedPlace"
-                  @set-selected-place="setSelectedPlace">
-              </place-tree-item>
+              <PlaceTreeItem v-for="item in placeTree" :item="item"></PlaceTreeItem>
             </ul>
           </div>
         </div>
@@ -152,21 +275,21 @@ export default {
               <button
                   class="btn add"
                   title="Добавить вещь"
-                  v-if="selectedPlace > 0"
+                  v-if="placeStore.selectedPlace > 0"
                   @click="addThing">
                 <i class="bi bi-plus-circle-fill"></i>
               </button>
               <button
                   class="btn edit"
                   title="Редактировать вещь"
-                  v-if="selectedThing > 0"
+                  v-if="thingStore.selectedThing > 0"
                   @click="updateThing">
                 <i class="bi bi-pencil-fill"></i>
               </button>
               <button
                   class="btn delete"
                   title="Удалить вещь"
-                  v-if="selectedThing > 0"
+                  v-if="thingStore.selectedThing > 0"
                   @click="deleteThing">
                 <i class="bi bi-trash-fill"></i>
               </button>
@@ -175,18 +298,18 @@ export default {
           <div class="list">
             <button
                 class="btn"
-                v-for="thing in thingsList"
-                @click="setSelectedThing(thing.id)"
-                :class="{ selected : selectedThing == thing.id }">
+                v-for="thing in thingList"
+                @click="thingStore.setSelectedThing(thing.id)"
+                :class="{ selected : thingStore.selectedThing === thing.id }">
               <div class="title">{{ thing.title }}</div>
               <div class="desc" v-if="thing.desc">{{ thing.desc }}</div>
               <div class="tags" v-if="thing.tags">
-                                    <span
-                                        class="badge rounded-pill"
-                                        v-for="tag in thing.tags"
-                                        v-bind:style="{ 'background-color': tag.style }">
-                                        {{ tag.title }}
-                                    </span>
+                <span
+                    class="badge rounded-pill"
+                    v-for="tag in thing.tags"
+                    v-bind:style="{ 'background-color': tag.style }">
+                    {{ tag.title }}
+                </span>
               </div>
               <div class="date">{{ thing.date }}</div>
             </button>
@@ -202,14 +325,14 @@ export default {
               <button
                   class="btn add"
                   title="Добавить фото"
-                  v-if="selectedPlace > 0 || selectedThing > 0"
+                  v-if="placeStore.selectedPlace > 0 || thingStore.selectedThing > 0"
                   @click="addImage">
                 <i class="bi bi-plus-circle-fill"></i>
               </button>
               <button
                   class="btn delete"
                   title="Удалить фото"
-                  v-if="selectedImage > 0"
+                  v-if="imageStore.selectedImage > 0"
                   @click="deleteImage">
                 <i class="bi bi-trash-fill"></i>
               </button>
@@ -218,10 +341,10 @@ export default {
           <div class="list">
             <button
                 class="btn"
-                v-for="image in imagesList"
+                v-for="image in imageList"
                 v-on:dblclick="showImage(image.id, image.place_id, image.thing_id)"
-                @click="setSelectedImage(image.id, image.place_id, image.thing_id)"
-                :class="{ selected : selectedImage == image.id }">
+                @click="imageStore.setSelectedImage(image.id, image.place_id, image.thing_id)"
+                :class="{ selected : imageStore.selectedImage === image.id }">
               <img class="img-fluid" :src="image.image">
               <div class="date">{{ image.date }}</div>
             </button>
