@@ -66,6 +66,19 @@ export default {
       }
     )
 
+    this.authStore.$onAction(
+      ({name, store, args, after, onError}) => {
+        switch (name) {
+          case "setAuth":
+            this.refreshPlaces()
+            break
+          case "resetAuth":
+            this.resetPlaces()
+            break
+        }
+      }
+    )
+
     this.imageStore.$onAction(
         ({name, store, args, after, onError}) => {
           if (name === "setSelectedImage" && args.length === 3) {
@@ -202,6 +215,7 @@ export default {
 
 <style>
 @import "../assets/main_page.css";
+@import "../assets/modal.css";
 </style>
 
 <template>
