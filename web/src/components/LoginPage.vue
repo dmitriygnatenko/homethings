@@ -39,14 +39,13 @@ export default {
       })
 
       if (res.status === client.statusOK && res.data.token !== undefined) {
+        auth.setToken(res.data.token)
+        this.authStore.setAuth(this.form.username)
+
         this.errors.username = false
         this.errors.password = false
         this.form.username = ""
         this.form.password = ""
-
-        auth.setToken(res.data.token)
-        this.authStore.setAuth(this.form.username)
-
         return
       }
 

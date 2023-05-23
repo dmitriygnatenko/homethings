@@ -1,5 +1,6 @@
 <script setup>
 import PlaceTreeItem from './PlaceTreeItem.vue'
+import ModalAddPlace from './modal/ModalAddPlace.vue'
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
 import {useThingStore} from '../stores/thing.js'
@@ -209,6 +210,16 @@ export default {
         });
       }
     },
+
+    // Actions
+
+    addPlace() {
+      this.$refs.modalAddPlace.init();
+    },
+
+    afterAddPlace(id) {
+      this.refreshPlaces(id)
+    },
   }
 }
 </script>
@@ -368,4 +379,7 @@ export default {
 
     </div>
   </main>
+
+  <ModalAddPlace ref="modalAddPlace" @after-add-place="afterAddPlace"></ModalAddPlace>
+
 </template>

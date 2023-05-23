@@ -4,8 +4,10 @@ import {usePlaceStore} from '../../stores/place.js'
 
 <script>
 import * as client from "../../client/client.js";
+import { Modal } from 'bootstrap'
 
 export default {
+  expose: ['init'],
   data() {
     return {
       placeStore: usePlaceStore(),
@@ -36,7 +38,7 @@ export default {
         }
       }
 
-      this.modal = new bootstrap.Modal(document.getElementById("add-place-modal"), {})
+      this.modal = new Modal(document.getElementById("add-place-modal"), {})
       this.modal.show()
     },
     submitForm() {
