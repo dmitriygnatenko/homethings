@@ -1,8 +1,9 @@
-"use strict"
+<script>
+import * as client from "../../client/client.js";
+import {Modal} from 'bootstrap'
 
-import * as client from "../client/client.js";
-
-export const modalAddUserComponent = {
+export default {
+    expose: ['init'],
     data() {
         return {
             modal: Object,
@@ -24,7 +25,7 @@ export const modalAddUserComponent = {
             this.errors.username = ""
             this.errors.password = ""
 
-            this.modal = new bootstrap.Modal(document.getElementById("add-user-modal"), {})
+            this.modal = new Modal(document.getElementById("add-user-modal"), {})
             this.modal.show()
         },
         submitForm() {
@@ -54,7 +55,10 @@ export const modalAddUserComponent = {
             this.modal.hide()
         },
     },
-    template: `
+}
+</script>
+
+<template>
     <div class="modal" tabindex="-1" id="add-user-modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -70,7 +74,7 @@ export const modalAddUserComponent = {
                                 v-model.trim="form.username"
                                 :class="{'is-invalid': errors.username}">
                             <div v-if="errors.username" class="invalid-feedback">
-                                <small>{{ errors.username }}<small>
+                                <small>{{ errors.username }}</small>
                             </div>
                         </div>
                     </div>
@@ -85,7 +89,7 @@ export const modalAddUserComponent = {
                                 v-model.trim="form.password"
                                 :class="{'is-invalid': errors.password}">
                             <div v-if="errors.password" class="invalid-feedback">
-                                <small>{{ errors.password }}<small>
+                                <small>{{ errors.password }}</small>
                             </div>
                         </div>
                     </div>
@@ -93,9 +97,8 @@ export const modalAddUserComponent = {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
                     <button type="button" class="btn btn-primary btn-sm" @click="submitForm">Добавить</button>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
-    `
-}
+</template>
