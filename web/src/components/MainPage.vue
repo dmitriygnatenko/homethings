@@ -9,6 +9,7 @@ import {useTagStore} from '../stores/tag.js'
 </script>
 
 <script>
+import * as auth from "../auth/auth.js"
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
 
@@ -220,6 +221,44 @@ export default {
     afterAddPlace(id) {
       this.refreshPlaces(id)
     },
+
+    logout() {
+      auth.clearToken()
+      this.authStore.resetAuth()
+    },
+
+
+    // TODO
+    addUser() {
+      this.$refs.modalAddUser.init()
+    },
+    afterAddUser(success) {
+      if (success) {
+        this.$refs.toast.showSuccess("Пользователь добавлен")
+      } else {
+        this.$refs.toast.showError("Ошибка при добавлении пользователя")
+      }
+    },
+    updateUsername() {
+      this.$refs.modalUpdateUsername.init()
+    },
+    afterUpdateUsername(success) {
+      if (success) {
+        this.logout()
+      } else {
+        this.$refs.toast.showError("Ошибка при изменении имени пользователя")
+      }
+    },
+    updatePassword() {
+      this.$refs.modalUpdatePassword.init()
+    },
+    afterUpdatePassword(success) {
+      if (success) {
+        this.logout()
+      } else {
+        this.$refs.toast.showError("Ошибка при изменении пароля пользователя")
+      }
+    },
   }
 }
 </script>
@@ -232,15 +271,16 @@ export default {
 <template>
   <main class="container-fluid" v-if="show">
     <div class="d-flex flex-grow h-100">
-      <div class="dropdown logout">
+      <div class="dropdown user-top">
         <button
             type="button"
             class="btn btn-sm dropdown-toggle"
-            data-bs-toggle="dropdown">
+            data-bs-toggle="dropdown"
+            data-bs-target="#dropdown-user-menu">
           <i class="bi bi-person-fill"></i>
-          {{ authStore.username }}
+          {{ this.authStore.username }}
         </button>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu" id="dropdown-user-menu">
           <li><button class="dropdown-item" @click="addUser">Добавить пользователя</button></li>
           <li><a class="dropdown-item" @click="updateUsername">Изменить свой логин</a></li>
           <li><a class="dropdown-item" @click="updatePassword">Изменить свой пароль</a></li>
