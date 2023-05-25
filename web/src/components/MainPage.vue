@@ -8,6 +8,7 @@ import ModalUpdateThing from "./modal/ModalUpdateThing.vue"
 import ModalDeleteThing from "./modal/ModalDeleteThing.vue"
 import ModalAddImage from "./modal/ModalAddImage.vue"
 import ModalSearchThing from "./modal/ModalSearchThing.vue"
+import ModalTags from "./modal/ModalTags.vue"
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
@@ -312,6 +313,15 @@ export default {
             this.refreshThings(this.placeStore.selectedPlace)
         },
 
+        showTags() {
+            this.$refs.modalTags.init();
+        },
+
+        afterTags() {
+            this.resetTags()
+            this.refreshThings(this.placeStore.selectedPlace)
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -532,6 +542,7 @@ export default {
     <ModalDeleteThing ref="modalDeleteThing" @after-delete-thing="afterDeleteThing"></ModalDeleteThing>
     <ModalAddImage ref="modalAddImage" @after-add-image="afterAddImage"></ModalAddImage>
     <ModalSearchThing ref="modalSearchThing" @after-search-thing="afterSearchThing" @after-filter-tag="afterFilterTag"></ModalSearchThing>
+    <ModalTags ref="modalTags" @after-tags="afterTags"></ModalTags>
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
     <ModalUpdatePassword ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></ModalUpdatePassword>

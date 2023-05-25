@@ -9,7 +9,7 @@ export default {
             modal: Object,
             loading: false,
             empty: false,
-            thingsList: [],
+            thingList: [],
             form: {
                 search: "",
                 tagsList: [],
