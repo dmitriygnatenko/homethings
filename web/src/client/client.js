@@ -48,13 +48,16 @@ export const routeDeleteTag = "/api/v1/tags/{tagId}"
 export const routeAddThingTag = "/api/v1/tags/{tagId}/thing/{thingId}"
 export const routeDeleteThingTag = "/api/v1/tags/{tagId}/thing/{thingId}"
 
-export function jsonRequest(method, url, data) {
-    let xhr = new XMLHttpRequest();
-    const token = getToken()
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const host = window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
+export function getHost() {
+    return window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
+}
 
-    xhr.open(method, host + url, false);
+export function jsonRequest(method, url, data) {
+    let xhr = new XMLHttpRequest()
+    const token = getToken()
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    xhr.open(method, getHost() + url, false)
 
     xhr.setRequestHeader("Accept", "application/json")
     xhr.setRequestHeader("Content-Type", "application/json")
@@ -77,12 +80,11 @@ export function jsonRequest(method, url, data) {
 }
 
 export function formDataRequest(method, url, data) {
-    let xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest()
     const token = getToken()
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const host = window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-    xhr.open(method, host + url, false);
+    xhr.open(method, getHost() + url, false)
 
     xhr.setRequestHeader("Accept", "application/json")
     xhr.setRequestHeader("Timezone", timezone)

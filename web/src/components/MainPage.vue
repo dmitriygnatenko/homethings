@@ -188,12 +188,13 @@ export default {
         refreshPlaceImages(placeID) {
             this.resetImages()
 
+            let host = client.getHost()
             let res = this.request(client.methodGet, client.routeGetPlaceImages.replace("{placeId}", placeID))
             if (Array.isArray(res.data.images) && res.data.images.length) {
                 res.data.images.forEach(image => {
                     this.imageList.push({
                         "id": image.id,
-                        "image": image.image,
+                        "image": host + image.image,
                         "place_id": image.place_id,
                         "thing_id": image.thing_id,
                         "date": formatDate(image.created_at),
@@ -205,12 +206,13 @@ export default {
         refreshThingImages(thingID) {
             this.resetImages()
 
+            let host = client.getHost()
             let res = this.request(client.methodGet, client.routeGetThingImages.replace("{thingId}", thingID))
             if (Array.isArray(res.data.images) && res.data.images.length) {
                 res.data.images.forEach(image => {
                     this.imageList.push({
                         "id": image.id,
-                        "image": image.image,
+                        "image": host + image.image,
                         "place_id": image.place_id,
                         "thing_id": image.thing_id,
                         "date": formatDate(image.created_at),
@@ -416,12 +418,12 @@ export default {
                             <div class="title">{{ thing.title }}</div>
                             <div class="desc" v-if="thing.desc">{{ thing.desc }}</div>
                             <div class="tags" v-if="thing.tags">
-                <span
-                    class="badge rounded-pill"
-                    v-for="tag in thing.tags"
-                    v-bind:style="{ 'background-color': tag.style }">
-                    {{ tag.title }}
-                </span>
+                                <span
+                                    class="badge rounded-pill"
+                                    v-for="tag in thing.tags"
+                                    v-bind:style="{ 'background-color': tag.style }">
+                                    {{ tag.title }}
+                                </span>
                             </div>
                             <div class="date">{{ thing.date }}</div>
                         </button>
