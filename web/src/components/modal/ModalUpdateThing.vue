@@ -1,21 +1,24 @@
-'use strict'
+<script setup>
+import {useThingStore} from '../../stores/thing.js'
+</script>
 
-import * as client from "../client/client.js";
-import {getPlacesListWithNestedTitles} from "../helpers/places.js";
+<script>
+import * as client from "../../client/client.js"
+import {getPlacesListWithNestedTitles} from "../../helpers/places.js";
+import {Modal} from 'bootstrap'
 
-export const modalUpdateThingComponent = {
-    props: {
-        selectedThing: Number,
-    },
+export default {
+    expose: ['init'],
     data() {
         return {
+            thingStore: useThingStore(),
             modal: Object,
             form: {
                 title: "",
                 desc: "",
                 placeID: 0,
-                placesList: [],
-                tagsList: [],
+                placeList: [],
+                tagList: [],
                 selectedTags: [],
                 initialTags: [],
             },
@@ -26,14 +29,16 @@ export const modalUpdateThingComponent = {
     },
     methods: {
         init() {
-            if (this.selectedThing === 0) {
+            let selectedThing = this.thingStore.selectedThing
+            if (selectedThing === 0) {
                 return
             }
+
             this.form.placeID = 0;
             this.form.title = ""
             this.form.desc = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", this.selectedThing))
+            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", selectedThing))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
                 this.form.desc = res.data.description
@@ -46,12 +51,12 @@ export const modalUpdateThingComponent = {
 
             let placesRes = client.jsonRequest(client.methodGet, client.routeGetPlaces)
             if (placesRes.status === client.statusOK) {
-                this.form.placesList = []
+                this.form.placeList = []
                 if (Array.isArray(placesRes.data.places) && placesRes.data.places.length) {
                     let obj = this
 
                     getPlacesListWithNestedTitles(placesRes.data.places).forEach(place => {
-                        obj.form.placesList.push({
+                        obj.form.placeList.push({
                             "id": place.id,
                             "title": place.title,
                         })
@@ -61,12 +66,12 @@ export const modalUpdateThingComponent = {
 
             let tagsRes = client.jsonRequest(client.methodGet, client.routeGetTags)
             if (tagsRes.status === client.statusOK) {
-                this.form.tagsList = []
+                this.form.tagList = []
                 if (Array.isArray(tagsRes.data.tags) && tagsRes.data.tags.length) {
                     let obj = this
 
                     tagsRes.data.tags.forEach(tag => {
-                        obj.form.tagsList.push({
+                        obj.form.tagList.push({
                             "id": tag.id,
                             "title": tag.title,
                         })
@@ -76,7 +81,7 @@ export const modalUpdateThingComponent = {
 
             this.form.initialTags = []
             this.form.selectedTags = []
-            let thingTagsRes = client.jsonRequest(client.methodGet, client.routeGetThingTags.replace("{thingId}", this.selectedThing))
+            let thingTagsRes = client.jsonRequest(client.methodGet, client.routeGetThingTags.replace("{thingId}", selectedThing))
             if (thingTagsRes.status === client.statusOK) {
                 if (Array.isArray(thingTagsRes.data.tags) && thingTagsRes.data.tags.length) {
                     let obj = this
@@ -88,10 +93,12 @@ export const modalUpdateThingComponent = {
                 }
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById('update-thing-modal'), {})
+            this.modal = new Modal(document.getElementById('modal-update-thing'), {})
             this.modal.show()
         },
         submitForm() {
+            let selectedThing = this.thingStore.selectedThing
+
             if (this.form.title === "") {
                 this.errors.title = "Название должно быть заполнено"
                 return
@@ -100,14 +107,14 @@ export const modalUpdateThingComponent = {
             // Delete
             this.form.initialTags.forEach(tagID => {
                 if (this.form.selectedTags.indexOf(tagID) < 0) {
-                    client.jsonRequest(client.methodDelete, client.routeDeleteThingTag.replace("{thingId}", this.selectedThing).replace("{tagId}", tagID))
+                    client.jsonRequest(client.methodDelete, client.routeDeleteThingTag.replace("{thingId}", selectedThing).replace("{tagId}", tagID))
                 }
             });
 
             // Add
             this.form.selectedTags.forEach(tagID => {
                 if (this.form.initialTags.indexOf(tagID) < 0) {
-                    client.jsonRequest(client.methodPost, client.routeAddThingTag.replace("{thingId}", this.selectedThing).replace("{tagId}", tagID))
+                    client.jsonRequest(client.methodPost, client.routeAddThingTag.replace("{thingId}", selectedThing).replace("{tagId}", tagID))
                 }
             });
 
@@ -117,7 +124,7 @@ export const modalUpdateThingComponent = {
                 place_id: this.form.placeID,
             }
 
-            let res = client.jsonRequest(client.methodPut, client.routeUpdateThing.replace("{thingId}", this.selectedThing), data)
+            let res = client.jsonRequest(client.methodPut, client.routeUpdateThing.replace("{thingId}", selectedThing), data)
             if (res.status === client.statusOK) {
                 this.$emit("after-update-thing");
             }
@@ -125,8 +132,11 @@ export const modalUpdateThingComponent = {
             this.modal.hide()
         },
     },
-    template: `
-    <div class="modal" tabindex="-1" id="update-thing-modal">
+}
+</script>
+
+<template>
+    <div class="modal" tabindex="-1" id="modal-update-thing">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
@@ -136,11 +146,11 @@ export const modalUpdateThingComponent = {
                         </label>
                         <div class="col-sm-9">
                             <select v-model="form.placeID" class="form-select form-select-sm">
-                                <option v-for="place in form.placesList" :value="place.id">
+                                <option v-for="place in form.placeList" :value="place.id">
                                     {{ place.title }}
                                 </option>
                             </select>
-                        </div>       
+                        </div>
                     </div>
                     <div class="row mb-3">
                         <label class="col-sm-3 col-form-label col-form-label-sm">
@@ -153,7 +163,7 @@ export const modalUpdateThingComponent = {
                                 v-model.trim="form.title"
                                 :class="{'is-invalid': errors.title}">
                             <div v-if="errors.title" class="invalid-feedback">
-                                <small>{{ errors.title }}<small>
+                                <small>{{ errors.title }}</small>
                             </div>
                         </div>
                     </div>
@@ -162,7 +172,7 @@ export const modalUpdateThingComponent = {
                             <b>Описание</b>
                         </label>
                         <div class="col-sm-9">
-                            <textarea 
+                            <textarea
                                 class="form-control form-control-sm"
                                 v-model.trim="form.desc">
                              </textarea>
@@ -173,12 +183,12 @@ export const modalUpdateThingComponent = {
                             <b>Теги</b>
                         </label>
                         <div class="col-sm-9">
-                            <div 
+                            <div
                                 class="form-check form-check-inline form-control-sm"
-                                v-for="tag in form.tagsList" :key="tag.id">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
+                                v-for="tag in form.tagList" :key="tag.id">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
                                     v-model="form.selectedTags"
                                     :id="'tag-' + tag.id"
                                     :value="tag.id">
@@ -192,9 +202,8 @@ export const modalUpdateThingComponent = {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
                     <button type="button" class="btn btn-primary btn-sm" @click="submitForm">Сохранить</button>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
-    `
-}
+</template>

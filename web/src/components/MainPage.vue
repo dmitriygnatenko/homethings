@@ -4,6 +4,7 @@ import ModalAddPlace from './modal/ModalAddPlace.vue'
 import ModalUpdatePlace from "./modal/ModalUpdatePlace.vue"
 import ModalDeletePlace from "./modal/ModalDeletePlace.vue";
 import ModalAddThing from "./modal/ModalAddThing.vue";
+import ModalUpdateThing from "./modal/ModalUpdateThing.vue";
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue";
@@ -258,6 +259,18 @@ export default {
             this.thingStore.setSelectedThing(thingID)
         },
 
+        updateThing() {
+            this.$refs.modalUpdateThing.init()
+        },
+
+        afterUpdateThing() {
+            let selectedThing = this.thingStore.selectedThing
+            this.resetTags()
+            this.refreshPlaces(this.placeStore.selectedPlace)
+            this.refreshThings(this.placeStore.selectedPlace)
+            this.thingStore.setSelectedThing(selectedThing)
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -476,6 +489,7 @@ export default {
     <ModalDeletePlace ref="modalDeletePlace" @after-delete-place="afterDeletePlace"></ModalDeletePlace>
 
     <ModalAddThing ref="modalAddThing" @after-add-thing="afterAddThing"></ModalAddThing>
+    <ModalUpdateThing ref="modalUpdateThing" @after-update-thing="afterUpdateThing"></ModalUpdateThing>
 
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
