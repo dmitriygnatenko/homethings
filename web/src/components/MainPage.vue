@@ -2,12 +2,13 @@
 import PlaceTreeItem from './PlaceTreeItem.vue'
 import ModalAddPlace from './modal/ModalAddPlace.vue'
 import ModalUpdatePlace from "./modal/ModalUpdatePlace.vue"
-import ModalDeletePlace from "./modal/ModalDeletePlace.vue";
-import ModalAddThing from "./modal/ModalAddThing.vue";
-import ModalUpdateThing from "./modal/ModalUpdateThing.vue";
+import ModalDeletePlace from "./modal/ModalDeletePlace.vue"
+import ModalAddThing from "./modal/ModalAddThing.vue"
+import ModalUpdateThing from "./modal/ModalUpdateThing.vue"
+import ModalDeleteThing from "./modal/ModalDeleteThing.vue"
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
-import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue";
+import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
 import ModalToast from "./modal/ModalToast.vue"
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
@@ -271,6 +272,15 @@ export default {
             this.thingStore.setSelectedThing(selectedThing)
         },
 
+        deleteThing() {
+            this.$refs.modalDeleteThing.init()
+        },
+
+        afterDeleteThing() {
+            this.resetTags()
+            this.refreshThings(this.placeStore.selectedPlace)
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -490,6 +500,7 @@ export default {
 
     <ModalAddThing ref="modalAddThing" @after-add-thing="afterAddThing"></ModalAddThing>
     <ModalUpdateThing ref="modalUpdateThing" @after-update-thing="afterUpdateThing"></ModalUpdateThing>
+    <ModalDeleteThing ref="modalDeleteThing" @after-delete-thing="afterDeleteThing"></ModalDeleteThing>
 
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>

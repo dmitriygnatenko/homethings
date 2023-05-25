@@ -1,13 +1,16 @@
-"use strict"
+<script setup>
+import {useThingStore} from '../../stores/thing.js'
+</script>
 
-import * as client from "../client/client.js";
+<script>
+import * as client from "../../client/client.js"
+import {Modal} from 'bootstrap'
 
-export const modalDeleteThingComponent = {
-    props: {
-        selectedThing: Number,
-    },
+export default {
+    expose: ['init'],
     data() {
         return {
+            thingStore: useThingStore(),
             modal: Object,
             form: {
                 title: "",
@@ -17,23 +20,25 @@ export const modalDeleteThingComponent = {
     },
     methods: {
         init() {
-            if (this.selectedThing === 0) {
+            let selectedThing = this.thingStore.selectedThing
+            if (selectedThing === 0) {
                 return
             }
+
             this.form.placeID = 0
             this.form.title = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", this.selectedThing))
+            let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", selectedThing))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
                 this.form.placeID = res.data.place_id
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById('delete-thing-modal'), {})
+            this.modal = new Modal(document.getElementById('modal-delete-thing'), {})
             this.modal.show()
         },
         submitForm() {
-            let res = client.jsonRequest(client.methodDelete, client.routeDeleteThing.replace("{thingId}", this.selectedThing))
+            let res = client.jsonRequest(client.methodDelete, client.routeDeleteThing.replace("{thingId}", this.thingStore.selectedThing))
             if (res.status === client.statusOK) {
                 this.$emit("after-delete-thing");
             }
@@ -41,8 +46,11 @@ export const modalDeleteThingComponent = {
             this.modal.hide()
         },
     },
-    template: `
-    <div class="modal" tabindex="-1" id="delete-thing-modal">
+}
+</script>
+
+<template>
+    <div class="modal" tabindex="-1" id="modal-delete-thing">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
@@ -57,5 +65,4 @@ export const modalDeleteThingComponent = {
             </div>
         </div>
     </div>
-    `
-}
+</template>
