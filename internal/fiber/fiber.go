@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	staticPath = "../../web"
+	staticPath = "../../web/public"
 	swaggerURI = "/docs/*"
 	metricsURI = "/metrics"
 )

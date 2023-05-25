@@ -12,7 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const uploadPath = "../../web"
+const uploadPath = "../../web/public"
 
 type fileRepository struct{}
 
