@@ -2,6 +2,7 @@
 import PlaceTreeItem from './PlaceTreeItem.vue'
 import ModalAddPlace from './modal/ModalAddPlace.vue'
 import ModalUpdatePlace from "./modal/ModalUpdatePlace.vue"
+import ModalDeletePlace from "./modal/ModalDeletePlace.vue";
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue";
@@ -235,6 +236,14 @@ export default {
             this.refreshPlaces(this.placeStore.selectedPlace)
         },
 
+        deletePlace() {
+            this.$refs.modalDeletePlace.init()
+        },
+
+        afterDeletePlace() {
+            this.refreshPlaces()
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -450,6 +459,7 @@ export default {
 
     <ModalAddPlace ref="modalAddPlace" @after-add-place="afterAddPlace"></ModalAddPlace>
     <ModalUpdatePlace ref="modalUpdatePlace" @after-update-place="afterUpdatePlace"></ModalUpdatePlace>
+    <ModalDeletePlace ref="modalDeletePlace" @after-delete-place="afterDeletePlace"></ModalDeletePlace>
 
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
