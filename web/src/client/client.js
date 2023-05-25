@@ -75,3 +75,26 @@ export function jsonRequest(method, url, data) {
         status: xhr.status,
     };
 }
+
+export function formDataRequest(method, url, data) {
+    let xhr = new XMLHttpRequest();
+    const token = getToken()
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const host = window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
+
+    xhr.open(method, host + url, false);
+
+    xhr.setRequestHeader("Accept", "application/json")
+    xhr.setRequestHeader("Timezone", timezone)
+
+    if (token !== "") {
+        xhr.setRequestHeader("Authorization", "Bearer " + token)
+    }
+
+    xhr.send(data);
+
+    return {
+        data: JSON.parse(xhr.responseText),
+        status: xhr.status,
+    };
+}
