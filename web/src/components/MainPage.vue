@@ -1,6 +1,7 @@
 <script setup>
 import PlaceTreeItem from './PlaceTreeItem.vue'
 import ModalAddPlace from './modal/ModalAddPlace.vue'
+import ModalUpdatePlace from "./modal/ModalUpdatePlace.vue"
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue";
@@ -226,6 +227,14 @@ export default {
             this.refreshPlaces(id)
         },
 
+        updatePlace() {
+            this.$refs.modalUpdatePlace.init()
+        },
+
+        afterUpdatePlace() {
+            this.refreshPlaces(this.placeStore.selectedPlace)
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -440,6 +449,7 @@ export default {
     <ModalToast ref="modalToast"></ModalToast>
 
     <ModalAddPlace ref="modalAddPlace" @after-add-place="afterAddPlace"></ModalAddPlace>
+    <ModalUpdatePlace ref="modalUpdatePlace" @after-update-place="afterUpdatePlace"></ModalUpdatePlace>
 
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
