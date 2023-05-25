@@ -2,6 +2,9 @@
 
 import {defineStore} from 'pinia'
 
+export const typePlace = "place"
+export const typeThing = "thing"
+
 export const useThingStore = defineStore({
     id: 'thing',
     state: () => ({

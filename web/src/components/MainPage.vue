@@ -6,6 +6,7 @@ import ModalDeletePlace from "./modal/ModalDeletePlace.vue"
 import ModalAddThing from "./modal/ModalAddThing.vue"
 import ModalUpdateThing from "./modal/ModalUpdateThing.vue"
 import ModalDeleteThing from "./modal/ModalDeleteThing.vue"
+import ModalAddImage from "./modal/ModalAddImage.vue"
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
@@ -21,6 +22,7 @@ import {useTagStore} from '../stores/tag.js'
 import * as auth from "../auth/auth.js"
 import * as client from "../client/client.js";
 import {formatDate} from "../helpers/date.js";
+import {typePlace} from "../stores/thing";
 
 export default {
     data() {
@@ -281,6 +283,18 @@ export default {
             this.refreshThings(this.placeStore.selectedPlace)
         },
 
+        addImage() {
+            this.$refs.modalAddImage.init()
+        },
+
+        afterAddImage(res) {
+            if (res === typePlace) {
+                this.refreshPlaceImages(this.placeStore.selectedPlace)
+            } else {
+                this.refreshThingImages(this.thingStore.selectedThing)
+            }
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -501,6 +515,8 @@ export default {
     <ModalAddThing ref="modalAddThing" @after-add-thing="afterAddThing"></ModalAddThing>
     <ModalUpdateThing ref="modalUpdateThing" @after-update-thing="afterUpdateThing"></ModalUpdateThing>
     <ModalDeleteThing ref="modalDeleteThing" @after-delete-thing="afterDeleteThing"></ModalDeleteThing>
+
+    <ModalAddImage ref="modalAddImage" @after-add-image="afterAddImage"></ModalAddImage>
 
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>

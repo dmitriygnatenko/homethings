@@ -1,17 +1,18 @@
-"use strict"
+<script setup>
+import {usePlaceStore} from '../../stores/place.js'
+import {useThingStore, typePlace, typeThing} from "../../stores/thing.js";
+</script>
 
-import * as client from "../client/client.js";
+<script>
+import * as client from "../../client/client.js"
+import {Modal} from 'bootstrap'
 
-export const typePlace = "place"
-export const typeThing = "thing"
-
-export const modalAddImageComponent = {
-    props: {
-        selectedPlace: Number,
-        selectedThing: Number,
-    },
+export default {
+    expose: ['init'],
     data() {
         return {
+            placeStore: usePlaceStore(),
+            thingStore: useThingStore(),
             maxFiles: 6,
             typePlace: typePlace,
             typeThing: typeThing,
@@ -30,30 +31,30 @@ export const modalAddImageComponent = {
             this.form.placeTitle = ""
             this.form.thingTitle = ""
 
-            if (this.selectedPlace > 0) {
-                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.selectedPlace))
+            if (this.placeStore.selectedPlace > 0) {
+                let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.placeStore.selectedPlace))
                 if (res.status === client.statusOK) {
                     this.form.type = this.typePlace
                     this.form.placeTitle = "Место: " + res.data.title
                 }
             }
 
-            if (this.selectedThing > 0) {
-                let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", this.selectedThing))
+            if (this.thingStore.selectedThing > 0) {
+                let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", this.thingStore.selectedThing))
                 if (res.status === client.statusOK) {
                     this.form.type = this.typeThing
                     this.form.thingTitle = "Вещь: " + res.data.title
                 }
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById("add-image-modal"), {})
+            this.modal = new Modal(document.getElementById("modal-add-image"), {})
             this.modal.show()
         },
         submitForm() {
             const formData = new FormData();
 
             this.form.files.forEach(function(item) {
-                if (item !== undefined && item !== null) {
+                if (item !== undefined && item !== null && item !== '') {
                     formData.append('files', item)
                 }
             });
@@ -64,9 +65,9 @@ export const modalAddImageComponent = {
             }
 
             if (this.form.type === this.typePlace) {
-                formData.set('place_id', this.selectedPlace)
+                formData.set('place_id', this.placeStore.selectedPlace)
             } else {
-                formData.set('thing_id', this.selectedThing)
+                formData.set('thing_id', this.thingStore.selectedThing)
             }
 
             let res = client.formDataRequest(client.methodPost, client.routeAddImage, formData)
@@ -92,8 +93,11 @@ export const modalAddImageComponent = {
             this.form.files[index] = e.target.files[0]
         },
     },
-    template: `
-    <div class="modal" tabindex="-1" id="add-image-modal">
+}
+</script>
+
+<template>
+    <div class="modal" tabindex="-1" id="modal-add-image">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
@@ -103,7 +107,7 @@ export const modalAddImageComponent = {
                             <label :for="typePlace" class="form-control-sm">{{ form.placeTitle }}</label>
                         </div>
                     </div>
-                    <div class="row" v-if="selectedThing > 0">
+                    <div class="row" v-if="thingStore.selectedThing > 0">
                         <div class="col-sm-12">
                             <input type="radio" :value="typeThing" :id="typeThing" v-model="form.type" />
                             <label :for="typeThing" class="form-control-sm">{{ form.thingTitle }}</label>
@@ -114,25 +118,25 @@ export const modalAddImageComponent = {
                         v-for="(file, index) in form.files"
                         :key="index">
                         <div class="col-9">
-                            <input 
-                            class="form-control form-control-sm" 
-                            accept="image/*"
-                            type="file"
-                            :data-index="index"
-                            @change="onFileChange">
-                        </div>       
+                            <input
+                                class="form-control form-control-sm"
+                                accept="image/*"
+                                type="file"
+                                :data-index="index"
+                                @change="onFileChange">
+                        </div>
                         <div class="col-3">
                             <button
                                 class="btn add"
                                 title="Добавить"
-                                v-if="index + 1 == form.files.length && index < maxFiles"
+                                v-if="index + 1 === form.files.length && index < maxFiles"
                                 @click="addField()">
                                 <i class="bi bi-plus-circle-fill"></i>
-                            </button>  
-                            <button 
+                            </button>
+                            <button
                                 class="btn delete"
                                 title="Удалить"
-                                v-if="index + 1 == form.files.length && index > 0"
+                                v-if="index + 1 === form.files.length && index > 0"
                                 @click="removeField()">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
@@ -146,5 +150,4 @@ export const modalAddImageComponent = {
             </div>
         </div>
     </div>
-    `
-}
+</template>
