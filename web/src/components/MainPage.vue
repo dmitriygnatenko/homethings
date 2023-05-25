@@ -7,6 +7,7 @@ import ModalAddThing from "./modal/ModalAddThing.vue"
 import ModalUpdateThing from "./modal/ModalUpdateThing.vue"
 import ModalDeleteThing from "./modal/ModalDeleteThing.vue"
 import ModalAddImage from "./modal/ModalAddImage.vue"
+import ModalSearchThing from "./modal/ModalSearchThing.vue"
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
@@ -295,6 +296,22 @@ export default {
             }
         },
 
+        searchThing() {
+            this.$refs.modalSearchThing.init()
+        },
+
+        afterSearchThing(placeID, thingID) {
+            this.resetTags()
+            this.refreshPlaces(placeID)
+            this.refreshThings(placeID)
+            this.thingStore.setSelectedThing(thingID)
+        },
+
+        afterFilterTag(tagID) {
+            this.tagStore.setSelectedTag(tagID)
+            this.refreshThings(this.placeStore.selectedPlace)
+        },
+
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -507,17 +524,14 @@ export default {
     </main>
 
     <ModalToast ref="modalToast"></ModalToast>
-
     <ModalAddPlace ref="modalAddPlace" @after-add-place="afterAddPlace"></ModalAddPlace>
     <ModalUpdatePlace ref="modalUpdatePlace" @after-update-place="afterUpdatePlace"></ModalUpdatePlace>
     <ModalDeletePlace ref="modalDeletePlace" @after-delete-place="afterDeletePlace"></ModalDeletePlace>
-
     <ModalAddThing ref="modalAddThing" @after-add-thing="afterAddThing"></ModalAddThing>
     <ModalUpdateThing ref="modalUpdateThing" @after-update-thing="afterUpdateThing"></ModalUpdateThing>
     <ModalDeleteThing ref="modalDeleteThing" @after-delete-thing="afterDeleteThing"></ModalDeleteThing>
-
     <ModalAddImage ref="modalAddImage" @after-add-image="afterAddImage"></ModalAddImage>
-
+    <ModalSearchThing ref="modalSearchThing" @after-search-thing="afterSearchThing" @after-filter-tag="afterFilterTag"></ModalSearchThing>
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
     <ModalUpdatePassword ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></ModalUpdatePassword>

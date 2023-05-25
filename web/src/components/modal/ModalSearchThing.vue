@@ -1,8 +1,9 @@
-"use strict"
+<script>
+import * as client from "../../client/client.js"
+import {Modal} from 'bootstrap'
 
-import * as client from "../client/client.js";
-
-export const modalSearchThingComponent = {
+export default {
+    expose: ['init'],
     data() {
         return {
             modal: Object,
@@ -22,11 +23,11 @@ export const modalSearchThingComponent = {
     },
     methods: {
         init() {
-            this.thingsList = []
+            this.thingList = []
             this.empty = false
             this.loading = false
             this.form.search = ""
-            this.form.tagsList = []
+            this.form.tagList = []
             this.form.tagID = 0
             this.errors.search = ""
             this.errors.tags = ""
@@ -35,19 +36,19 @@ export const modalSearchThingComponent = {
             if (Array.isArray(res.data.tags) && res.data.tags.length) {
                 let obj = this
                 res.data.tags.forEach(tag => {
-                    obj.form.tagsList.push({
+                    obj.form.tagList.push({
                         "id": tag.id,
                         "title": tag.title,
                     })
                 });
             }
 
-            this.modal = new bootstrap.Modal(document.getElementById("search-thing-modal"), {})
+            this.modal = new Modal(document.getElementById("modal-search-thing"), {})
             this.modal.show()
         },
         submitForm() {
             this.empty = false
-            this.thingsList = []
+            this.thingList = []
 
             if (this.form.search === "") {
                 this.errors.search = "Заполните поле для поиска"
@@ -67,7 +68,7 @@ export const modalSearchThingComponent = {
             if (Array.isArray(res.data.things) && res.data.things.length) {
                 let obj = this
                 res.data.things.forEach(thing => {
-                    obj.thingsList.push({
+                    obj.thingList.push({
                         "id": thing.id,
                         "place_id": thing.place_id,
                         "title": thing.title,
@@ -77,7 +78,7 @@ export const modalSearchThingComponent = {
 
             this.loading = false
 
-            if (this.thingsList.length === 0) {
+            if (this.thingList.length === 0) {
                 this.empty = true
             }
         },
@@ -90,15 +91,20 @@ export const modalSearchThingComponent = {
             this.errors.tags = ""
 
             this.modal.hide()
+
             this.$emit("afterFilterTag", this.form.tagID);
         },
         showResult(thingID, placeID) {
             this.modal.hide()
+
             this.$emit("afterSearchThing", placeID, thingID);
         }
     },
-    template: `
-    <div class="modal" tabindex="-1" id="search-thing-modal">
+}
+</script>
+
+<template>
+    <div class="modal" tabindex="-1" id="modal-search-thing">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
@@ -110,21 +116,23 @@ export const modalSearchThingComponent = {
                                 v-on:keyup.enter="submitForm"
                                 v-model.trim="form.search"
                                 :class="{ 'is-invalid': errors.search }">
-                                <div class="invalid-feedback">
-                                    <small>{{ errors.search }}</small>
-                                </div>
+                            <div class="invalid-feedback">
+                                <small>{{ errors.search }}</small>
+                            </div>
                         </div>
                         <div class="col-sm-3">
-                            <button type="button" class="search btn btn-primary btn-sm w-100" @click="submitForm">Поиск</button>
+                            <button type="button" class="search btn btn-primary btn-sm w-100" @click="submitForm">
+                                Поиск
+                            </button>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-9">
-                            <select 
-                                v-model="form.tagID" 
+                            <select
+                                v-model="form.tagID"
                                 class="form-select form-select-sm"
                                 :class="{ 'is-invalid': errors.tags }">
-                                <option v-for="tag in form.tagsList" :value="tag.id">
+                                <option v-for="tag in form.tagList" :value="tag.id">
                                     {{ tag.title }}
                                 </option>
                             </select>
@@ -133,7 +141,9 @@ export const modalSearchThingComponent = {
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <button type="button" class="search btn btn-primary btn-sm w-100" @click="submitTagForm">Тег</button>
+                            <button type="button" class="search btn btn-primary btn-sm w-100" @click="submitTagForm">
+                                Тег
+                            </button>
                         </div>
                     </div>
                     <div class="row mb-3 search-results">
@@ -143,21 +153,19 @@ export const modalSearchThingComponent = {
                         <div class="text-center text-secondary" v-if="empty">
                             <small>Ничего не найдено</small>
                         </div>
-                        <a 
+                        <a
                             href="#"
                             class="link-primary"
-                            v-for="thing in thingsList"
-                            @click="showResult(thing.id, thing.place_id)"
-                            >
+                            v-for="thing in thingList"
+                            @click="showResult(thing.id, thing.place_id)">
                             {{ thing.title }}
                         </a>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
-    `
-}
+</template>
