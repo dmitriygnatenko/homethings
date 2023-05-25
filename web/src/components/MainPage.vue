@@ -3,6 +3,7 @@ import PlaceTreeItem from './PlaceTreeItem.vue'
 import ModalAddPlace from './modal/ModalAddPlace.vue'
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
+import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue";
 import ModalToast from "./modal/ModalToast.vue"
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
@@ -254,15 +255,15 @@ export default {
             }
         },
 
-        // TODO
         updatePassword() {
             this.$refs.modalUpdatePassword.init()
         },
+
         afterUpdatePassword(success) {
             if (success) {
                 this.logout()
             } else {
-                this.$refs.toast.showError("Ошибка при изменении пароля пользователя")
+                this.$refs.modalToast.showError("Ошибка при изменении пароля пользователя")
             }
         },
     }
@@ -442,4 +443,5 @@ export default {
 
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
+    <ModalUpdatePassword ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></ModalUpdatePassword>
 </template>
