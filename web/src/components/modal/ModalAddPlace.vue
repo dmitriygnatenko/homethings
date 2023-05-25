@@ -38,7 +38,7 @@ export default {
                 }
             }
 
-            this.modal = new Modal(document.getElementById("add-place-modal"), {})
+            this.modal = new Modal(document.getElementById("modal-add-place"), {})
             this.modal.show()
         },
         submitForm() {
@@ -62,7 +62,7 @@ export default {
 </script>
 
 <template>
-    <div class="modal" tabindex="-1" id="add-place-modal">
+    <div class="modal" tabindex="-1" id="modal-add-place">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">

@@ -25,7 +25,7 @@ export default {
             this.errors.username = ""
             this.errors.password = ""
 
-            this.modal = new Modal(document.getElementById("add-user-modal"), {})
+            this.modal = new Modal(document.getElementById("modal-add-user"), {})
             this.modal.show()
         },
         submitForm() {
@@ -59,7 +59,7 @@ export default {
 </script>
 
 <template>
-    <div class="modal" tabindex="-1" id="add-user-modal">
+    <div class="modal" tabindex="-1" id="modal-add-user">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">

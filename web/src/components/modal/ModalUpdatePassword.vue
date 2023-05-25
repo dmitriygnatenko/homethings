@@ -20,7 +20,7 @@ export default {
             this.form.password = ""
             this.errors.password = ""
 
-            this.modal = new Modal(document.getElementById("update-password-modal"), {})
+            this.modal = new Modal(document.getElementById("modal-update-password"), {})
             this.modal.show()
         },
         submitForm() {
@@ -43,7 +43,7 @@ export default {
 </script>
 
 <template>
-    <div class="modal" tabindex="-1" id="update-password-modal">
+    <div class="modal" tabindex="-1" id="modal-update-password">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body">
