@@ -1,8 +1,9 @@
-"use strict"
+<script>
+import * as client from "../../client/client.js";
+import {Modal} from 'bootstrap'
 
-import * as client from "../client/client.js";
-
-export const modalUpdateUsernameComponent = {
+export default {
+    expose: ['init'],
     data() {
         return {
             modal: Object,
@@ -19,7 +20,7 @@ export const modalUpdateUsernameComponent = {
             this.form.username = ""
             this.errors.username = ""
 
-            this.modal = new bootstrap.Modal(document.getElementById("update-username-modal"), {})
+            this.modal = new Modal(document.getElementById("update-username-modal"), {})
             this.modal.show()
         },
         submitForm() {
@@ -38,7 +39,10 @@ export const modalUpdateUsernameComponent = {
             this.modal.hide()
         },
     },
-    template: `
+}
+</script>
+
+<template>
     <div class="modal" tabindex="-1" id="update-username-modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -54,7 +58,7 @@ export const modalUpdateUsernameComponent = {
                                 v-model.trim="form.username"
                                 :class="{'is-invalid': errors.username}">
                             <div v-if="errors.username" class="invalid-feedback">
-                                <small>{{ errors.username }}<small>
+                                <small>{{ errors.username }}</small>
                             </div>
                         </div>
                     </div>
@@ -62,9 +66,8 @@ export const modalUpdateUsernameComponent = {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
                     <button type="button" class="btn btn-primary btn-sm" @click="submitForm">Сохранить</button>
-                </div>  
+                </div>
             </div>
         </div>
     </div>
-    `
-}
+</template>

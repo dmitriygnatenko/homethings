@@ -2,6 +2,7 @@
 import PlaceTreeItem from './PlaceTreeItem.vue'
 import ModalAddPlace from './modal/ModalAddPlace.vue'
 import ModalAddUser from './modal/ModalAddUser.vue'
+import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalToast from "./modal/ModalToast.vue"
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
@@ -241,19 +242,19 @@ export default {
             }
         },
 
-
-        // TODO
-
         updateUsername() {
             this.$refs.modalUpdateUsername.init()
         },
+
         afterUpdateUsername(success) {
             if (success) {
                 this.logout()
             } else {
-                this.$refs.toast.showError("Ошибка при изменении имени пользователя")
+                this.$refs.modalToast.showError("Ошибка при изменении имени пользователя")
             }
         },
+
+        // TODO
         updatePassword() {
             this.$refs.modalUpdatePassword.init()
         },
@@ -436,6 +437,9 @@ export default {
     </main>
 
     <ModalToast ref="modalToast"></ModalToast>
+
     <ModalAddPlace ref="modalAddPlace" @after-add-place="afterAddPlace"></ModalAddPlace>
+
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
+    <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
 </template>
