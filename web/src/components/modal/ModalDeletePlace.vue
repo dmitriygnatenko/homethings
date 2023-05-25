@@ -20,18 +20,20 @@ export default {
     },
     methods: {
         init() {
-            if (this.placeStore.selectedPlace === 0) {
+            let selectedPlace = this.placeStore.selectedPlace
+            if (selectedPlace === 0) {
                 return
             }
+
             this.form.title = ""
             this.form.error = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.placeStore.selectedPlace))
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", selectedPlace))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
             }
 
-            let nestedRes = client.jsonRequest(client.methodGet, client.routeGetNestedPlaces.replace("{parentPlaceId}", this.placeStore.selectedPlace))
+            let nestedRes = client.jsonRequest(client.methodGet, client.routeGetNestedPlaces.replace("{parentPlaceId}", selectedPlace))
             if (nestedRes.status === client.statusOK) {
                 if (Array.isArray(nestedRes.data.places) && nestedRes.data.places.length) {
                     this.form.error = "Необходимо вначале удалить вложенные места."

@@ -25,13 +25,14 @@ export default {
     },
     methods: {
         init() {
-            if (this.placeStore.selectedPlace === 0) {
+            let selectedPlace = this.placeStore.selectedPlace
+            if (selectedPlace === 0) {
                 return
             }
             this.errors.title = ""
             this.form.title = ""
 
-            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", this.placeStore.selectedPlace))
+            let res = client.jsonRequest(client.methodGet, client.routeGetPlace.replace("{placeId}", selectedPlace))
             if (res.status === client.statusOK) {
                 this.form.title = res.data.title
                 this.form.parentID = res.data.parent_id
@@ -48,7 +49,7 @@ export default {
                         })
 
                         getPlacesListWithNestedTitles(placesRes.data.places).forEach(place => {
-                            if (place.id !== obj.placeStore.selectedPlace) {
+                            if (place.id !== selectedPlace) {
                                 obj.form.placeList.push({
                                     "id": place.id,
                                     "title": place.title,
