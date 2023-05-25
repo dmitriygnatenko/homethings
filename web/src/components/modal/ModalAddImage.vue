@@ -9,6 +9,7 @@ import {Modal} from 'bootstrap'
 
 export default {
     expose: ['init'],
+    emits: ['after-add-image'],
     data() {
         return {
             placeStore: usePlaceStore(),

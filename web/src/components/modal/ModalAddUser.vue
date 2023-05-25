@@ -4,6 +4,7 @@ import {Modal} from 'bootstrap'
 
 export default {
     expose: ['init'],
+    emits: ['after-add-user'],
     data() {
         return {
             modal: Object,

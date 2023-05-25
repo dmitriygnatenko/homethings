@@ -9,6 +9,7 @@ import {getPlacesListWithNestedTitles} from "../../helpers/places";
 
 export default {
     expose: ['init'],
+    emits: ['after-add-thing'],
     data() {
         return {
             placeStore: usePlaceStore(),

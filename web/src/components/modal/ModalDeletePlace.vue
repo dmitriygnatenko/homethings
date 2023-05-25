@@ -8,6 +8,7 @@ import {Modal} from 'bootstrap'
 
 export default {
     expose: ['init'],
+    emits: ['after-delete-place'],
     data() {
         return {
             placeStore: usePlaceStore(),

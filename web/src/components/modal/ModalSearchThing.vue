@@ -4,6 +4,7 @@ import {Modal} from 'bootstrap'
 
 export default {
     expose: ['init'],
+    emits: ['after-search-thing', 'after-filter-tag'],
     data() {
         return {
             modal: Object,
@@ -92,12 +93,12 @@ export default {
 
             this.modal.hide()
 
-            this.$emit("afterFilterTag", this.form.tagID);
+            this.$emit("after-filter-tag", this.form.tagID);
         },
         showResult(thingID, placeID) {
             this.modal.hide()
 
-            this.$emit("afterSearchThing", placeID, thingID);
+            this.$emit("after-search-thing", placeID, thingID);
         }
     },
 }

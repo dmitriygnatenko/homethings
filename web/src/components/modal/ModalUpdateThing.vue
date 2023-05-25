@@ -9,6 +9,7 @@ import {Modal} from 'bootstrap'
 
 export default {
     expose: ['init'],
+    emits: ['after-update-thing'],
     data() {
         return {
             thingStore: useThingStore(),
