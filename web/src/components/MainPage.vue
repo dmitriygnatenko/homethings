@@ -36,7 +36,6 @@ export default {
             tagStore: useTagStore(),
             placeTree: [],
             thingList: [],
-            imageList: [],
         };
     },
     computed: {
@@ -94,14 +93,6 @@ export default {
             }
         )
 
-        this.imageStore.$onAction(
-            ({name, store, args, after, onError}) => {
-                if (name === "setSelectedImage" && args.length === 3) {
-                    // TODO
-                }
-            }
-        )
-
         // Refresh places after start
         if (this.authStore.isAuth) {
             this.refreshPlaces()
@@ -136,7 +127,6 @@ export default {
         },
 
         resetImages() {
-            this.imageList = []
             this.imageStore.reset()
         },
 
@@ -198,7 +188,7 @@ export default {
             let res = this.request(client.methodGet, client.routeGetPlaceImages.replace("{placeId}", placeID))
             if (Array.isArray(res.data.images) && res.data.images.length) {
                 res.data.images.forEach(image => {
-                    this.imageList.push({
+                    this.imageStore.addImage({
                         "id": image.id,
                         "image": host + image.image,
                         "place_id": image.place_id,
@@ -216,7 +206,7 @@ export default {
             let res = this.request(client.methodGet, client.routeGetThingImages.replace("{thingId}", thingID))
             if (Array.isArray(res.data.images) && res.data.images.length) {
                 res.data.images.forEach(image => {
-                    this.imageList.push({
+                    this.imageStore.addImage({
                         "id": image.id,
                         "image": host + image.image,
                         "place_id": image.place_id,
@@ -320,6 +310,38 @@ export default {
         afterTags() {
             this.resetTags()
             this.refreshThings(this.placeStore.selectedPlace)
+        },
+
+        selectImage(imageID, placeID, thingID) {
+            this.imageStore.setSelected(imageID, placeID, thingID)
+        },
+
+        showImage(imageID, placeID, thingID) {
+            this.$refs.modalShowImages.init(imageID, placeID, thingID)
+        },
+
+        deleteImage() {
+            let imageID = this.imageStore.selectedImage
+            let placeID = this.imageStore.selectedImagePlace
+            let thingID = this.imageStore.selectedImageThing
+
+            if (imageID === 0 || (placeID === 0 && thingID === 0)) {
+                return
+            }
+
+            if (placeID > 0) {
+                let res = this.request(client.methodDelete, client.routeDeletePlaceImages.replace("{imageId}", imageID))
+                if (res.status === client.statusOK) {
+                    this.refreshPlaceImages(placeID)
+                }
+            }
+
+            if (thingID > 0) {
+                let res = this.request(client.methodDelete, client.routeDeleteThingImages.replace("{imageId}", imageID))
+                if (res.status === client.statusOK) {
+                    this.refreshThingImages(thingID)
+                }
+            }
         },
 
         logout() {
@@ -519,10 +541,12 @@ export default {
                     <div class="list">
                         <button
                             class="btn"
-                            v-for="image in imageList"
+                            v-for="image in imageStore.imageList"
                             v-on:dblclick="showImage(image.id, image.place_id, image.thing_id)"
-                            @click="imageStore.setSelectedImage(image.id, image.place_id, image.thing_id)"
-                            :class="{ selected : imageStore.selectedImage === image.id }">
+                            @click="selectImage(image.id, image.place_id, image.thing_id)"
+                            :class="{ selected : this.imageStore.selectedImage === image.id &&
+                                this.imageStore.selectedImagePlace === image.place_id &&
+                                this.imageStore.selectedImageThing === image.thing_id }">
                             <img class="img-fluid" :src="image.image">
                             <div class="date">{{ image.date }}</div>
                         </button>
