@@ -1,37 +1,37 @@
-"use strict"
+<script setup>
+import {useImageStore} from '../../stores/image.js'
+</script>
 
-export const modalShowImagesComponent = {
-    props: ["images"],
+<script>
+import {Modal} from 'bootstrap'
+
+export default {
+    expose: ['init'],
     data() {
         return {
+            imageStore: useImageStore(),
             modal: Object,
-            modalImages: [],
+            activeImageID: 0,
+            activeImagePlaceID: 0,
+            activeImageThingID: 0,
         }
     },
     methods: {
         init(imageID, placeID, thingID) {
-            this.modalImages = []
+            this.activeImageID = imageID
+            this.activeImagePlaceID = placeID
+            this.activeImageThingID = thingID
 
-            let obj = this
-            this.images.forEach(image => {
-                let isActive = (image.id === imageID && image.place_id === placeID && image.thing_id === thingID)
-
-                obj.modalImages.push({
-                    "image": image.image,
-                    "active": isActive,
-                })
-            });
-
-            let modal = document.getElementById('show-images-modal')
-            modal.addEventListener('hide.bs.modal', event => {
-                this.modalImages = []
-            })
-            this.modal = new bootstrap.Modal(modal, {})
+            let modal = document.getElementById('modal-show-images')
+            this.modal = new Modal(modal, {})
             this.modal.show()
         },
     },
-    template: `
-    <div class="modal" tabindex="-1" id="show-images-modal">
+}
+</script>
+
+<template>
+    <div class="modal" tabindex="-1" id="modal-show-images">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-body">
@@ -39,8 +39,10 @@ export const modalShowImagesComponent = {
                         <div class="carousel-inner">
                             <div
                                 class="carousel-item"
-                                v-for="image of modalImages"
-                                :class="{ active : image.active }">
+                                v-for="image of imageStore.imageList"
+                                :class="{ active : this.activeImageID === image.id &&
+                                    this.activeImagePlaceID === image.place_id &&
+                                    this.activeImageThingID === image.thing_id }">
                                 <img :src="image.image" class="d-block w-100">
                             </div>
                         </div>
@@ -58,5 +60,4 @@ export const modalShowImagesComponent = {
             </div>
         </div>
     </div>
-    `
-}
+</template>

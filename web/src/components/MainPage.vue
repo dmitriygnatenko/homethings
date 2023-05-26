@@ -9,6 +9,7 @@ import ModalDeleteThing from "./modal/ModalDeleteThing.vue"
 import ModalAddImage from "./modal/ModalAddImage.vue"
 import ModalSearchThing from "./modal/ModalSearchThing.vue"
 import ModalTags from "./modal/ModalTags.vue"
+import ModalShowImage from "./modal/ModalShowImage.vue"
 import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
@@ -317,7 +318,7 @@ export default {
         },
 
         showImage(imageID, placeID, thingID) {
-            this.$refs.modalShowImages.init(imageID, placeID, thingID)
+            this.$refs.modalShowImage.init(imageID, placeID, thingID)
         },
 
         deleteImage() {
@@ -567,6 +568,7 @@ export default {
     <ModalAddImage ref="modalAddImage" @after-add-image="afterAddImage"></ModalAddImage>
     <ModalSearchThing ref="modalSearchThing" @after-search-thing="afterSearchThing" @after-filter-tag="afterFilterTag"></ModalSearchThing>
     <ModalTags ref="modalTags" @after-tags="afterTags"></ModalTags>
+    <ModalShowImage ref="modalShowImage"></ModalShowImage>
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
     <ModalUpdatePassword ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></ModalUpdatePassword>
