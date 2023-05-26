@@ -73,4 +73,4 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o build/app/app cmd/app/main.go
 
 build-frontend:
-	npm run build
+	npm run build --emptyOutDir
