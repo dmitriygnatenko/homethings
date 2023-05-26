@@ -48,6 +48,13 @@ export const routeDeleteTag = "/api/v1/tags/{tagId}"
 export const routeAddThingTag = "/api/v1/tags/{tagId}/thing/{thingId}"
 export const routeDeleteThingTag = "/api/v1/tags/{tagId}/thing/{thingId}"
 
+// Notifications
+export const routeAddNotification = "/api/v1/things/notifications"
+export const routeGetExpiredNotifications = "/api/v1/things/notifications/expired"
+export const routeGetNotification = "/api/v1/things/notifications/{thingId}"
+export const routeUpdateNotification = "/api/v1/things/notifications/{thingId}"
+export const routeDeleteNotification = "/api/v1/things/notifications/{thingId}"
+
 export function getHost() {
     return window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
 }

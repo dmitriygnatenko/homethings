@@ -1,5 +1,6 @@
 <script>
 import {useThingStore} from '../../stores/thing.js'
+import {formatDate} from "../../helpers/date.js";
 import * as client from "../../client/client.js"
 import {getPlacesListWithNestedTitles} from "../../helpers/places.js";
 import {Modal} from 'bootstrap'
@@ -14,9 +15,11 @@ export default {
     data() {
         return {
             modal: Object,
+            initDate: "",
             form: {
                 title: "",
                 desc: "",
+                date: "",
                 placeID: 0,
                 placeList: [],
                 tagList: [],
@@ -38,6 +41,8 @@ export default {
             this.form.placeID = 0;
             this.form.title = ""
             this.form.desc = ""
+            this.form.date = ""
+            this.initDate = ""
 
             let res = client.jsonRequest(client.methodGet, client.routeGetThing.replace("{thingId}", selectedThing))
             if (res.status === client.statusOK) {
@@ -94,6 +99,12 @@ export default {
                 }
             }
 
+            let notificationRes = client.jsonRequest(client.methodGet, client.routeGetNotification.replace("{thingId}", selectedThing))
+            if (notificationRes.status === client.statusOK) {
+                this.form.date = formatDate(notificationRes.data.notification_date)
+                this.initDate = this.form.date
+            }
+
             this.modal = new Modal(document.getElementById('modal-update-thing'), {})
             this.modal.show()
         },
@@ -103,6 +114,28 @@ export default {
             if (this.form.title === "") {
                 this.errors.title = "Название должно быть заполнено"
                 return
+            }
+
+            if (this.form.date === "") {
+                if (this.initDate !== "") {
+                    // Delete
+                    client.jsonRequest(client.methodDelete, client.routeGetNotification.replace("{thingId}", selectedThing))
+                }
+            } else {
+                if (this.initDate === "") {
+                    // Add
+                    let data = {
+                        notification_date: this.form.date + "T00:00:00.000Z",
+                        thing_id: selectedThing,
+                    }
+                    client.jsonRequest(client.methodPost, client.routeAddNotification, data)
+                } else if (this.form.date !== this.initDate) {
+                    // Update
+                    let data = {
+                        notification_date: this.form.date + "T00:00:00.000Z",
+                    }
+                    client.jsonRequest(client.methodPut, client.routeUpdateNotification.replace("{thingId}", selectedThing), data)
+                }
             }
 
             // Delete
@@ -177,6 +210,17 @@ export default {
                                 class="form-control form-control-sm"
                                 v-model.trim="form.desc">
                              </textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label col-form-label-sm">
+                            <b>Напоминание</b>
+                        </label>
+                        <div class="col-sm-9">
+                            <input
+                                type="date"
+                                class="form-control form-control-sm"
+                                v-model.trim="form.date">
                         </div>
                     </div>
                     <div class="row">

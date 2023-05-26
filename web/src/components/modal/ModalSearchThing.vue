@@ -95,7 +95,7 @@ export default {
 
             this.$emit("after-filter-tag", this.form.tagID);
         },
-        showResult(thingID, placeID) {
+        showResult(placeID, thingID) {
             this.modal.hide()
 
             this.$emit("after-search-thing", placeID, thingID);
@@ -158,7 +158,7 @@ export default {
                             href="#"
                             class="link-primary"
                             v-for="thing in thingList"
-                            @click="showResult(thing.id, thing.place_id)">
+                            @click="showResult(thing.place_id, thing.id)">
                             {{ thing.title }}
                         </a>
                     </div>

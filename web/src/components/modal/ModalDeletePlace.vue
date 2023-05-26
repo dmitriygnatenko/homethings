@@ -67,8 +67,7 @@ export default {
                     <div v-else>
                         Подтвердите удаление <b>{{ form.title }}</b>
                         <br><br>
-                        <small class="text-secondary">Будут удалены все вещи и фото, прикрепленные к данному
-                            месту</small>
+                        <small class="text-secondary">Будут удалены все вещи и фото, прикрепленные к данному месту</small>
                     </div>
                 </div>
                 <div class="modal-footer">

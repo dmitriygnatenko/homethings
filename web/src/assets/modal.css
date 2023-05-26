@@ -1,43 +1,23 @@
-#add-thing-modal .btn.add {
+#modal-add-thing .btn.add, #modal-add-image .btn.add, #modal-tags .btn.add {
     color: green;
     padding-top: 2px;
 }
 
-#add-thing-modal .btn.delete {
+#modal-add-thing .btn.delete, #modal-add-image .btn.delete, #modal-tags .btn.delete {
     color: #cf0000;
     padding-top: 2px;
 }
 
-#add-image-modal .btn.add {
-    color: green;
-    padding-top: 2px;
-}
-
-#add-image-modal .btn.delete {
-    color: #cf0000;
-    padding-top: 2px;
-}
-
-.search-results {
+.search-results, .notification-results {
     font-size: 14px;
 }
 
-#tags-modal .btn.add {
-    color: green;
-    padding-top: 2px;
-}
-
-#tags-modal .btn.delete {
-    color: #cf0000;
-    padding-top: 2px;
-}
-
-#tags-modal .btn.edit {
+#modal-tags .btn.edit {
     color: #003bcf;
     padding-top: 2px;
 }
 
-#tags-modal .btn:focus {
+#modal-tags .btn:focus {
     outline: 0;
     -webkit-box-shadow: none;
     -o-box-shadow: none;
@@ -45,19 +25,34 @@
     box-shadow: none;
 }
 
+#modal-expired-notifications .btn.edit {
+    color: #003bcf;
+    padding: 0;
+    margin: 0;
+}
+
+#modal-expired-notifications .btn.delete {
+    color: #cf0000;
+    padding: 0;
+    margin: 0 0 0 10px;
+}
+
 @media (max-width: 767px) {
-    #search-thing-modal button.search {
+    #modal-search-thing button.search {
         margin-top: 15px;
     }
-    #add-image-modal .btn.add, #add-image-modal .btn.delete {
+
+    #modal-add-image .btn.add, #modal-add-image .btn.delete {
         padding-top: 1px;
         padding-left: 0;
     }
-    #add-thing-modal .btn.add, #add-thing-modal .btn.delete {
+
+    #modal-add-thing .btn.add, #modal-add-thing .btn.delete {
         padding-top: 1px;
         padding-left: 0;
     }
-    #tags-modal .btn.edit, #tags-modal .btn.delete {
+
+    #modal-tags .btn.edit, #modal-tags .btn.delete {
         padding-top: 1px;
         padding-left: 0;
     }

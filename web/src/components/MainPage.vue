@@ -14,14 +14,15 @@ import ModalAddUser from './modal/ModalAddUser.vue'
 import ModalUpdateUsername from './modal/ModalUpdateUsername.vue'
 import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
 import ModalToast from "./modal/ModalToast.vue"
+import ModalExpiredNotifications from "./modal/ModalExpiredNotifications.vue"
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
-import {useThingStore, typePlace} from '../stores/thing.js'
+import {typePlace, useThingStore} from '../stores/thing.js'
 import {useImageStore} from '../stores/image.js'
 import {useTagStore} from '../stores/tag.js'
 import * as auth from "../auth/auth.js"
 import * as client from "../client/client.js"
-import {formatDate} from "../helpers/date.js"
+import {formatDateRusStr} from "../helpers/date.js"
 
 export default {
     components: {
@@ -36,6 +37,7 @@ export default {
         ModalSearchThing,
         ModalTags,
         ModalShowImage,
+        ModalExpiredNotifications,
         ModalAddUser,
         ModalUpdateUsername,
         ModalUpdatePassword,
@@ -89,9 +91,7 @@ export default {
                 if (name === "setSelectedThing" && args.length) {
                     if (args[0] !== this.thingStore.selectedThing) {
                         after(() => {
-                            let thingID = this.thingStore.selectedThing
-
-                            this.refreshThingImages(thingID)
+                            this.refreshThingImages(this.thingStore.selectedThing)
                         })
                     }
                 }
@@ -103,6 +103,7 @@ export default {
                 switch (name) {
                     case "setAuth":
                         this.refreshPlaces()
+                        this.refreshExpiredNotifications()
                         break
                     case "resetAuth":
                         this.resetPlaces()
@@ -114,6 +115,7 @@ export default {
         // Refresh places after start
         if (this.authStore.isAuth) {
             this.refreshPlaces()
+            this.refreshExpiredNotifications()
         }
     },
     methods: {
@@ -191,7 +193,7 @@ export default {
                             "id": thing.id,
                             "title": thing.title,
                             "desc": thing.description,
-                            "date": formatDate(thing.updated_at),
+                            "date": formatDateRusStr(thing.updated_at),
                             "tags": thing.tags
                         })
                     }
@@ -211,7 +213,7 @@ export default {
                         "image": host + image.image,
                         "place_id": image.place_id,
                         "thing_id": image.thing_id,
-                        "date": formatDate(image.created_at),
+                        "date": formatDateRusStr(image.created_at),
                     })
                 });
             }
@@ -229,10 +231,23 @@ export default {
                         "image": host + image.image,
                         "place_id": image.place_id,
                         "thing_id": image.thing_id,
-                        "date": formatDate(image.created_at),
+                        "date": formatDateRusStr(image.created_at),
                     })
                 });
             }
+        },
+
+        refreshExpiredNotifications() {
+            const interval = setInterval(() => {
+                if (this.$refs.modalExpiredNotifications) {
+                    clearInterval(interval)
+
+                    let res = this.request(client.methodGet, client.routeGetExpiredNotifications)
+                    if (Array.isArray(res.data.notifications) && res.data.notifications.length) {
+                        this.$refs.modalExpiredNotifications.init(res.data.notifications)
+                    }
+                }
+            }, 100)
         },
 
         // Actions
@@ -361,7 +376,12 @@ export default {
                 }
             }
         },
-
+        afterExpiredNotification(placeID, thingID) {
+            this.resetTags()
+            this.refreshPlaces(placeID)
+            this.refreshThings(placeID)
+            this.thingStore.setSelectedThing(thingID)
+        },
         logout() {
             auth.clearToken()
             this.authStore.resetAuth()
@@ -586,6 +606,7 @@ export default {
     <ModalSearchThing ref="modalSearchThing" @after-search-thing="afterSearchThing" @after-filter-tag="afterFilterTag"></ModalSearchThing>
     <ModalTags ref="modalTags" @after-tags="afterTags"></ModalTags>
     <ModalShowImage ref="modalShowImage"></ModalShowImage>
+    <ModalExpiredNotifications ref="modalExpiredNotifications" @after-expired-notification="afterExpiredNotification"></ModalExpiredNotifications>
     <ModalAddUser ref="modalAddUser" @after-add-user="afterAddUser"></ModalAddUser>
     <ModalUpdateUsername ref="modalUpdateUsername" @after-update-username="afterUpdateUsername"></ModalUpdateUsername>
     <ModalUpdatePassword ref="modalUpdatePassword" @after-update-password="afterUpdatePassword"></ModalUpdatePassword>

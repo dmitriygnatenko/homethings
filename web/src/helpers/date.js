@@ -1,6 +1,6 @@
 "use strict"
 
-export function formatDate(str) {
+export function formatDateRusStr(str) {
     let date = new Date(str);
     let res = date.getDate() + " "
 
@@ -43,5 +43,18 @@ export function formatDate(str) {
     }
 
     res += " " + date.getFullYear()
+
     return res
+}
+
+export function formatDate(str) {
+    let date = new Date(str);
+    let yyyy = date.getFullYear();
+    let mm = date.getMonth() + 1;
+    let dd = date.getDate();
+
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+
+    return yyyy + '-' + mm + '-' + dd;
 }
