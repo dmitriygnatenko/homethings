@@ -1,6 +1,6 @@
 /go.sum
 /.idea/
 /.env
-/web/files/
 /coverage.out
 /node_modules/
+/web/public/files/
