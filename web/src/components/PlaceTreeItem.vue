@@ -1,15 +1,16 @@
-<script setup>
-import {usePlaceStore} from '../stores/place.js'
-</script>
-
 <script>
+import {usePlaceStore} from '../stores/place.js'
+
 export default {
+    setup() {
+        const placeStore = usePlaceStore()
+        return {placeStore}
+    },
     props: {
         item: Object,
     },
     data: function () {
         return {
-            placeStore: usePlaceStore(),
             open: false,
         };
     },

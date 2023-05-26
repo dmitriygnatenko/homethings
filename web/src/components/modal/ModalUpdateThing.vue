@@ -1,18 +1,18 @@
-<script setup>
-import {useThingStore} from '../../stores/thing.js'
-</script>
-
 <script>
+import {useThingStore} from '../../stores/thing.js'
 import * as client from "../../client/client.js"
 import {getPlacesListWithNestedTitles} from "../../helpers/places.js";
 import {Modal} from 'bootstrap'
 
 export default {
+    setup() {
+        const thingStore = useThingStore()
+        return {thingStore}
+    },
     expose: ['init'],
     emits: ['after-update-thing'],
     data() {
         return {
-            thingStore: useThingStore(),
             modal: Object,
             form: {
                 title: "",

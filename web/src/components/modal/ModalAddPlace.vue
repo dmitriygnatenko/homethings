@@ -1,17 +1,17 @@
-<script setup>
-import {usePlaceStore} from '../../stores/place.js'
-</script>
-
 <script>
+import {usePlaceStore} from '../../stores/place.js'
 import * as client from "../../client/client.js"
 import {Modal} from 'bootstrap'
 
 export default {
+    setup() {
+        const placeStore = usePlaceStore()
+        return {placeStore}
+    },
     expose: ['init'],
     emits: ['after-add-place'],
     data() {
         return {
-            placeStore: usePlaceStore(),
             modal: Object,
             form: {
                 parentID: 0,

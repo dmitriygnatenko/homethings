@@ -1,18 +1,18 @@
-<script setup>
-import {usePlaceStore} from '../../stores/place.js'
-</script>
-
 <script>
+import {usePlaceStore} from '../../stores/place.js'
 import * as client from "../../client/client.js"
 import {getPlacesListWithNestedTitles} from "../../helpers/places.js";
 import {Modal} from 'bootstrap'
 
 export default {
+    setup() {
+        const placeStore = usePlaceStore()
+        return {placeStore}
+    },
     expose: ['init'],
     emits: ['after-update-place'],
     data() {
         return {
-            placeStore: usePlaceStore(),
             modal: Object,
             form: {
                 title: "",

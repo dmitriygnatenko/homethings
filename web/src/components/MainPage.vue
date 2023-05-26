@@ -1,4 +1,4 @@
-<script setup>
+<script>
 import PlaceTreeItem from './PlaceTreeItem.vue'
 import ModalAddPlace from './modal/ModalAddPlace.vue'
 import ModalUpdatePlace from "./modal/ModalUpdatePlace.vue"
@@ -16,25 +16,42 @@ import ModalUpdatePassword from "./modal/ModalUpdatePassword.vue"
 import ModalToast from "./modal/ModalToast.vue"
 import {useAuthStore} from '../stores/auth.js'
 import {usePlaceStore} from '../stores/place.js'
-import {useThingStore} from '../stores/thing.js'
+import {useThingStore, typePlace} from '../stores/thing.js'
 import {useImageStore} from '../stores/image.js'
 import {useTagStore} from '../stores/tag.js'
-</script>
-
-<script>
 import * as auth from "../auth/auth.js"
-import * as client from "../client/client.js";
-import {formatDate} from "../helpers/date.js";
-import {typePlace} from "../stores/thing";
+import * as client from "../client/client.js"
+import {formatDate} from "../helpers/date.js"
 
 export default {
+    components: {
+        PlaceTreeItem,
+        ModalAddPlace,
+        ModalUpdatePlace,
+        ModalDeletePlace,
+        ModalAddThing,
+        ModalUpdateThing,
+        ModalDeleteThing,
+        ModalAddImage,
+        ModalSearchThing,
+        ModalTags,
+        ModalShowImage,
+        ModalAddUser,
+        ModalUpdateUsername,
+        ModalUpdatePassword,
+        ModalToast,
+    },
+    setup() {
+        const authStore = useAuthStore()
+        const placeStore = usePlaceStore()
+        const thingStore = useThingStore()
+        const imageStore = useImageStore()
+        const tagStore = useTagStore()
+
+        return {authStore, placeStore, thingStore, imageStore, tagStore}
+    },
     data() {
         return {
-            authStore: useAuthStore(),
-            placeStore: usePlaceStore(),
-            thingStore: useThingStore(),
-            imageStore: useImageStore(),
-            tagStore: useTagStore(),
             placeTree: [],
             thingList: [],
         };

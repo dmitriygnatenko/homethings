@@ -1,19 +1,19 @@
-<script setup>
+<script>
 import {usePlaceStore} from '../../stores/place.js'
 import {useThingStore, typePlace, typeThing} from "../../stores/thing.js";
-</script>
-
-<script>
 import * as client from "../../client/client.js"
 import {Modal} from 'bootstrap'
 
 export default {
+    setup() {
+        const placeStore = usePlaceStore()
+        const thingStore = useThingStore()
+        return {placeStore, thingStore}
+    },
     expose: ['init'],
     emits: ['after-add-image'],
     data() {
         return {
-            placeStore: usePlaceStore(),
-            thingStore: useThingStore(),
             maxFiles: 6,
             typePlace: typePlace,
             typeThing: typeThing,

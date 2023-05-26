@@ -1,17 +1,17 @@
-<script setup>
-import {usePlaceStore} from '../../stores/place.js'
-</script>
-
 <script>
+import {usePlaceStore} from '../../stores/place.js'
 import * as client from "../../client/client.js"
 import {Modal} from 'bootstrap'
 
 export default {
+    setup() {
+        const placeStore = usePlaceStore()
+        return {placeStore}
+    },
     expose: ['init'],
     emits: ['after-delete-place'],
     data() {
         return {
-            placeStore: usePlaceStore(),
             modal: Object,
             form: {
                 title: "",
@@ -67,12 +67,14 @@ export default {
                     <div v-else>
                         Подтвердите удаление <b>{{ form.title }}</b>
                         <br><br>
-                        <small class="text-secondary">Будут удалены все вещи и фото, прикрепленные к данному месту</small>
+                        <small class="text-secondary">Будут удалены все вещи и фото, прикрепленные к данному
+                            месту</small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
-                    <button v-if="!form.error" type="button" class="btn btn-danger btn-sm" @click="submitForm">Удалить</button>
+                    <button v-if="!form.error" type="button" class="btn btn-danger btn-sm" @click="submitForm">Удалить
+                    </button>
                 </div>
             </div>
         </div>

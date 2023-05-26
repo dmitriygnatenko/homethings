@@ -1,14 +1,15 @@
-<script setup>
-import {useAuthStore} from '../stores/auth.js'</script>
-
 <script>
-import * as client from "../client/client.js";
+import {useAuthStore} from "../stores/auth.js"
+import * as client from "../client/client.js"
 import * as auth from "../auth/auth.js"
 
 export default {
+    setup() {
+        const authStore = useAuthStore()
+        return {authStore}
+    },
     data() {
         return {
-            authStore: useAuthStore(),
             form: {
                 username: "",
                 password: "",

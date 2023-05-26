@@ -1,15 +1,15 @@
-<script setup>
-import {useImageStore} from '../../stores/image.js'
-</script>
-
 <script>
+import {useImageStore} from '../../stores/image.js'
 import {Modal} from 'bootstrap'
 
 export default {
+    setup() {
+        const imageStore = useImageStore()
+        return {imageStore}
+    },
     expose: ['init'],
     data() {
         return {
-            imageStore: useImageStore(),
             modal: Object,
             activeImageID: 0,
             activeImagePlaceID: 0,
@@ -46,10 +46,12 @@ export default {
                                 <img :src="image.image" class="d-block w-100">
                             </div>
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#imagesCarousel" data-bs-slide="prev">
+                        <button class="carousel-control-prev" type="button" data-bs-target="#imagesCarousel"
+                                data-bs-slide="prev">
                             <span class="carousel-control-prev-icon"></span>
                         </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#imagesCarousel" data-bs-slide="next">
+                        <button class="carousel-control-next" type="button" data-bs-target="#imagesCarousel"
+                                data-bs-slide="next">
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         </button>
                     </div>
