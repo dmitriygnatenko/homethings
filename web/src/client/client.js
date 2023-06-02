@@ -56,7 +56,11 @@ export const routeUpdateNotification = "/api/v1/things/notifications/{thingId}"
 export const routeDeleteNotification = "/api/v1/things/notifications/{thingId}"
 
 export function getHost() {
-    return window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
+    if (window.location.hostname === "localhost") {
+        return window.location.protocol + "//" + window.location.hostname + ":" + serverPort;
+    }
+
+    return window.location.protocol + "//" + window.location.hostname;
 }
 
 export function jsonRequest(method, url, data) {
