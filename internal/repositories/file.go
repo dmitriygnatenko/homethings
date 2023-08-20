@@ -9,10 +9,15 @@ import (
 	"os"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
+	"github.com/disintegration/imaging"
 	"github.com/gofiber/fiber/v2"
 )
 
-const uploadPath = "../../web/public"
+const (
+	uploadPath   = "../../web/public"
+	resizeWidth  = 1000
+	resizeHeight = 800
+)
 
 type fileRepository struct{}
 
@@ -21,9 +26,40 @@ func InitFileRepository() interfaces.FileRepository {
 }
 
 func (r fileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error {
-	return fctx.SaveFile(header, uploadPath+path)
+	fullPath := getFullPath(path)
+
+	if err := fctx.SaveFile(header, fullPath); err != nil {
+		return err
+	}
+
+	// Resize image
+	src, err := imaging.Open(fullPath)
+	if err != nil {
+		return err
+	}
+
+	origHeight := src.Bounds().Size().Y
+	origWidth := src.Bounds().Size().X
+	var newHeight, newWidth int
+
+	if origWidth > origHeight {
+		newWidth = resizeWidth
+	} else {
+		newHeight = resizeHeight
+	}
+
+	dst := imaging.Resize(src, newWidth, newHeight, imaging.Lanczos)
+	if err = imaging.Save(dst, fullPath); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r fileRepository) Delete(path string) error {
-	return os.RemoveAll(uploadPath + path)
+	return os.RemoveAll(getFullPath(path))
+}
+
+func getFullPath(path string) string {
+	return uploadPath + path
 }

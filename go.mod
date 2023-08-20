@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/brianvoe/gofakeit/v6 v6.19.0
+	github.com/disintegration/imaging v1.6.2
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/gofiber/fiber/v2 v2.42.0
 	github.com/gofiber/jwt/v3 v3.3.6
@@ -58,10 +59,11 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.44.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
-	golang.org/x/tools v0.3.0 // indirect
+	golang.org/x/image v0.11.0 // indirect
+	golang.org/x/net v0.6.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
