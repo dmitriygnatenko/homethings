@@ -349,7 +349,8 @@ paths:
         in: formData
         name: thing_id
         type: integer
-      - description: Files
+      - collectionFormat: csv
+        description: Files
         in: formData
         items:
           type: file

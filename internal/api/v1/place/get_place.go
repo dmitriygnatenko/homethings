@@ -2,11 +2,12 @@ package place
 
 import (
 	"database/sql"
+	"errors"
+
+	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/places/{placeId} [get]
@@ -20,7 +21,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetPlaceHandler(placeRepository PlaceRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("placeId")
@@ -28,9 +29,9 @@ func GetPlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		res, err := sp.GetPlaceRepository().Get(ctx, id)
+		res, err := placeRepository.Get(ctx, id)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusNotFound, "")
 			}
 
@@ -39,6 +40,6 @@ func GetPlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToPlaceResponseDTO(*res))
+		return fctx.JSON(mappers.ToPlaceResponse(*res))
 	}
 }

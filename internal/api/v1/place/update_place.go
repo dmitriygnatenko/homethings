@@ -1,13 +1,13 @@
 package place
 
 import (
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/places/{placeId} [put]
@@ -21,7 +21,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdatePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func UpdatePlaceHandler(placeRepository PlaceRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("placeId")
@@ -39,18 +39,18 @@ func UpdatePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		err = sp.GetPlaceRepository().Update(ctx, mappers.ConvertToUpdatePlaceRequestModel(id, req), nil)
+		err = placeRepository.Update(ctx, mappers.ToUpdatePlaceRequest(id, req), nil)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res, err := sp.GetPlaceRepository().Get(ctx, id)
+		res, err := placeRepository.Get(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToPlaceResponseDTO(*res))
+		return fctx.JSON(mappers.ToPlaceResponse(*res))
 	}
 }

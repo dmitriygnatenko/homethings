@@ -6,20 +6,20 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
-	authMocks "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth/mocks"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/user/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 )
 
-func Test_AddUserHandler(t *testing.T) {
+func TestAddUserHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method      string
 		route       string
@@ -28,7 +28,6 @@ func Test_AddUserHandler(t *testing.T) {
 	}
 
 	var (
-		mc        = minimock.NewController(t)
 		id        = gofakeit.Number(1, 1000)
 		username  = gofakeit.Username()
 		password  = gofakeit.Word()
@@ -50,16 +49,16 @@ func Test_AddUserHandler(t *testing.T) {
 		req             req
 		resCode         int
 		resBody         interface{}
-		userRepoMock    func(mc *minimock.Controller) interfaces.UserRepository
-		authServiceMock func(mc *minimock.Controller) interfaces.Auth
+		userRepoMock    func(mc *minimock.Controller) UserRepository
+		authServiceMock func(mc *minimock.Controller) AuthService
 	}{
 		{
 			name:    "positive case",
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				mock := repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				mock := mocks.NewUserRepositoryMock(mc)
 
 				mock.AddMock.Inspect(func(ctx context.Context, reqUsername string, reqPassword string) {
 					assert.Equal(mc, username, reqUsername)
@@ -68,8 +67,8 @@ func Test_AddUserHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				mock := authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				mock := mocks.NewAuthServiceMock(mc)
 				mock.GeneratePasswordHashMock.Return(password, nil)
 				return mock
 			},
@@ -81,11 +80,11 @@ func Test_AddUserHandler(t *testing.T) {
 				route:  "/v1/users",
 			},
 			resCode: fiber.StatusBadRequest,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				return repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				return mocks.NewUserRepositoryMock(mc)
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				return authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				return mocks.NewAuthServiceMock(mc)
 			},
 		},
 		{
@@ -99,19 +98,19 @@ func Test_AddUserHandler(t *testing.T) {
 				contentType: fiber.MIMEApplicationJSON,
 			},
 			resCode: fiber.StatusBadRequest,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				return repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				return mocks.NewUserRepositoryMock(mc)
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				return authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				return mocks.NewAuthServiceMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				mock := repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				mock := mocks.NewUserRepositoryMock(mc)
 
 				mock.AddMock.Inspect(func(ctx context.Context, reqUsername string, reqPassword string) {
 					assert.Equal(mc, username, reqUsername)
@@ -120,8 +119,8 @@ func Test_AddUserHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				mock := authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				mock := mocks.NewAuthServiceMock(mc)
 				mock.GeneratePasswordHashMock.Return(password, nil)
 				return mock
 			},
@@ -130,11 +129,11 @@ func Test_AddUserHandler(t *testing.T) {
 			name:    "negative case - auth service error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				return repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				return mocks.NewUserRepositoryMock(mc)
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				mock := authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				mock := mocks.NewAuthServiceMock(mc)
 				mock.GeneratePasswordHashMock.Return("", testError)
 				return mock
 			},
@@ -143,10 +142,11 @@ func Test_AddUserHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.userRepoMock(mc), tt.authServiceMock(mc))
+			t.Parallel()
 
-			fiberApp.Post("/v1/users", AddUserHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+			fiberApp.Post("/v1/users", AddUserHandler(tt.authServiceMock(mc), tt.userRepoMock(mc)))
 
 			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)

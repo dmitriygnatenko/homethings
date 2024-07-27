@@ -8,27 +8,27 @@ import (
 	"strconv"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func Test_GetThingImagesHandler(t *testing.T) {
+func TestGetThingImagesHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method string
 		route  string
 	}
 
 	var (
-		mc        = minimock.NewController(t)
 		thingID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
 		layout    = "2006-01-02 15:04:05"
@@ -88,7 +88,7 @@ func Test_GetThingImagesHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
-		thingImageRepoMock func(mc *minimock.Controller) interfaces.ThingImageRepository
+		thingImageRepoMock func(mc *minimock.Controller) ThingImageRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -97,16 +97,16 @@ func Test_GetThingImagesHandler(t *testing.T) {
 				route:  "/v1/images/thing/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -120,8 +120,8 @@ func Test_GetThingImagesHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -134,10 +134,12 @@ func Test_GetThingImagesHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.thingImageRepoMock(mc))
+			t.Parallel()
 
-			fiberApp.Get("/v1/images/thing/:thingId", GetThingImagesHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+
+			fiberApp.Get("/v1/images/thing/:thingId", GetThingImagesHandler(tt.thingImageRepoMock(mc)))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 

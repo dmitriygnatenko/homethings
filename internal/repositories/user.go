@@ -1,31 +1,27 @@
 package repositories
 
-//go:generate mkdir -p mocks
-//go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.UserRepository -o ./mocks/ -s "_minimock.go"
-
 import (
 	"context"
 	"database/sql"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	sq "github.com/Masterminds/squirrel"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
 const (
 	userTableName = "\"user\""
 )
 
-type userRepository struct {
+type UserRepository struct {
 	db *sql.DB
 }
 
-func InitUserRepository(db *sql.DB) interfaces.UserRepository {
-	return userRepository{db: db}
+func InitUserRepository(db *sql.DB) *UserRepository {
+	return &UserRepository{db: db}
 }
 
-func (r userRepository) Get(ctx context.Context, username string) (*models.User, error) {
+func (r UserRepository) Get(ctx context.Context, username string) (*models.User, error) {
 	query, args, err := sq.Select("id", "username", "password", "created_at", "updated_at").
 		From(userTableName).
 		PlaceholderFormat(sq.Dollar).
@@ -47,7 +43,7 @@ func (r userRepository) Get(ctx context.Context, username string) (*models.User,
 	return &res, nil
 }
 
-func (r userRepository) Add(ctx context.Context, username string, password string) (int, error) {
+func (r UserRepository) Add(ctx context.Context, username string, password string) (int, error) {
 	query, args, err := sq.Insert(userTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("username", "password").
@@ -67,7 +63,7 @@ func (r userRepository) Add(ctx context.Context, username string, password strin
 	return id, nil
 }
 
-func (r userRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
+func (r UserRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
 	qb := sq.Update(userTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("updated_at", "NOW()").

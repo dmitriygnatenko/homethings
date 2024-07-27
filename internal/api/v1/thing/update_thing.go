@@ -1,14 +1,14 @@
 package thing
 
 import (
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/things/{thingId} [put]
@@ -22,7 +22,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdateThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func UpdateThingHandler(
+	thingRepository ThingRepository,
+	placeThingRepository PlaceThingRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("thingId")
@@ -40,46 +43,46 @@ func UpdateThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		thing, err := sp.GetThingRepository().Get(ctx, id)
+		thing, err := thingRepository.Get(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		placeThing, err := sp.GetPlaceThingRepository().GetByThingID(ctx, id)
+		placeThing, err := placeThingRepository.GetByThingID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		tx, err := sp.GetThingRepository().BeginTx(ctx, API.DefaultTxLevel)
+		tx, err := thingRepository.BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if req.Title != thing.Title || req.Description != thing.Description {
-			err = sp.GetThingRepository().Update(ctx, mappers.ConvertToUpdateThingRequestModel(id, req), tx)
+			err = thingRepository.Update(ctx, mappers.ToUpdateThingRequest(id, req), tx)
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		if placeThing.PlaceID != req.PlaceID {
-			err = sp.GetPlaceThingRepository().UpdatePlace(ctx, mappers.ConvertToUpdatePlaceThingRequestModel(id, req.PlaceID), tx)
+			err = placeThingRepository.UpdatePlace(ctx, mappers.ToUpdatePlaceThingRequest(id, req.PlaceID), tx)
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
-		if err = sp.GetThingRepository().CommitTx(tx); err != nil {
+		if err = thingRepository.CommitTx(tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res, err := sp.GetThingRepository().Get(ctx, id)
+		res, err := thingRepository.Get(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToThingResponseDTO(*res))
+		return fctx.JSON(mappers.ToThingResponse(*res))
 	}
 }

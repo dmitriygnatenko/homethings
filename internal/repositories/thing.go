@@ -1,37 +1,33 @@
 package repositories
 
-//go:generate mkdir -p mocks
-//go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.ThingRepository -o ./mocks/ -s "_minimock.go"
-
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	sq "github.com/Masterminds/squirrel"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
 const (
 	thingTableName = "thing"
 )
 
-type thingRepository struct {
+type ThingRepository struct {
 	db *sql.DB
 }
 
-func InitThingRepository(db *sql.DB) interfaces.ThingRepository {
-	return thingRepository{db: db}
+func InitThingRepository(db *sql.DB) *ThingRepository {
+	return &ThingRepository{db: db}
 }
 
-func (r thingRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
+func (r ThingRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
 	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
 }
 
-func (r thingRepository) CommitTx(tx *sql.Tx) error {
+func (r ThingRepository) CommitTx(tx *sql.Tx) error {
 	if tx == nil {
 		return errors.New("empty transaction")
 	}
@@ -39,7 +35,7 @@ func (r thingRepository) CommitTx(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, error) {
+func (r ThingRepository) Get(ctx context.Context, thingID int) (*models.Thing, error) {
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
 		From(thingTableName + " t").
 		Join(placeThingTableName + " p ON p.thing_id = t.id").
@@ -63,7 +59,7 @@ func (r thingRepository) Get(ctx context.Context, thingID int) (*models.Thing, e
 	return &res, nil
 }
 
-func (r thingRepository) Search(ctx context.Context, search string) ([]models.Thing, error) {
+func (r ThingRepository) Search(ctx context.Context, search string) ([]models.Thing, error) {
 	var res []models.Thing
 
 	s := fmt.Sprint("%", search, "%")
@@ -111,7 +107,7 @@ func (r thingRepository) Search(ctx context.Context, search string) ([]models.Th
 	return res, nil
 }
 
-func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error) {
+func (r ThingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error) {
 	var res []models.Thing
 
 	query, args, err := sq.Select("t.id", "t.title", "t.description", "t.created_at", "t.updated_at", "p.place_id").
@@ -158,7 +154,7 @@ func (r thingRepository) GetByPlaceID(ctx context.Context, placeID int) ([]model
 }
 
 // GetAllByPlaceID return things by place ID and all child places
-func (r thingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error) {
+func (r ThingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error) {
 	var res []models.Thing
 
 	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
@@ -206,7 +202,7 @@ func (r thingRepository) GetAllByPlaceID(ctx context.Context, placeID int) ([]mo
 	return res, nil
 }
 
-func (r thingRepository) Add(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) (int, error) {
+func (r ThingRepository) Add(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) (int, error) {
 	query, args, err := sq.Insert(thingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("title", "description").
@@ -232,7 +228,7 @@ func (r thingRepository) Add(ctx context.Context, req models.AddThingRequest, tx
 	return id, nil
 }
 
-func (r thingRepository) Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error {
+func (r ThingRepository) Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error {
 	query, args, err := sq.Update(thingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
@@ -254,7 +250,7 @@ func (r thingRepository) Update(ctx context.Context, req models.UpdateThingReque
 	return err
 }
 
-func (r thingRepository) Delete(ctx context.Context, thingID int, tx *sql.Tx) error {
+func (r ThingRepository) Delete(ctx context.Context, thingID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(thingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": thingID}).

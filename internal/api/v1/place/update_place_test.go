@@ -8,20 +8,21 @@ import (
 	"strconv"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func Test_UpdatePlaceHandler(t *testing.T) {
+func TestUpdatePlaceHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method      string
 		route       string
@@ -30,7 +31,6 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 	}
 
 	var (
-		mc        = minimock.NewController(t)
 		placeID   = gofakeit.Number(1, 1000)
 		parentID  = gofakeit.Number(1, 1000)
 		title     = gofakeit.Phrase()
@@ -69,15 +69,15 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		placeRepoMock func(mc *minimock.Controller) interfaces.PlaceRepository
+		placeRepoMock func(mc *minimock.Controller) PlaceRepository
 	}{
 		{
 			name:    "positive case",
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
 					assert.Equal(mc, title, req.Title)
@@ -98,8 +98,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 				route:  "/v1/places/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				return repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				return mocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
@@ -109,8 +109,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 				route:  "/v1/places/" + strconv.Itoa(placeID),
 			},
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				return repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				return mocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
@@ -128,16 +128,16 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 					Tag:   "required",
 				},
 			},
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				return repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				return mocks.NewPlaceRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (update place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
 					assert.Equal(mc, title, req.Title)
@@ -151,8 +151,8 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 			name:    "negative case - repository error (get place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
 					assert.Equal(mc, title, req.Title)
@@ -170,10 +170,11 @@ func Test_UpdatePlaceHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.placeRepoMock(mc))
+			t.Parallel()
 
-			fiberApp.Put("/v1/places/:placeId", UpdatePlaceHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+			fiberApp.Put("/v1/places/:placeId", UpdatePlaceHandler(tt.placeRepoMock(mc)))
 
 			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)

@@ -1,7 +1,6 @@
 package sp
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
 	authService "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
 	dbService "git.dmitriygnatenko.ru/dima/homethings/internal/services/db"
@@ -10,22 +9,22 @@ import (
 )
 
 type ServiceProvider struct {
-	env                         interfaces.Env
-	auth                        interfaces.Auth
-	mailer                      interfaces.Mailer
-	placeRepository             interfaces.PlaceRepository
-	thingRepository             interfaces.ThingRepository
-	tagRepository               interfaces.TagRepository
-	placeThingRepository        interfaces.PlaceThingRepository
-	placeImageRepository        interfaces.PlaceImageRepository
-	thingImageRepository        interfaces.ThingImageRepository
-	thingTagRepository          interfaces.ThingTagRepository
-	userRepository              interfaces.UserRepository
-	thingNotificationRepository interfaces.ThingNotificationRepository
-	fileRepository              interfaces.FileRepository
+	env                         *envService.Service
+	auth                        *authService.Service
+	mailer                      *mailerService.Service
+	placeRepository             *repositories.PlaceRepository
+	thingRepository             *repositories.ThingRepository
+	tagRepository               *repositories.TagRepository
+	placeThingRepository        *repositories.PlaceThingRepository
+	placeImageRepository        *repositories.PlaceImageRepository
+	thingImageRepository        *repositories.ThingImageRepository
+	thingTagRepository          *repositories.ThingTagRepository
+	userRepository              *repositories.UserRepository
+	thingNotificationRepository *repositories.ThingNotificationRepository
+	fileRepository              *repositories.FileRepository
 }
 
-func Init() (interfaces.ServiceProvider, error) {
+func Init() (*ServiceProvider, error) {
 	sp := &ServiceProvider{}
 
 	env, err := envService.Init()
@@ -66,89 +65,54 @@ func Init() (interfaces.ServiceProvider, error) {
 	return sp, nil
 }
 
-func (sp *ServiceProvider) GetEnvService() interfaces.Env {
+func (sp *ServiceProvider) GetEnvService() *envService.Service {
 	return sp.env
 }
 
-func (sp *ServiceProvider) GetAuthService() interfaces.Auth {
+func (sp *ServiceProvider) GetAuthService() *authService.Service {
 	return sp.auth
 }
 
-func (sp *ServiceProvider) GetMailerService() interfaces.Mailer {
+func (sp *ServiceProvider) GetMailerService() *mailerService.Service {
 	return sp.mailer
 }
 
-func (sp *ServiceProvider) GetPlaceRepository() interfaces.PlaceRepository {
+func (sp *ServiceProvider) GetPlaceRepository() *repositories.PlaceRepository {
 	return sp.placeRepository
 }
 
-func (sp *ServiceProvider) GetThingRepository() interfaces.ThingRepository {
+func (sp *ServiceProvider) GetThingRepository() *repositories.ThingRepository {
 	return sp.thingRepository
 }
 
-func (sp *ServiceProvider) GetTagRepository() interfaces.TagRepository {
+func (sp *ServiceProvider) GetTagRepository() *repositories.TagRepository {
 	return sp.tagRepository
 }
 
-func (sp *ServiceProvider) GetPlaceThingRepository() interfaces.PlaceThingRepository {
+func (sp *ServiceProvider) GetPlaceThingRepository() *repositories.PlaceThingRepository {
 	return sp.placeThingRepository
 }
 
-func (sp *ServiceProvider) GetPlaceImageRepository() interfaces.PlaceImageRepository {
+func (sp *ServiceProvider) GetPlaceImageRepository() *repositories.PlaceImageRepository {
 	return sp.placeImageRepository
 }
 
-func (sp *ServiceProvider) GetThingImageRepository() interfaces.ThingImageRepository {
+func (sp *ServiceProvider) GetThingImageRepository() *repositories.ThingImageRepository {
 	return sp.thingImageRepository
 }
 
-func (sp *ServiceProvider) GetThingTagRepository() interfaces.ThingTagRepository {
+func (sp *ServiceProvider) GetThingTagRepository() *repositories.ThingTagRepository {
 	return sp.thingTagRepository
 }
 
-func (sp *ServiceProvider) GetThingNotificationRepository() interfaces.ThingNotificationRepository {
+func (sp *ServiceProvider) GetThingNotificationRepository() *repositories.ThingNotificationRepository {
 	return sp.thingNotificationRepository
 }
 
-func (sp *ServiceProvider) GetUserRepository() interfaces.UserRepository {
+func (sp *ServiceProvider) GetUserRepository() *repositories.UserRepository {
 	return sp.userRepository
 }
 
-func (sp *ServiceProvider) GetFileRepository() interfaces.FileRepository {
+func (sp *ServiceProvider) GetFileRepository() *repositories.FileRepository {
 	return sp.fileRepository
-}
-
-func InitMock(deps ...interface{}) interfaces.ServiceProvider {
-	sp := ServiceProvider{}
-
-	for _, d := range deps {
-		switch s := d.(type) {
-		case interfaces.Env:
-			sp.env = s
-		case interfaces.Auth:
-			sp.auth = s
-		case interfaces.PlaceThingRepository:
-			sp.placeThingRepository = s
-		case interfaces.ThingRepository:
-			sp.thingRepository = s
-		case interfaces.PlaceRepository:
-			sp.placeRepository = s
-		case interfaces.PlaceImageRepository:
-			sp.placeImageRepository = s
-		case interfaces.ThingImageRepository:
-			sp.thingImageRepository = s
-		case interfaces.TagRepository:
-			sp.tagRepository = s
-		case interfaces.ThingTagRepository:
-			sp.thingTagRepository = s
-		case interfaces.ThingNotificationRepository:
-			sp.thingNotificationRepository = s
-		case interfaces.UserRepository:
-			sp.userRepository = s
-		case interfaces.FileRepository:
-			sp.fileRepository = s
-		}
-	}
-
-	return &sp
 }

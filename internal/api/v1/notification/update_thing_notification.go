@@ -3,13 +3,13 @@ package notification
 import (
 	"database/sql"
 
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/things/notifications/{thingId} [put]
@@ -23,7 +23,9 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdateThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func UpdateThingNotificationHandler(
+	thingNotificationRepository ThingNotificationRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("thingId")
@@ -41,7 +43,7 @@ func UpdateThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		_, err = sp.GetThingNotificationRepository().Get(ctx, id)
+		_, err = thingNotificationRepository.Get(ctx, id)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return fiber.NewError(fiber.StatusBadRequest, "")
@@ -50,22 +52,22 @@ func UpdateThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		dbReq, err := mappers.ConvertToUpdateThingNotificationRequestModel(id, req)
+		dbReq, err := mappers.ToUpdateThingNotificationRequest(id, req)
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		if err = sp.GetThingNotificationRepository().Update(ctx, *dbReq, nil); err != nil {
+		if err = thingNotificationRepository.Update(ctx, *dbReq, nil); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res, err := sp.GetThingNotificationRepository().Get(ctx, id)
+		res, err := thingNotificationRepository.Get(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToThingNotificationResponseDTO(*res))
+		return fctx.JSON(mappers.ToThingNotificationResponse(*res))
 	}
 }

@@ -1,13 +1,33 @@
 package user
 
+//go:generate mkdir -p mocks
+//go:generate rm -rf ./mocks/*_minimock.go
+//go:generate minimock -i AuthService,UserRepository -o ./mocks/ -s "_minimock.go"
+
 import (
+	"context"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+)
+
+type (
+	AuthService interface {
+		GeneratePasswordHash(password string) (string, error)
+		GetClaims(fctx *fiber.Ctx) jwt.MapClaims
+	}
+
+	UserRepository interface {
+		Get(ctx context.Context, username string) (*models.User, error)
+		Add(ctx context.Context, username string, password string) (int, error)
+		Update(ctx context.Context, req models.UpdateUserRequest) error
+	}
 )
 
 // @Router 		/api/v1/users [post]
@@ -20,7 +40,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func AddUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func AddUserHandler(
+	authService AuthService,
+	userRepository UserRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		req := dto.AddUserRequest{}
@@ -33,12 +56,12 @@ func AddUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		hash, err := sp.GetAuthService().GeneratePasswordHash(strings.TrimSpace(req.Password))
+		hash, err := authService.GeneratePasswordHash(strings.TrimSpace(req.Password))
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		_, err = sp.GetUserRepository().Add(ctx, strings.TrimSpace(req.Username), hash)
+		_, err = userRepository.Add(ctx, strings.TrimSpace(req.Username), hash)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}

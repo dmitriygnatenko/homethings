@@ -7,27 +7,27 @@ import (
 	"strconv"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func Test_GetThingTagsHandler(t *testing.T) {
+func TestGetThingTagsHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method string
 		route  string
 	}
 
 	var (
-		mc        = minimock.NewController(t)
 		thingID   = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
 		layout    = "2006-01-02 15:04:05"
@@ -79,15 +79,15 @@ func Test_GetThingTagsHandler(t *testing.T) {
 		req         req
 		resCode     int
 		resBody     interface{}
-		tagRepoMock func(mc *minimock.Controller) interfaces.TagRepository
+		tagRepoMock func(mc *minimock.Controller) TagRepository
 	}{
 		{
 			name:    "positive case",
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -100,8 +100,8 @@ func Test_GetThingTagsHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -118,18 +118,19 @@ func Test_GetThingTagsHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusBadRequest,
 			resBody: nil,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				return repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				return mocks.NewTagRepositoryMock(mc)
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.tagRepoMock(mc))
+			t.Parallel()
 
-			fiberApp.Get("/v1/tags/thing/:thingId", GetThingTagsHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+			fiberApp.Get("/v1/tags/thing/:thingId", GetThingTagsHandler(tt.tagRepoMock(mc)))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

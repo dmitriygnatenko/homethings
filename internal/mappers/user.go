@@ -8,7 +8,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ConvertToUpdateUserRequestModel(id int, req dto.UpdateUserRequest) models.UpdateUserRequest {
+func ToUpdateUserRequest(id int, req dto.UpdateUserRequest) models.UpdateUserRequest {
 	res := models.UpdateUserRequest{
 		ID: id,
 	}
@@ -32,10 +32,10 @@ func ConvertToUpdateUserRequestModel(id int, req dto.UpdateUserRequest) models.U
 	return res
 }
 
-func ConvertToUserResponseDTO(req models.User) dto.UserResponse {
+func ToUserResponse(req models.User) dto.UserResponse {
 	return dto.UserResponse{Username: req.Username}
 }
 
-func ConvertToLoginResponseDTO(token string) dto.LoginResponse {
+func ToLoginResponse(token string) dto.LoginResponse {
 	return dto.LoginResponse{Token: token}
 }

@@ -1,36 +1,32 @@
 package repositories
 
-//go:generate mkdir -p mocks
-//go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.TagRepository -o ./mocks/ -s "_minimock.go"
-
 import (
 	"context"
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	sq "github.com/Masterminds/squirrel"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
 const (
 	tagTableName = "tag"
 )
 
-type tagRepository struct {
+type TagRepository struct {
 	db *sql.DB
 }
 
-func InitTagRepository(db *sql.DB) interfaces.TagRepository {
-	return tagRepository{db: db}
+func InitTagRepository(db *sql.DB) *TagRepository {
+	return &TagRepository{db: db}
 }
 
-func (r tagRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
+func (r TagRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
 	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
 }
 
-func (r tagRepository) CommitTx(tx *sql.Tx) error {
+func (r TagRepository) CommitTx(tx *sql.Tx) error {
 	if tx == nil {
 		return errors.New("empty transaction")
 	}
@@ -38,7 +34,7 @@ func (r tagRepository) CommitTx(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-func (r tagRepository) GetAll(ctx context.Context) ([]models.Tag, error) {
+func (r TagRepository) GetAll(ctx context.Context) ([]models.Tag, error) {
 	var res []models.Tag
 
 	query, args, err := sq.Select("id", "title", "style", "created_at", "updated_at").
@@ -79,7 +75,7 @@ func (r tagRepository) GetAll(ctx context.Context) ([]models.Tag, error) {
 	return res, nil
 }
 
-func (r tagRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error) {
+func (r TagRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error) {
 	var res []models.Tag
 
 	query, args, err := sq.Select("t.id", "t.title", "t.style", "t.created_at", "t.updated_at").
@@ -123,7 +119,7 @@ func (r tagRepository) GetByThingID(ctx context.Context, thingID int) ([]models.
 	return res, nil
 }
 
-func (r tagRepository) Get(ctx context.Context, tagID int) (*models.Tag, error) {
+func (r TagRepository) Get(ctx context.Context, tagID int) (*models.Tag, error) {
 	query, args, err := sq.Select("id", "title", "style", "created_at", "updated_at").
 		From(tagTableName).
 		PlaceholderFormat(sq.Dollar).
@@ -146,7 +142,7 @@ func (r tagRepository) Get(ctx context.Context, tagID int) (*models.Tag, error) 
 	return &res, nil
 }
 
-func (r tagRepository) Add(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) (int, error) {
+func (r TagRepository) Add(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) (int, error) {
 	query, args, err := sq.Insert(tagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("title", "style").
@@ -172,7 +168,7 @@ func (r tagRepository) Add(ctx context.Context, req models.AddTagRequest, tx *sq
 	return id, nil
 }
 
-func (r tagRepository) Update(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) error {
+func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) error {
 	query, args, err := sq.Update(tagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
@@ -194,7 +190,7 @@ func (r tagRepository) Update(ctx context.Context, req models.UpdateTagRequest, 
 	return err
 }
 
-func (r tagRepository) Delete(ctx context.Context, tagID int, tx *sql.Tx) error {
+func (r TagRepository) Delete(ctx context.Context, tagID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(tagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": tagID}).

@@ -8,27 +8,27 @@ import (
 	"strconv"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func Test_DeletePlaceHandler(t *testing.T) {
+func TestDeletePlaceHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method string
 		route  string
 	}
 
 	var (
-		mc      = minimock.NewController(t)
 		placeID = gofakeit.Number(1, 1000)
 		thingID = gofakeit.Number(1, 1000)
 
@@ -70,14 +70,14 @@ func Test_DeletePlaceHandler(t *testing.T) {
 		req                       req
 		resCode                   int
 		resBody                   interface{}
-		placeRepoMock             func(mc *minimock.Controller) interfaces.PlaceRepository
-		thingRepoMock             func(mc *minimock.Controller) interfaces.ThingRepository
-		placeThingRepoMock        func(mc *minimock.Controller) interfaces.PlaceThingRepository
-		thingImageRepoMock        func(mc *minimock.Controller) interfaces.ThingImageRepository
-		placeImageRepoMock        func(mc *minimock.Controller) interfaces.PlaceImageRepository
-		thingTagRepoMock          func(mc *minimock.Controller) interfaces.ThingTagRepository
-		thingNotificationRepoMock func(mc *minimock.Controller) interfaces.ThingNotificationRepository
-		fileRepoMock              func(mc *minimock.Controller) interfaces.FileRepository
+		placeRepoMock             func(mc *minimock.Controller) PlaceRepository
+		thingRepoMock             func(mc *minimock.Controller) ThingRepository
+		placeThingRepoMock        func(mc *minimock.Controller) PlaceThingRepository
+		thingImageRepoMock        func(mc *minimock.Controller) ThingImageRepository
+		placeImageRepoMock        func(mc *minimock.Controller) PlaceImageRepository
+		thingTagRepoMock          func(mc *minimock.Controller) ThingTagRepository
+		thingNotificationRepoMock func(mc *minimock.Controller) ThingNotificationRepository
+		fileRepoMock              func(mc *minimock.Controller) FileRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -86,37 +86,37 @@ func Test_DeletePlaceHandler(t *testing.T) {
 				route:  "/v1/places/" + gofakeit.Word(),
 			},
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				return repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				return mocks.NewPlaceRepositoryMock(mc)
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				return repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - bad request (place not found)",
 			req:     correctReq,
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -124,34 +124,34 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				return repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (get place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -159,34 +159,34 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				return repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (get nested places)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -198,34 +198,34 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				return repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - bad request (nested places exists)",
 			req:     correctReq,
 			resCode: fiber.StatusBadRequest,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -237,34 +237,34 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				return repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (get place images)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -276,17 +276,17 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -294,22 +294,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (get things)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -321,8 +321,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -330,14 +330,14 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				return repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				return mocks.NewThingImageRepositoryMock(mc)
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -345,22 +345,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (get things images)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -372,8 +372,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -381,11 +381,11 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -393,8 +393,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -402,22 +402,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (begin tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -431,8 +431,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -440,11 +440,11 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -452,8 +452,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -461,22 +461,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete place image)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -490,8 +490,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -499,11 +499,11 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -511,8 +511,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -524,22 +524,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete thing image)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -553,8 +553,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -562,11 +562,11 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				return repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				return mocks.NewPlaceThingRepositoryMock(mc)
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -578,8 +578,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -591,22 +591,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete place thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -620,8 +620,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -629,8 +629,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -638,8 +638,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -651,8 +651,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -664,22 +664,22 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete thing tags)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -693,8 +693,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -702,8 +702,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -711,8 +711,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -724,8 +724,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -737,8 +737,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -746,19 +746,19 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				return repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				return mocks.NewThingNotificationRepositoryMock(mc)
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete thing notifications)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -772,8 +772,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -781,8 +781,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -790,8 +790,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -803,8 +803,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -816,8 +816,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -825,8 +825,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -834,16 +834,16 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -857,8 +857,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -870,8 +870,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -879,8 +879,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -892,8 +892,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -905,8 +905,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -914,8 +914,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -923,16 +923,16 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (delete place)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -950,8 +950,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -963,8 +963,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -972,8 +972,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -985,8 +985,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -998,8 +998,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1007,8 +1007,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1016,16 +1016,16 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error (commit tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1045,8 +1045,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1058,8 +1058,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1067,8 +1067,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -1080,8 +1080,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1093,8 +1093,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1102,8 +1102,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1111,16 +1111,16 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				return repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				return mocks.NewFileRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - delete place image error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1140,8 +1140,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1153,8 +1153,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1162,8 +1162,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -1175,8 +1175,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1188,8 +1188,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1197,8 +1197,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1206,8 +1206,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				mock := repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				mock := mocks.NewFileRepositoryMock(mc)
 				mock.DeleteMock.When(placeImageURL).Then(testError)
 				return mock
 			},
@@ -1216,8 +1216,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 			name:    "negative case - delete thing image error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1237,8 +1237,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1250,8 +1250,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1259,8 +1259,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -1272,8 +1272,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1285,8 +1285,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1294,8 +1294,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1303,8 +1303,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				mock := repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				mock := mocks.NewFileRepositoryMock(mc)
 
 				mock.DeleteMock.When(placeImageURL).Then(nil)
 				mock.DeleteMock.When(thingImageURL).Then(testError)
@@ -1317,8 +1317,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: &dto.EmptyResponse{},
-			placeRepoMock: func(mc *minimock.Controller) interfaces.PlaceRepository {
-				mock := repoMocks.NewPlaceRepositoryMock(mc)
+			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
+				mock := mocks.NewPlaceRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1338,8 +1338,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1351,8 +1351,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeThingRepoMock: func(mc *minimock.Controller) interfaces.PlaceThingRepository {
-				mock := repoMocks.NewPlaceThingRepositoryMock(mc)
+			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
+				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
 				mock.DeleteThingMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1360,8 +1360,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingImageRepoMock: func(mc *minimock.Controller) interfaces.ThingImageRepository {
-				mock := repoMocks.NewThingImageRepositoryMock(mc)
+			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
+				mock := mocks.NewThingImageRepositoryMock(mc)
 
 				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, thingID, id)
@@ -1373,8 +1373,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			placeImageRepoMock: func(mc *minimock.Controller) interfaces.PlaceImageRepository {
-				mock := repoMocks.NewPlaceImageRepositoryMock(mc)
+			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
+				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
 				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, placeID, id)
@@ -1386,8 +1386,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByThingIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1395,8 +1395,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			thingNotificationRepoMock: func(mc *minimock.Controller) interfaces.ThingNotificationRepository {
-				mock := repoMocks.NewThingNotificationRepositoryMock(mc)
+			thingNotificationRepoMock: func(mc *minimock.Controller) ThingNotificationRepository {
+				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
 				mock.DeleteMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, thingID, id)
@@ -1404,8 +1404,8 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 				return mock
 			},
-			fileRepoMock: func(mc *minimock.Controller) interfaces.FileRepository {
-				mock := repoMocks.NewFileRepositoryMock(mc)
+			fileRepoMock: func(mc *minimock.Controller) FileRepository {
+				mock := mocks.NewFileRepositoryMock(mc)
 
 				mock.DeleteMock.When(placeImageURL).Then(nil)
 				mock.DeleteMock.When(thingImageURL).Then(nil)
@@ -1417,19 +1417,21 @@ func Test_DeletePlaceHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mc := minimock.NewController(t)
 			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(
+
+			fiberApp.Delete("/v1/places/:placeId", DeletePlaceHandler(
 				tt.placeRepoMock(mc),
 				tt.thingRepoMock(mc),
-				tt.placeThingRepoMock(mc),
 				tt.placeImageRepoMock(mc),
 				tt.thingImageRepoMock(mc),
+				tt.placeThingRepoMock(mc),
 				tt.thingTagRepoMock(mc),
 				tt.thingNotificationRepoMock(mc),
 				tt.fileRepoMock(mc),
-			)
-
-			fiberApp.Delete("/v1/places/:placeId", DeletePlaceHandler(serviceProvider))
+			))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

@@ -5,7 +5,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ConvertToImageResponseDTO(req models.Image) dto.ImageResponse {
+func ToImageResponse(req models.Image) dto.ImageResponse {
 	var placeIDPtr, thingIDPtr *int
 
 	if req.PlaceID.Valid {
@@ -27,11 +27,11 @@ func ConvertToImageResponseDTO(req models.Image) dto.ImageResponse {
 	}
 }
 
-func ConvertToImagesResponseDTO(images []models.Image) dto.ImagesResponse {
+func ToImagesResponse(images []models.Image) dto.ImagesResponse {
 	res := make([]dto.ImageResponse, 0, len(images))
 
 	for _, image := range images {
-		res = append(res, ConvertToImageResponseDTO(image))
+		res = append(res, ToImageResponse(image))
 	}
 
 	return dto.ImagesResponse{Images: res}

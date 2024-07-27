@@ -7,28 +7,27 @@ import (
 	"net/url"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func Test_SearchThingHandler(t *testing.T) {
+func TestSearchThingHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method string
 		route  string
 	}
 
 	var (
-		mc = minimock.NewController(t)
-
 		search    = gofakeit.LetterN(10)
 		testError = errors.New(gofakeit.Phrase())
 		layout    = "2006-01-02 15:04:05"
@@ -84,7 +83,7 @@ func Test_SearchThingHandler(t *testing.T) {
 		req           req
 		resCode       int
 		resBody       interface{}
-		thingRepoMock func(mc *minimock.Controller) interfaces.ThingRepository
+		thingRepoMock func(mc *minimock.Controller) ThingRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -93,8 +92,8 @@ func Test_SearchThingHandler(t *testing.T) {
 				route:  "/v1/things/search/" + url.QueryEscape(gofakeit.LetterN(2)),
 			},
 			resCode: fiber.StatusBadRequest,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
 		},
 		{
@@ -104,16 +103,16 @@ func Test_SearchThingHandler(t *testing.T) {
 				route:  "/v1/things/search/" + url.QueryEscape(gofakeit.LetterN(10)+":"),
 			},
 			resCode: fiber.StatusBadRequest,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				return repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				return mocks.NewThingRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.SearchMock.Inspect(func(ctx context.Context, s string) {
 					assert.Equal(mc, search, s)
@@ -127,8 +126,8 @@ func Test_SearchThingHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			thingRepoMock: func(mc *minimock.Controller) interfaces.ThingRepository {
-				mock := repoMocks.NewThingRepositoryMock(mc)
+			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
+				mock := mocks.NewThingRepositoryMock(mc)
 
 				mock.SearchMock.Inspect(func(ctx context.Context, s string) {
 					assert.Equal(mc, search, s)
@@ -141,10 +140,11 @@ func Test_SearchThingHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.thingRepoMock(mc))
+			t.Parallel()
 
-			fiberApp.Get("/v1/things/search/:search", SearchThingHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+			fiberApp.Get("/v1/things/search/:search", SearchThingHandler(tt.thingRepoMock(mc)))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

@@ -3,11 +3,11 @@ package place
 import (
 	"database/sql"
 
+	"github.com/gofiber/fiber/v2"
+
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/places/{placeId} [delete]
@@ -20,7 +20,16 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func DeletePlaceHandler(
+	placeRepository PlaceRepository,
+	thingRepository ThingRepository,
+	placeImageRepository PlaceImageRepository,
+	thingImageRepository ThingImageRepository,
+	placeThingRepository PlaceThingRepository,
+	thingTagRepository ThingTagRepository,
+	thingNotificationRepository ThingNotificationRepository,
+	fileRepository FileRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("placeId")
@@ -28,7 +37,7 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		_, err = sp.GetPlaceRepository().Get(ctx, id)
+		_, err = placeRepository.Get(ctx, id)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return fiber.NewError(fiber.StatusBadRequest, "")
@@ -37,7 +46,7 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		nestedRes, err := sp.GetPlaceRepository().GetNestedPlaces(ctx, id)
+		nestedRes, err := placeRepository.GetNestedPlaces(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
@@ -46,12 +55,12 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
-		placeImages, err := sp.GetPlaceImageRepository().GetByPlaceID(ctx, id)
+		placeImages, err := placeImageRepository.GetByPlaceID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		things, err := sp.GetThingRepository().GetByPlaceID(ctx, id)
+		things, err := thingRepository.GetByPlaceID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
@@ -62,17 +71,15 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		for _, thing := range things {
 			thingIDs = append(thingIDs, thing.ID)
 
-			thingImagesRes, thingImagesErr := sp.GetThingImageRepository().GetByThingID(ctx, thing.ID)
+			thingImagesRes, thingImagesErr := thingImageRepository.GetByThingID(ctx, thing.ID)
 			if thingImagesErr != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, thingImagesErr.Error())
 			}
 
-			for i := range thingImagesRes {
-				thingImages = append(thingImages, thingImagesRes[i])
-			}
+			thingImages = append(thingImages, thingImagesRes...)
 		}
 
-		tx, err := sp.GetPlaceRepository().BeginTx(ctx, API.DefaultTxLevel)
+		tx, err := placeRepository.BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
@@ -81,53 +88,53 @@ func DeletePlaceHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		for i := range placeImages {
 			placeImageURLs = append(placeImageURLs, placeImages[i].Image)
 
-			if err = sp.GetPlaceImageRepository().Delete(ctx, placeImages[i].ID, tx); err != nil {
+			if err = placeImageRepository.Delete(ctx, placeImages[i].ID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		for i := range thingImages {
-			if err = sp.GetThingImageRepository().Delete(ctx, thingImages[i].ID, tx); err != nil {
+			if err = thingImageRepository.Delete(ctx, thingImages[i].ID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
 		for _, thingID := range thingIDs {
-			if err = sp.GetPlaceThingRepository().DeleteThing(ctx, thingID, tx); err != nil {
+			if err = placeThingRepository.DeleteThing(ctx, thingID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
-			if err = sp.GetThingTagRepository().DeleteByThingID(ctx, thingID, tx); err != nil {
+			if err = thingTagRepository.DeleteByThingID(ctx, thingID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
-			if err = sp.GetThingNotificationRepository().Delete(ctx, thingID, tx); err != nil {
+			if err = thingNotificationRepository.Delete(ctx, thingID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 
-			if err = sp.GetThingRepository().Delete(ctx, thingID, tx); err != nil {
+			if err = thingRepository.Delete(ctx, thingID, tx); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
 
-		if err = sp.GetPlaceRepository().Delete(ctx, id, tx); err != nil {
+		if err = placeRepository.Delete(ctx, id, tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetPlaceRepository().CommitTx(tx); err != nil {
+		if err = placeRepository.CommitTx(tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if len(placeImageURLs) > 0 {
 			for i := range placeImageURLs {
-				if err = sp.GetFileRepository().Delete(placeImageURLs[i]); err != nil {
+				if err = fileRepository.Delete(placeImageURLs[i]); err != nil {
 					return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 				}
 			}
 		}
 
 		for i := range thingImages {
-			if err = sp.GetFileRepository().Delete(thingImages[i].Image); err != nil {
+			if err = fileRepository.Delete(thingImages[i].Image); err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}

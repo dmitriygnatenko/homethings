@@ -4,9 +4,10 @@ import (
 	"log"
 	"time"
 
+	_ "github.com/lib/pq"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/fiber"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
-	_ "github.com/lib/pq"
 )
 
 // @title 						Homethings API

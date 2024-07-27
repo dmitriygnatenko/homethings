@@ -1,10 +1,10 @@
 package thing
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/things/place/{placeId} [get]
@@ -17,7 +17,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetPlaceThingsHandler(
+	thingRepository ThingRepository,
+	thingTagRepository ThingTagRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("placeId")
@@ -25,12 +28,12 @@ func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		things, err := sp.GetThingRepository().GetAllByPlaceID(ctx, id)
+		things, err := thingRepository.GetAllByPlaceID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		tags, err := sp.GetThingTagRepository().GetByPlaceID(ctx, id)
+		tags, err := thingTagRepository.GetByPlaceID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
@@ -38,6 +41,6 @@ func GetPlaceThingsHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		things = helpers.ApplyLocation(fctx, things)
 		tags = helpers.ApplyLocation(fctx, tags)
 
-		return fctx.JSON(mappers.ConvertToThingsExtResponseDTO(things, tags))
+		return fctx.JSON(mappers.ToThingsExtResponse(things, tags))
 	}
 }

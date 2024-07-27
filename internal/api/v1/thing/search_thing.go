@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"strings"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/things/search/{search} [get]
@@ -21,7 +21,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func SearchThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func SearchThingHandler(thingRepository ThingRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		search, _ := url.QueryUnescape(fctx.Params("search", ""))
@@ -34,13 +34,13 @@ func SearchThingHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
-		res, err := sp.GetThingRepository().Search(ctx, search)
+		res, err := thingRepository.Search(ctx, search)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToThingsResponseDTO(res))
+		return fctx.JSON(mappers.ToThingsResponse(res))
 	}
 }

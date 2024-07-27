@@ -1,36 +1,32 @@
 package repositories
 
-//go:generate mkdir -p mocks
-//go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.PlaceRepository -o ./mocks/ -s "_minimock.go"
-
 import (
 	"context"
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	sq "github.com/Masterminds/squirrel"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
 const (
 	placeTableName = "place"
 )
 
-type placeRepository struct {
+type PlaceRepository struct {
 	db *sql.DB
 }
 
-func InitPlaceRepository(db *sql.DB) interfaces.PlaceRepository {
-	return placeRepository{db: db}
+func InitPlaceRepository(db *sql.DB) *PlaceRepository {
+	return &PlaceRepository{db: db}
 }
 
-func (r placeRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
+func (r PlaceRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
 	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
 }
 
-func (r placeRepository) CommitTx(tx *sql.Tx) error {
+func (r PlaceRepository) CommitTx(tx *sql.Tx) error {
 	if tx == nil {
 		return errors.New("empty transaction")
 	}
@@ -38,7 +34,7 @@ func (r placeRepository) CommitTx(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-func (r placeRepository) GetAll(ctx context.Context) ([]models.Place, error) {
+func (r PlaceRepository) GetAll(ctx context.Context) ([]models.Place, error) {
 	var res []models.Place
 
 	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
@@ -79,7 +75,7 @@ func (r placeRepository) GetAll(ctx context.Context) ([]models.Place, error) {
 	return res, nil
 }
 
-func (r placeRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]models.Place, error) {
+func (r PlaceRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]models.Place, error) {
 	var res []models.Place
 
 	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
@@ -122,7 +118,7 @@ func (r placeRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]mo
 	return res, nil
 }
 
-func (r placeRepository) Get(ctx context.Context, placeID int) (*models.Place, error) {
+func (r PlaceRepository) Get(ctx context.Context, placeID int) (*models.Place, error) {
 	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
 		From(placeTableName).
 		PlaceholderFormat(sq.Dollar).
@@ -145,7 +141,7 @@ func (r placeRepository) Get(ctx context.Context, placeID int) (*models.Place, e
 	return &res, nil
 }
 
-func (r placeRepository) Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error) {
+func (r PlaceRepository) Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error) {
 	query, args, err := sq.Insert(placeTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("title", "parent_id").
@@ -171,7 +167,7 @@ func (r placeRepository) Add(ctx context.Context, req models.AddPlaceRequest, tx
 	return id, nil
 }
 
-func (r placeRepository) Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error {
+func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error {
 	query, args, err := sq.Update(placeTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
@@ -193,7 +189,7 @@ func (r placeRepository) Update(ctx context.Context, req models.UpdatePlaceReque
 	return err
 }
 
-func (r placeRepository) Delete(ctx context.Context, placeID int, tx *sql.Tx) error {
+func (r PlaceRepository) Delete(ctx context.Context, placeID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(placeTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": placeID}).

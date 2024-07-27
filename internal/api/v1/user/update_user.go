@@ -2,13 +2,15 @@ package user
 
 import (
 	"database/sql"
+	"errors"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/gofiber/fiber/v2"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
 )
 
 // @Router 		/api/v1/users [put]
@@ -21,7 +23,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdateUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func UpdateUserHandler(
+	authService AuthService,
+	userRepository UserRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var err error
 		var username, password string
@@ -37,7 +42,7 @@ func UpdateUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		}
 
 		if req.Password != nil {
-			password, err = sp.GetAuthService().GeneratePasswordHash(strings.TrimSpace(*req.Password))
+			password, err = authService.GeneratePasswordHash(strings.TrimSpace(*req.Password))
 			if err != nil {
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
@@ -47,11 +52,11 @@ func UpdateUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, "")
 		}
 
-		claims := sp.GetAuthService().GetClaims(fctx)
+		claims := authService.GetClaims(fctx)
 
-		user, err := sp.GetUserRepository().Get(ctx, claims["name"].(string))
+		user, err := userRepository.Get(ctx, claims[auth.ClaimsKeyName].(string))
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
@@ -61,7 +66,7 @@ func UpdateUserHandler(sp interfaces.ServiceProvider) fiber.Handler {
 		req.Password = &password
 		req.Username = &username
 
-		err = sp.GetUserRepository().Update(ctx, mappers.ConvertToUpdateUserRequestModel(user.ID, req))
+		err = userRepository.Update(ctx, mappers.ToUpdateUserRequest(user.ID, req))
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}

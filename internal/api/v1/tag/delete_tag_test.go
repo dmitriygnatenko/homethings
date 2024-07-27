@@ -8,19 +8,20 @@ import (
 	"strconv"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
 )
 
-func Test_DeleteTagHandler(t *testing.T) {
+func TestDeleteTagHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method      string
 		route       string
@@ -28,7 +29,6 @@ func Test_DeleteTagHandler(t *testing.T) {
 	}
 
 	var (
-		mc        = minimock.NewController(t)
 		tagID     = gofakeit.Number(1, 1000)
 		testError = errors.New(gofakeit.Phrase())
 
@@ -44,8 +44,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 		req              req
 		resCode          int
 		resBody          interface{}
-		tagRepoMock      func(mc *minimock.Controller) interfaces.TagRepository
-		thingTagRepoMock func(mc *minimock.Controller) interfaces.ThingTagRepository
+		tagRepoMock      func(mc *minimock.Controller) TagRepository
+		thingTagRepoMock func(mc *minimock.Controller) ThingTagRepository
 	}{
 		{
 			name: "negative case - bad request",
@@ -55,19 +55,19 @@ func Test_DeleteTagHandler(t *testing.T) {
 				contentType: fiber.MIMEApplicationJSON,
 			},
 			resCode: fiber.StatusBadRequest,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				return repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				return mocks.NewTagRepositoryMock(mc)
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - tag is not exist",
 			req:     correctReq,
 			resCode: fiber.StatusBadRequest,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -75,16 +75,16 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - tag repository error (get)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -92,16 +92,16 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - tag repository error (begin tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -111,16 +111,16 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				return repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				return mocks.NewThingTagRepositoryMock(mc)
 			},
 		},
 		{
 			name:    "negative case - thing tag repository error (delete)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -130,8 +130,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, tagID, id)
@@ -144,8 +144,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 			name:    "negative case - tag repository error (delete)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -159,8 +159,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, tagID, id)
@@ -173,8 +173,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 			name:    "negative case - tag repository error (commit tx)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -190,8 +190,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, tagID, id)
@@ -205,8 +205,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
-			tagRepoMock: func(mc *minimock.Controller) interfaces.TagRepository {
-				mock := repoMocks.NewTagRepositoryMock(mc)
+			tagRepoMock: func(mc *minimock.Controller) TagRepository {
+				mock := mocks.NewTagRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, id int) {
 					assert.Equal(mc, tagID, id)
@@ -222,8 +222,8 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 				return mock
 			},
-			thingTagRepoMock: func(mc *minimock.Controller) interfaces.ThingTagRepository {
-				mock := repoMocks.NewThingTagRepositoryMock(mc)
+			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
+				mock := mocks.NewThingTagRepositoryMock(mc)
 
 				mock.DeleteByTagIDMock.Inspect(func(ctx context.Context, id int, tx *sql.Tx) {
 					assert.Equal(mc, tagID, id)
@@ -236,10 +236,11 @@ func Test_DeleteTagHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.tagRepoMock(mc), tt.thingTagRepoMock(mc))
+			t.Parallel()
 
-			fiberApp.Delete("/v1/tags/:tagId", DeleteTagHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+			fiberApp.Delete("/v1/tags/:tagId", DeleteTagHandler(tt.tagRepoMock(mc), tt.thingTagRepoMock(mc)))
 
 			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, nil)
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)

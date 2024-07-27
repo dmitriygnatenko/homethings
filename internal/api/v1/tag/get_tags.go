@@ -1,10 +1,10 @@
 package tag
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/tags [get]
@@ -16,15 +16,15 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetTagsHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetTagsHandler(tagRepository TagRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
-		res, err := sp.GetTagRepository().GetAll(fctx.Context())
+		res, err := tagRepository.GetAll(fctx.Context())
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToTagsResponseDTO(res))
+		return fctx.JSON(mappers.ToTagsResponse(res))
 	}
 }

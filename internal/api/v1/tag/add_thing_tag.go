@@ -2,11 +2,12 @@ package tag
 
 import (
 	"database/sql"
+	"errors"
+
+	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/tags/{tagId}/thing/{thingId} [post]
@@ -20,7 +21,11 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func AddThingTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func AddThingTagHandler(
+	tagRepository TagRepository,
+	thingRepository ThingRepository,
+	thingTagRepository ThingTagRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		tagID, err := fctx.ParamsInt("tagId")
@@ -33,27 +38,27 @@ func AddThingTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		tag, err := sp.GetTagRepository().Get(ctx, tagID)
+		tag, err := tagRepository.Get(ctx, tagID)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return fiber.NewError(fiber.StatusBadRequest, "")
+			}
+			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		if _, err = thingRepository.Get(ctx, thingID); err != nil {
 			if err == sql.ErrNoRows {
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if _, err = sp.GetThingRepository().Get(ctx, thingID); err != nil {
-			if err == sql.ErrNoRows {
-				return fiber.NewError(fiber.StatusBadRequest, "")
-			}
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
-
-		if err = sp.GetThingTagRepository().Add(ctx, mappers.ConvertToAddThingTagRequestModel(tagID, thingID), nil); err != nil {
+		if err = thingTagRepository.Add(ctx, mappers.ToAddThingTagRequest(tagID, thingID), nil); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		tag = helpers.ApplyLocation(fctx, tag)
 
-		return fctx.JSON(mappers.ConvertToTagResponseDTO(*tag))
+		return fctx.JSON(mappers.ToTagResponse(*tag))
 	}
 }

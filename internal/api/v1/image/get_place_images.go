@@ -3,11 +3,11 @@ package image
 import (
 	"sort"
 
+	"github.com/gofiber/fiber/v2"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/images/place/{placeId} [get]
@@ -20,7 +20,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetPlaceImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetPlaceImagesHandler(
+	thingImageRepository ThingImageRepository,
+	placeImageRepository PlaceImageRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var res []models.Image
 		ctx := fctx.Context()
@@ -29,13 +32,13 @@ func GetPlaceImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		placesRes, err := sp.GetPlaceImageRepository().GetByPlaceID(ctx, id)
+		placesRes, err := placeImageRepository.GetByPlaceID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 		res = append(res, placesRes...)
 
-		thingsRes, err := sp.GetThingImageRepository().GetByPlaceID(ctx, id)
+		thingsRes, err := thingImageRepository.GetByPlaceID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
@@ -47,6 +50,6 @@ func GetPlaceImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToImagesResponseDTO(res))
+		return fctx.JSON(mappers.ToImagesResponse(res))
 	}
 }

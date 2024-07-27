@@ -2,10 +2,11 @@ package notification
 
 import (
 	"database/sql"
+	"errors"
+
+	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/things/notifications/{thingId} [delete]
@@ -18,7 +19,9 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func DeleteThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func DeleteThingNotificationHandler(
+	thingNotificationRepository ThingNotificationRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("thingId")
@@ -26,16 +29,16 @@ func DeleteThingNotificationHandler(sp interfaces.ServiceProvider) fiber.Handler
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		_, err = sp.GetThingNotificationRepository().Get(ctx, id)
+		_, err = thingNotificationRepository.Get(ctx, id)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetThingNotificationRepository().Delete(ctx, id, nil); err != nil {
+		if err = thingNotificationRepository.Delete(ctx, id, nil); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

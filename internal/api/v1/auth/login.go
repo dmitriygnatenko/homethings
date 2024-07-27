@@ -2,13 +2,14 @@ package auth
 
 import (
 	"database/sql"
+	"errors"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/auth/login [post]
@@ -21,7 +22,10 @@ import (
 // @Tags  		Auth
 // @Accept      json
 // @Produce     json
-func LoginHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func LoginHandler(
+	authService AuthService,
+	userRepository UserRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		req := dto.LoginRequest{}
@@ -34,24 +38,24 @@ func LoginHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		user, err := sp.GetUserRepository().Get(ctx, req.Username)
+		user, err := userRepository.Get(ctx, req.Username)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusForbidden, "")
 			}
 
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if !sp.GetAuthService().IsCorrectPassword(req.Password, user.Password) {
+		if !authService.IsCorrectPassword(req.Password, user.Password) {
 			return fiber.NewError(fiber.StatusForbidden, "")
 		}
 
-		token, err := sp.GetAuthService().GenerateToken(*user)
+		token, err := authService.GenerateToken(*user)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		return fctx.JSON(mappers.ConvertToLoginResponseDTO(token))
+		return fctx.JSON(mappers.ToLoginResponse(token))
 	}
 }

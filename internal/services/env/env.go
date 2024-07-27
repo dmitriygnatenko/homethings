@@ -3,44 +3,36 @@ package env
 import (
 	"flag"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/spf13/viper"
 )
 
 const defaultConfigPath = "../../.env"
 
-type env struct {
-	AppPort string `mapstructure:"APP_PORT"`
-
-	DBHost     string `mapstructure:"DB_HOST"`
-	DBPort     string `mapstructure:"DB_PORT"`
-	DBName     string `mapstructure:"DB_NAME"`
-	DBUser     string `mapstructure:"DB_USER"`
-	DBPassword string `mapstructure:"DB_PASSWORD"`
-
-	DBMaxOpenConns        int `mapstructure:"DB_MAX_OPEN_CONNS"`
-	DBMaxIdleConns        int `mapstructure:"DB_MAX_IDLE_CONNS"`
-	DBMaxConnLifetime     int `mapstructure:"DB_MAX_CONN_LIFETIME"`
-	DBMaxIdleConnLifetime int `mapstructure:"DB_MAX_IDLE_CONN_LIFETIME"`
-
-	CORSAllowOrigins string `mapstructure:"CORS_ALLOW_ORIGING"`
-	CORSAllowMethods string `mapstructure:"CORS_ALLOW_METHODS"`
-
-	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
-	JWTLifeTime  int    `mapstructure:"JWT_LIFETIME"`
-
-	BasicAuthUser     string `mapstructure:"BASIC_AUTH_USER"`
-	BasicAuthPassword string `mapstructure:"BASIC_AUTH_PASSWORD"`
-
-	SMTPHost     string `mapstructure:"SMTP_HOST"`
-	SMTPPort     string `mapstructure:"SMTP_PORT"`
-	SMTPUser     string `mapstructure:"SMTP_USER"`
-	SMTPPassword string `mapstructure:"SMTP_PASSWORD"`
-
-	ErrorsEmail string `mapstructure:"ERRORS_EMAIL"`
+type Service struct {
+	appPort               string
+	dbHost                string
+	dbPort                string
+	dbName                string
+	dbUser                string
+	dbPassword            string
+	dbMaxOpenConns        int
+	dbMaxIdleConns        int
+	dbMaxConnLifetime     int
+	dbMaxIdleConnLifetime int
+	corsAllowOrigins      string
+	corsAllowMethods      string
+	jwtSecretKey          string
+	jwtLifeTime           int
+	basicAuthUser         string
+	basicAuthPassword     string
+	smtpHost              string
+	smtpPort              string
+	smtpUser              string
+	smtpPassword          string
+	errorsEmail           string
 }
 
-func Init() (interfaces.Env, error) {
+func Init() (*Service, error) {
 	var configPath string
 	flag.StringVar(&configPath, "config", "", "Path to .env config file")
 	flag.Parse()
@@ -57,92 +49,139 @@ func Init() (interfaces.Env, error) {
 		return nil, err
 	}
 
-	res := &env{}
-	err := viper.Unmarshal(&res)
+	s := struct {
+		AppPort               string `mapstructure:"APP_PORT"`
+		DBHost                string `mapstructure:"DB_HOST"`
+		DBPort                string `mapstructure:"DB_PORT"`
+		DBName                string `mapstructure:"DB_NAME"`
+		DBUser                string `mapstructure:"DB_USER"`
+		DBPassword            string `mapstructure:"DB_PASSWORD"`
+		DBMaxOpenConns        int    `mapstructure:"DB_MAX_OPEN_CONNS"`
+		DBMaxIdleConns        int    `mapstructure:"DB_MAX_IDLE_CONNS"`
+		DBMaxConnLifetime     int    `mapstructure:"DB_MAX_CONN_LIFETIME"`
+		DBMaxIdleConnLifetime int    `mapstructure:"DB_MAX_IDLE_CONN_LIFETIME"`
+		CORSAllowOrigins      string `mapstructure:"CORS_ALLOW_ORIGING"`
+		CORSAllowMethods      string `mapstructure:"CORS_ALLOW_METHODS"`
+		JWTSecretKey          string `mapstructure:"JWT_SECRET_KEY"`
+		JWTLifeTime           int    `mapstructure:"JWT_LIFETIME"`
+		BasicAuthUser         string `mapstructure:"BASIC_AUTH_USER"`
+		BasicAuthPassword     string `mapstructure:"BASIC_AUTH_PASSWORD"`
+		SMTPHost              string `mapstructure:"SMTP_HOST"`
+		SMTPPort              string `mapstructure:"SMTP_PORT"`
+		SMTPUser              string `mapstructure:"SMTP_USER"`
+		SMTPPassword          string `mapstructure:"SMTP_PASSWORD"`
+		ErrorsEmail           string `mapstructure:"ERRORS_EMAIL"`
+	}{}
 
-	return res, err
+	if err := viper.Unmarshal(&s); err != nil {
+		return nil, err
+	}
+
+	return &Service{
+		appPort:               s.AppPort,
+		dbHost:                s.DBHost,
+		dbPort:                s.DBPort,
+		dbName:                s.DBName,
+		dbUser:                s.DBUser,
+		dbPassword:            s.DBPassword,
+		dbMaxOpenConns:        s.DBMaxOpenConns,
+		dbMaxIdleConns:        s.DBMaxIdleConns,
+		dbMaxConnLifetime:     s.DBMaxConnLifetime,
+		dbMaxIdleConnLifetime: s.DBMaxIdleConnLifetime,
+		corsAllowOrigins:      s.CORSAllowOrigins,
+		corsAllowMethods:      s.CORSAllowMethods,
+		jwtSecretKey:          s.JWTSecretKey,
+		jwtLifeTime:           s.JWTLifeTime,
+		basicAuthUser:         s.BasicAuthUser,
+		basicAuthPassword:     s.BasicAuthPassword,
+		smtpHost:              s.SMTPHost,
+		smtpPort:              s.SMTPPort,
+		smtpUser:              s.SMTPUser,
+		smtpPassword:          s.SMTPPassword,
+		errorsEmail:           s.ErrorsEmail,
+	}, nil
 }
 
-func (e *env) GetAppPort() string {
-	return e.AppPort
+func (e *Service) GetAppPort() string {
+	return e.appPort
 }
 
-func (e *env) GetDBHost() string {
-	return e.DBHost
+func (e *Service) GetDBHost() string {
+	return e.dbHost
 }
 
-func (e *env) GetDBPort() string {
-	return e.DBPort
+func (e *Service) GetDBPort() string {
+	return e.dbPort
 }
 
-func (e *env) GetDBName() string {
-	return e.DBName
+func (e *Service) GetDBName() string {
+	return e.dbName
 }
 
-func (e *env) GetDBUser() string {
-	return e.DBUser
+func (e *Service) GetDBUser() string {
+	return e.dbUser
 }
 
-func (e *env) GetDBPassword() string {
-	return e.DBPassword
+func (e *Service) GetDBPassword() string {
+	return e.dbPassword
 }
 
-func (e *env) GetCORSAllowOrigins() string {
-	return e.CORSAllowOrigins
+func (e *Service) GetCORSAllowOrigins() string {
+	return e.corsAllowOrigins
 }
 
-func (e *env) GetCORSAllowMethods() string {
-	return e.CORSAllowMethods
+func (e *Service) GetCORSAllowMethods() string {
+	return e.corsAllowMethods
 }
 
-func (e *env) GetDBMaxOpenConns() int {
-	return e.DBMaxOpenConns
+func (e *Service) GetDBMaxOpenConns() int {
+	return e.dbMaxOpenConns
 }
 
-func (e *env) GetDBMaxIdleConns() int {
-	return e.DBMaxIdleConns
+func (e *Service) GetDBMaxIdleConns() int {
+	return e.dbMaxIdleConns
 }
 
-func (e *env) GetDBMaxConnLifetime() int {
-	return e.DBMaxConnLifetime
+func (e *Service) GetDBMaxConnLifetime() int {
+	return e.dbMaxConnLifetime
 }
 
-func (e *env) GetDBMaxIdleConnLifetime() int {
-	return e.DBMaxIdleConnLifetime
+func (e *Service) GetDBMaxIdleConnLifetime() int {
+	return e.dbMaxIdleConnLifetime
 }
 
-func (e *env) GetSMTPHost() string {
-	return e.SMTPHost
+func (e *Service) GetSMTPHost() string {
+	return e.smtpHost
 }
 
-func (e *env) GetSMTPPort() string {
-	return e.SMTPPort
+func (e *Service) GetSMTPPort() string {
+	return e.smtpPort
 }
 
-func (e *env) GetSMTPUser() string {
-	return e.SMTPUser
+func (e *Service) GetSMTPUser() string {
+	return e.smtpUser
 }
 
-func (e *env) GetSMTPPassword() string {
-	return e.SMTPPassword
+func (e *Service) GetSMTPPassword() string {
+	return e.smtpPassword
 }
 
-func (e *env) GetJWTSecretKey() string {
-	return e.JWTSecretKey
+func (e *Service) GetJWTSecretKey() string {
+	return e.jwtSecretKey
 }
 
-func (e *env) GetJWTLifetime() int {
-	return e.JWTLifeTime
+func (e *Service) GetJWTLifetime() int {
+	return e.jwtLifeTime
 }
 
-func (e *env) GetErrorsEmail() string {
-	return e.ErrorsEmail
+func (e *Service) GetErrorsEmail() string {
+	return e.errorsEmail
 }
 
-func (e *env) GetBasicAuthUser() string {
-	return e.BasicAuthUser
+func (e *Service) GetBasicAuthUser() string {
+	return e.basicAuthUser
 }
 
-func (e *env) GetBasicAuthPassword() string {
-	return e.BasicAuthPassword
+func (e *Service) GetBasicAuthPassword() string {
+	return e.basicAuthPassword
 }

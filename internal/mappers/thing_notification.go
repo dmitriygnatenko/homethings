@@ -7,7 +7,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ConvertToAddThingNotificationRequestModel(req dto.AddThingNotificationRequest) (*models.AddThingNotificationRequest, error) {
+func ToAddThingNotificationRequest(req dto.AddThingNotificationRequest) (*models.AddThingNotificationRequest, error) {
 	date, err := time.Parse(time.RFC3339, req.NotificationDate)
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func ConvertToAddThingNotificationRequestModel(req dto.AddThingNotificationReque
 	}, nil
 }
 
-func ConvertToUpdateThingNotificationRequestModel(thingID int, req dto.UpdateThingNotificationRequest) (*models.UpdateThingNotificationRequest, error) {
+func ToUpdateThingNotificationRequest(thingID int, req dto.UpdateThingNotificationRequest) (*models.UpdateThingNotificationRequest, error) {
 	date, err := time.Parse(time.RFC3339, req.NotificationDate)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func ConvertToUpdateThingNotificationRequestModel(thingID int, req dto.UpdateThi
 	}, nil
 }
 
-func ConvertToThingNotificationResponseDTO(req models.ThingNotification) dto.ThingNotificationResponse {
+func ToThingNotificationResponse(req models.ThingNotification) dto.ThingNotificationResponse {
 	return dto.ThingNotificationResponse{
 		ThingID:          req.ThingID,
 		NotificationDate: req.NotificationDate.Format(defaultDateTimeLayout),
@@ -40,7 +40,7 @@ func ConvertToThingNotificationResponseDTO(req models.ThingNotification) dto.Thi
 	}
 }
 
-func ConvertToThingNotificationExtResponseDTO(req models.ExtThingNotification) dto.ThingNotificationExtResponse {
+func ToThingNotificationExtResponse(req models.ExtThingNotification) dto.ThingNotificationExtResponse {
 	return dto.ThingNotificationExtResponse{
 		ThingID:          req.ThingID,
 		PlaceID:          req.PlaceID,
@@ -52,11 +52,11 @@ func ConvertToThingNotificationExtResponseDTO(req models.ExtThingNotification) d
 	}
 }
 
-func ConvertToThingNotificationsExtResponseDTO(req []models.ExtThingNotification) dto.ThingNotificationsExtResponse {
+func ToThingNotificationsExtResponse(req []models.ExtThingNotification) dto.ThingNotificationsExtResponse {
 	res := make([]dto.ThingNotificationExtResponse, 0, len(req))
 
 	for _, notification := range req {
-		res = append(res, ConvertToThingNotificationExtResponseDTO(notification))
+		res = append(res, ToThingNotificationExtResponse(notification))
 	}
 
 	return dto.ThingNotificationsExtResponse{Notifications: res}

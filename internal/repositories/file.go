@@ -1,14 +1,9 @@
 package repositories
 
-//go:generate mkdir -p mocks
-//go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.FileRepository -o ./mocks/ -s "_minimock.go"
-
 import (
 	"mime/multipart"
 	"os"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"github.com/disintegration/imaging"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,13 +14,13 @@ const (
 	resizeHeight = 800
 )
 
-type fileRepository struct{}
+type FileRepository struct{}
 
-func InitFileRepository() interfaces.FileRepository {
-	return fileRepository{}
+func InitFileRepository() *FileRepository {
+	return &FileRepository{}
 }
 
-func (r fileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error {
+func (r FileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path string) error {
 	fullPath := getFullPath(path)
 
 	if err := fctx.SaveFile(header, fullPath); err != nil {
@@ -56,7 +51,7 @@ func (r fileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path
 	return nil
 }
 
-func (r fileRepository) Delete(path string) error {
+func (r FileRepository) Delete(path string) error {
 	return os.RemoveAll(getFullPath(path))
 }
 

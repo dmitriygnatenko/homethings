@@ -7,14 +7,14 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ConvertToAddThingRequestModel(req dto.AddThingRequest) models.AddThingRequest {
+func ToAddThingRequest(req dto.AddThingRequest) models.AddThingRequest {
 	return models.AddThingRequest{
 		Title:       req.Title,
 		Description: req.Description,
 	}
 }
 
-func ConvertToUpdateThingRequestModel(id int, req dto.UpdateThingRequest) models.UpdateThingRequest {
+func ToUpdateThingRequest(id int, req dto.UpdateThingRequest) models.UpdateThingRequest {
 	return models.UpdateThingRequest{
 		ID:          id,
 		Title:       req.Title,
@@ -22,21 +22,21 @@ func ConvertToUpdateThingRequestModel(id int, req dto.UpdateThingRequest) models
 	}
 }
 
-func ConvertToAddPlaceThingRequestModel(thingID int, placeID int) models.AddPlaceThingRequest {
+func ToAddPlaceThingRequest(thingID int, placeID int) models.AddPlaceThingRequest {
 	return models.AddPlaceThingRequest{
 		PlaceID: placeID,
 		ThingID: thingID,
 	}
 }
 
-func ConvertToUpdatePlaceThingRequestModel(thingID int, placeID int) models.UpdatePlaceThingRequest {
+func ToUpdatePlaceThingRequest(thingID int, placeID int) models.UpdatePlaceThingRequest {
 	return models.UpdatePlaceThingRequest{
 		ThingID: thingID,
 		PlaceID: placeID,
 	}
 }
 
-func ConvertToThingResponseDTO(req models.Thing) dto.ThingResponse {
+func ToThingResponse(req models.Thing) dto.ThingResponse {
 	return dto.ThingResponse{
 		ID:          req.ID,
 		PlaceID:     req.PlaceID,
@@ -47,17 +47,17 @@ func ConvertToThingResponseDTO(req models.Thing) dto.ThingResponse {
 	}
 }
 
-func ConvertToThingsResponseDTO(things []models.Thing) dto.ThingsResponse {
+func ToThingsResponse(things []models.Thing) dto.ThingsResponse {
 	res := make([]dto.ThingResponse, 0, len(things))
 
 	for _, thing := range things {
-		res = append(res, ConvertToThingResponseDTO(thing))
+		res = append(res, ToThingResponse(thing))
 	}
 
 	return dto.ThingsResponse{Things: res}
 }
 
-func ConvertToThingsExtResponseDTO(things []models.Thing, tags []models.ThingTag) dto.ThingsExtResponse {
+func ToThingsExtResponse(things []models.Thing, tags []models.ThingTag) dto.ThingsExtResponse {
 	res := make([]dto.ThingExtResponse, 0, len(things))
 
 	groupedTags := make(map[int][]dto.TagResponse)
@@ -66,7 +66,7 @@ func ConvertToThingsExtResponseDTO(things []models.Thing, tags []models.ThingTag
 			groupedTags[tag.ThingID] = make([]dto.TagResponse, 0)
 		}
 
-		groupedTags[tag.ThingID] = append(groupedTags[tag.ThingID], ConvertThingTagToTagResponseDTO(tag))
+		groupedTags[tag.ThingID] = append(groupedTags[tag.ThingID], ThingTagToTagResponse(tag))
 	}
 
 	for _, thing := range things {
@@ -79,7 +79,7 @@ func ConvertToThingsExtResponseDTO(things []models.Thing, tags []models.ThingTag
 		}
 
 		res = append(res, dto.ThingExtResponse{
-			ThingResponse: ConvertToThingResponseDTO(thing),
+			ThingResponse: ToThingResponse(thing),
 			Tags:          thingTags,
 		})
 	}

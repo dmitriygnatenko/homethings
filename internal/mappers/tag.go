@@ -7,14 +7,14 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ConvertToAddTagRequestModel(req dto.AddTagRequest) models.AddTagRequest {
+func ToAddTagRequest(req dto.AddTagRequest) models.AddTagRequest {
 	return models.AddTagRequest{
 		Title: req.Title,
 		Style: req.Style,
 	}
 }
 
-func ConvertToUpdateTagRequestModel(id int, req dto.UpdateTagRequest) models.UpdateTagRequest {
+func ToUpdateTagRequest(id int, req dto.UpdateTagRequest) models.UpdateTagRequest {
 	return models.UpdateTagRequest{
 		ID:    id,
 		Title: req.Title,
@@ -22,21 +22,21 @@ func ConvertToUpdateTagRequestModel(id int, req dto.UpdateTagRequest) models.Upd
 	}
 }
 
-func ConvertToAddThingTagRequestModel(tagID int, thingID int) models.AddThingTagRequest {
+func ToAddThingTagRequest(tagID int, thingID int) models.AddThingTagRequest {
 	return models.AddThingTagRequest{
 		ThingID: thingID,
 		TagID:   tagID,
 	}
 }
 
-func ConvertToDeleteThingTagRequestModel(tagID int, thingID int) models.DeleteThingTagRequest {
+func ToDeleteThingTagRequest(tagID int, thingID int) models.DeleteThingTagRequest {
 	return models.DeleteThingTagRequest{
 		ThingID: thingID,
 		TagID:   tagID,
 	}
 }
 
-func ConvertToTagResponseDTO(req models.Tag) dto.TagResponse {
+func ToTagResponse(req models.Tag) dto.TagResponse {
 	return dto.TagResponse{
 		ID:        req.ID,
 		Title:     req.Title,
@@ -46,7 +46,7 @@ func ConvertToTagResponseDTO(req models.Tag) dto.TagResponse {
 	}
 }
 
-func ConvertThingTagToTagResponseDTO(req models.ThingTag) dto.TagResponse {
+func ThingTagToTagResponse(req models.ThingTag) dto.TagResponse {
 	return dto.TagResponse{
 		ID:        req.ID,
 		Title:     req.Title,
@@ -56,11 +56,11 @@ func ConvertThingTagToTagResponseDTO(req models.ThingTag) dto.TagResponse {
 	}
 }
 
-func ConvertToTagsResponseDTO(req []models.Tag) dto.TagsResponse {
+func ToTagsResponse(req []models.Tag) dto.TagsResponse {
 	res := make([]dto.TagResponse, 0, len(req))
 
 	for _, p := range req {
-		res = append(res, ConvertToTagResponseDTO(p))
+		res = append(res, ToTagResponse(p))
 	}
 
 	sort.Slice(res, func(i, j int) bool {

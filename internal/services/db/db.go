@@ -3,11 +3,22 @@ package db
 import (
 	"database/sql"
 	"time"
-
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 )
 
-func Init(env interfaces.Env) (*sql.DB, error) {
+type Env interface {
+	GetAppPort() string
+	GetDBHost() string
+	GetDBPort() string
+	GetDBName() string
+	GetDBUser() string
+	GetDBPassword() string
+	GetDBMaxOpenConns() int
+	GetDBMaxIdleConns() int
+	GetDBMaxConnLifetime() int
+	GetDBMaxIdleConnLifetime() int
+}
+
+func Init(env Env) (*sql.DB, error) {
 	dataSource := "user=" + env.GetDBUser() +
 		" password=" + env.GetDBPassword() +
 		" dbname=" + env.GetDBName() +

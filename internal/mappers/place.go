@@ -8,7 +8,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ConvertToPlaceResponseDTO(req models.Place) dto.PlaceResponse {
+func ToPlaceResponse(req models.Place) dto.PlaceResponse {
 	res := dto.PlaceResponse{
 		ID:        req.ID,
 		Title:     req.Title,
@@ -24,7 +24,7 @@ func ConvertToPlaceResponseDTO(req models.Place) dto.PlaceResponse {
 	return res
 }
 
-func ConvertToAddPlaceRequestModel(req dto.AddPlaceRequest) models.AddPlaceRequest {
+func ToAddPlaceRequest(req dto.AddPlaceRequest) models.AddPlaceRequest {
 	res := models.AddPlaceRequest{
 		Title: req.Title,
 	}
@@ -36,7 +36,7 @@ func ConvertToAddPlaceRequestModel(req dto.AddPlaceRequest) models.AddPlaceReque
 	return res
 }
 
-func ConvertToUpdatePlaceRequestModel(id int, req dto.UpdatePlaceRequest) models.UpdatePlaceRequest {
+func ToUpdatePlaceRequest(id int, req dto.UpdatePlaceRequest) models.UpdatePlaceRequest {
 	res := models.UpdatePlaceRequest{
 		ID:    id,
 		Title: req.Title,
@@ -49,11 +49,11 @@ func ConvertToUpdatePlaceRequestModel(id int, req dto.UpdatePlaceRequest) models
 	return res
 }
 
-func ConvertToPlacesResponseDTO(req []models.Place) dto.PlacesResponse {
+func ToPlacesResponse(req []models.Place) dto.PlacesResponse {
 	res := make([]dto.PlaceResponse, 0, len(req))
 
 	for _, p := range req {
-		res = append(res, ConvertToPlaceResponseDTO(p))
+		res = append(res, ToPlaceResponse(p))
 	}
 
 	sort.Slice(res, func(i, j int) bool {
@@ -65,14 +65,14 @@ func ConvertToPlacesResponseDTO(req []models.Place) dto.PlacesResponse {
 	}
 }
 
-func ConvertToPlaceTreeResponseDTO(req []models.Place) dto.PlaceTreeResponse {
+func ToPlaceTreeResponse(req []models.Place) dto.PlaceTreeResponse {
 	var res []dto.PlaceTree
 	parentMap := make(map[int][]models.Place, len(req))
 
 	for _, p := range req {
 		if !p.ParentID.Valid {
 			res = append(res, dto.PlaceTree{
-				Place: ConvertToPlaceResponseDTO(p),
+				Place: ToPlaceResponse(p),
 			})
 			continue
 		}
@@ -100,7 +100,7 @@ func recursiveFillNested(item *dto.PlaceTree, parentMap map[int][]models.Place) 
 	if _, ok := parentMap[id]; ok {
 		for _, childPlace := range parentMap[id] {
 			nestedItem := dto.PlaceTree{
-				Place: ConvertToPlaceResponseDTO(childPlace),
+				Place: ToPlaceResponse(childPlace),
 			}
 
 			recursiveFillNested(&nestedItem, parentMap)

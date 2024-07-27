@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"net/smtp"
 	"strings"
-
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 )
 
-type mailer struct {
+type Env interface {
+	GetSMTPHost() string
+	GetSMTPPort() string
+	GetSMTPUser() string
+	GetSMTPPassword() string
+}
+
+type Service struct {
 	isEnabled bool
 	host      string
 	port      string
@@ -21,17 +26,17 @@ type mailerAuth struct {
 	password string
 }
 
-func Init(env interfaces.Env) (interfaces.Mailer, error) {
+func Init(env Env) (*Service, error) {
 	host := strings.TrimSpace(env.GetSMTPHost())
 	port := strings.TrimSpace(env.GetSMTPPort())
 	user := strings.TrimSpace(env.GetSMTPUser())
 	password := strings.TrimSpace(env.GetSMTPPassword())
 
 	if host == "" || port == "" || user == "" || password == "" {
-		return &mailer{}, nil
+		return &Service{}, nil
 	}
 
-	return &mailer{
+	return &Service{
 		isEnabled: true,
 		host:      host,
 		port:      port,
@@ -40,7 +45,7 @@ func Init(env interfaces.Env) (interfaces.Mailer, error) {
 	}, nil
 }
 
-func (m mailer) Send(recipient string, subject string, text string) error {
+func (m Service) Send(recipient string, subject string, text string) error {
 	if !m.isEnabled {
 		return nil
 	}
@@ -56,7 +61,7 @@ func (m mailer) Send(recipient string, subject string, text string) error {
 	return smtp.SendMail(m.host+":"+m.port, auth, m.user, to, msg)
 }
 
-func (m mailer) GetMailerAuth(username, password string) smtp.Auth {
+func (m Service) GetMailerAuth(username, password string) smtp.Auth {
 	return &mailerAuth{username, password}
 }
 
@@ -72,10 +77,10 @@ func (a *mailerAuth) Next(fromServer []byte, more bool) ([]byte, error) {
 
 	if more {
 		if command == "username" {
-			return []byte(fmt.Sprintf("%s", a.username)), nil
+			return []byte(a.username), nil
 		}
 		if command == "password" {
-			return []byte(fmt.Sprintf("%s", a.password)), nil
+			return []byte(a.password), nil
 		}
 
 		return nil, fmt.Errorf("unexpected server challenge: %s", command)

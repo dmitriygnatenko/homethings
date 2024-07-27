@@ -3,9 +3,10 @@ package helpers
 import (
 	"time"
 
+	"github.com/gofiber/fiber/v2"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/middleware/timezone"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	"github.com/gofiber/fiber/v2"
 )
 
 func ApplyLocation[T interface{}](fctx *fiber.Ctx, req T) T {

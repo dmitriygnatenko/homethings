@@ -1,10 +1,10 @@
 package image
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/images/thing/{thingId} [get]
@@ -17,7 +17,9 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetThingImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetThingImagesHandler(
+	thingImageRepository ThingImageRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("thingId")
@@ -25,13 +27,13 @@ func GetThingImagesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		res, err := sp.GetThingImageRepository().GetByThingID(ctx, id)
+		res, err := thingImageRepository.GetByThingID(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToImagesResponseDTO(res))
+		return fctx.JSON(mappers.ToImagesResponse(res))
 	}
 }

@@ -126,6 +126,7 @@
                         "items": {
                             "type": "file"
                         },
+                        "collectionFormat": "csv",
                         "description": "Files",
                         "name": "files",
                         "in": "formData",

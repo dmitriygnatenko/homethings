@@ -2,11 +2,12 @@ package tag
 
 import (
 	"database/sql"
+	"errors"
+
+	"github.com/gofiber/fiber/v2"
 
 	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/tags/{tagId} [delete]
@@ -19,7 +20,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func DeleteTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func DeleteTagHandler(
+	tagRepository TagRepository,
+	thingTagRepository ThingTagRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("tagId")
@@ -27,27 +31,27 @@ func DeleteTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		if _, err = sp.GetTagRepository().Get(ctx, id); err != nil {
-			if err == sql.ErrNoRows {
+		if _, err = tagRepository.Get(ctx, id); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		tx, err := sp.GetTagRepository().BeginTx(ctx, API.DefaultTxLevel)
+		tx, err := tagRepository.BeginTx(ctx, API.DefaultTxLevel)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetThingTagRepository().DeleteByTagID(ctx, id, tx); err != nil {
+		if err = thingTagRepository.DeleteByTagID(ctx, id, tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetTagRepository().Delete(ctx, id, tx); err != nil {
+		if err = tagRepository.Delete(ctx, id, tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetTagRepository().CommitTx(tx); err != nil {
+		if err = tagRepository.CommitTx(tx); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

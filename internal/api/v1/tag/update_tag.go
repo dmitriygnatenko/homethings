@@ -1,13 +1,13 @@
 package tag
 
 import (
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/tags/{tagId} [put]
@@ -21,7 +21,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func UpdateTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func UpdateTagHandler(tagRepository TagRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("tagId")
@@ -39,18 +39,18 @@ func UpdateTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		err = sp.GetTagRepository().Update(ctx, mappers.ConvertToUpdateTagRequestModel(id, req), nil)
+		err = tagRepository.Update(ctx, mappers.ToUpdateTagRequest(id, req), nil)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res, err := sp.GetTagRepository().Get(ctx, id)
+		res, err := tagRepository.Get(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToTagResponseDTO(*res))
+		return fctx.JSON(mappers.ToTagResponse(*res))
 	}
 }

@@ -54,13 +54,16 @@ docker-up:
 docker-down:
 	docker compose down
 
-install-deps: install-lint install-goose install-swagger
+install-deps: install-lint install-goose install-minimock install-swagger
 
 install-lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 install-goose:
 	go install github.com/pressly/goose/v3/cmd/goose@latest
+
+install-minimock:
+	go install github.com/gojuno/minimock/v3/cmd/minimock@latest
 
 install-swagger:
 	go install github.com/swaggo/swag/cmd/swag@latest

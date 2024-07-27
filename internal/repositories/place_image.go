@@ -1,36 +1,32 @@
 package repositories
 
-//go:generate mkdir -p mocks
-//go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i git.dmitriygnatenko.ru/dima/homethings/internal/interfaces.PlaceImageRepository -o ./mocks/ -s "_minimock.go"
-
 import (
 	"context"
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	sq "github.com/Masterminds/squirrel"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
 const (
 	placeImageTableName = "place_image"
 )
 
-type placeImageRepository struct {
+type PlaceImageRepository struct {
 	db *sql.DB
 }
 
-func InitPlaceImageRepository(db *sql.DB) interfaces.PlaceImageRepository {
-	return placeImageRepository{db: db}
+func InitPlaceImageRepository(db *sql.DB) *PlaceImageRepository {
+	return &PlaceImageRepository{db: db}
 }
 
-func (r placeImageRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
+func (r PlaceImageRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
 	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
 }
 
-func (r placeImageRepository) CommitTx(tx *sql.Tx) error {
+func (r PlaceImageRepository) CommitTx(tx *sql.Tx) error {
 	if tx == nil {
 		return errors.New("empty transaction")
 	}
@@ -38,7 +34,7 @@ func (r placeImageRepository) CommitTx(tx *sql.Tx) error {
 	return tx.Commit()
 }
 
-func (r placeImageRepository) Add(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) error {
+func (r PlaceImageRepository) Add(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) error {
 	query, args, err := sq.Insert(placeImageTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("place_id", "image").
@@ -58,7 +54,7 @@ func (r placeImageRepository) Add(ctx context.Context, req models.AddPlaceImageR
 	return err
 }
 
-func (r placeImageRepository) Get(ctx context.Context, imageID int) (*models.Image, error) {
+func (r PlaceImageRepository) Get(ctx context.Context, imageID int) (*models.Image, error) {
 	query, args, err := sq.Select("id", "image", "place_id", "created_at").
 		From(placeImageTableName).
 		PlaceholderFormat(sq.Dollar).
@@ -81,7 +77,7 @@ func (r placeImageRepository) Get(ctx context.Context, imageID int) (*models.Ima
 	return &res, nil
 }
 
-func (r placeImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error) {
+func (r PlaceImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error) {
 	var res []models.Image
 
 	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
@@ -127,7 +123,7 @@ func (r placeImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]
 	return res, nil
 }
 
-func (r placeImageRepository) Delete(ctx context.Context, imageID int, tx *sql.Tx) error {
+func (r PlaceImageRepository) Delete(ctx context.Context, imageID int, tx *sql.Tx) error {
 	query, args, err := sq.Delete(placeImageTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"id": imageID}).

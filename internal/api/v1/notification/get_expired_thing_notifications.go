@@ -1,10 +1,10 @@
 package notification
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/things/notifications/expired [get]
@@ -16,15 +16,17 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetExpiredThingNotificationsHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetExpiredThingNotificationsHandler(
+	thingNotificationRepository ThingNotificationRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
-		res, err := sp.GetThingNotificationRepository().GetExpired(fctx.Context())
+		res, err := thingNotificationRepository.GetExpired(fctx.Context())
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToThingNotificationsExtResponseDTO(res))
+		return fctx.JSON(mappers.ToThingNotificationsExtResponse(res))
 	}
 }

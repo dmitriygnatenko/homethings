@@ -1,13 +1,44 @@
 package tag
 
+//go:generate mkdir -p mocks
+//go:generate rm -rf ./mocks/*_minimock.go
+//go:generate minimock -i TagRepository,ThingRepository,ThingTagRepository -o ./mocks/ -s "_minimock.go"
+
 import (
+	"context"
+	"database/sql"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+)
+
+type (
+	TagRepository interface {
+		GetAll(ctx context.Context) ([]models.Tag, error)
+		Get(ctx context.Context, tagID int) (*models.Tag, error)
+		GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error)
+		Add(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) (int, error)
+		Update(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) error
+		Delete(ctx context.Context, tagID int, tx *sql.Tx) error
+		BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
+		CommitTx(tx *sql.Tx) error
+	}
+
+	ThingRepository interface {
+		Get(ctx context.Context, thingID int) (*models.Thing, error)
+	}
+
+	ThingTagRepository interface {
+		Add(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) error
+		Delete(ctx context.Context, req models.DeleteThingTagRequest, tx *sql.Tx) error
+		DeleteByTagID(ctx context.Context, tagID int, tx *sql.Tx) error
+	}
 )
 
 // @Router 		/api/v1/tags [post]
@@ -20,7 +51,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func AddTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func AddTagHandler(tagRepository TagRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		req := dto.AddTagRequest{}
@@ -33,18 +64,18 @@ func AddTagHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		id, err := sp.GetTagRepository().Add(ctx, mappers.ConvertToAddTagRequestModel(req), nil)
+		id, err := tagRepository.Add(ctx, mappers.ToAddTagRequest(req), nil)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res, err := sp.GetTagRepository().Get(ctx, id)
+		res, err := tagRepository.Get(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToTagResponseDTO(*res))
+		return fctx.JSON(mappers.ToTagResponse(*res))
 	}
 }

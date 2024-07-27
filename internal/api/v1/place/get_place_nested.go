@@ -1,10 +1,10 @@
 package place
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"github.com/gofiber/fiber/v2"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/places/{parentPlaceId}/nested [get]
@@ -17,7 +17,7 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func GetNestedPlacesHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func GetNestedPlacesHandler(placeRepository PlaceRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("parentPlaceId")
@@ -25,13 +25,13 @@ func GetNestedPlacesHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		res, err := sp.GetPlaceRepository().GetNestedPlaces(ctx, id)
+		res, err := placeRepository.GetNestedPlaces(ctx, id)
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res = helpers.ApplyLocation(fctx, res)
 
-		return fctx.JSON(mappers.ConvertToPlacesResponseDTO(res))
+		return fctx.JSON(mappers.ToPlacesResponse(res))
 	}
 }

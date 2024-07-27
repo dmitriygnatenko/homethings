@@ -7,22 +7,22 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	repoMocks "git.dmitriygnatenko.ru/dima/homethings/internal/repositories/mocks"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
-	authMocks "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth/mocks"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
+
+	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth/mocks"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func Test_CheckAuthHandler(t *testing.T) {
+func TestCheckAuthHandler(t *testing.T) {
+	t.Parallel()
+
 	type req struct {
 		method      string
 		route       string
@@ -30,7 +30,6 @@ func Test_CheckAuthHandler(t *testing.T) {
 	}
 
 	var (
-		mc        = minimock.NewController(t)
 		username  = gofakeit.Username()
 		testError = errors.New(gofakeit.Phrase())
 
@@ -56,16 +55,16 @@ func Test_CheckAuthHandler(t *testing.T) {
 		req             req
 		resCode         int
 		resBody         interface{}
-		userRepoMock    func(mc *minimock.Controller) interfaces.UserRepository
-		authServiceMock func(mc *minimock.Controller) interfaces.Auth
+		userRepoMock    func(mc *minimock.Controller) UserRepository
+		authServiceMock func(mc *minimock.Controller) AuthService
 	}{
 		{
 			name:    "positive case",
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				mock := repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				mock := mocks.NewUserRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
@@ -73,8 +72,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				mock := authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				mock := mocks.NewAuthServiceMock(mc)
 				mock.GetClaimsMock.Return(claims)
 				return mock
 			},
@@ -83,8 +82,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 			name:    "negative case - user not found",
 			req:     correctReq,
 			resCode: fiber.StatusForbidden,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				mock := repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				mock := mocks.NewUserRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
@@ -92,8 +91,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				mock := authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				mock := mocks.NewAuthServiceMock(mc)
 				mock.GetClaimsMock.Return(claims)
 				return mock
 			},
@@ -102,8 +101,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 			name:    "negative case - repository error",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
-			userRepoMock: func(mc *minimock.Controller) interfaces.UserRepository {
-				mock := repoMocks.NewUserRepositoryMock(mc)
+			userRepoMock: func(mc *minimock.Controller) UserRepository {
+				mock := mocks.NewUserRepositoryMock(mc)
 
 				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
@@ -111,8 +110,8 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 				return mock
 			},
-			authServiceMock: func(mc *minimock.Controller) interfaces.Auth {
-				mock := authMocks.NewAuthMock(mc)
+			authServiceMock: func(mc *minimock.Controller) AuthService {
+				mock := mocks.NewAuthServiceMock(mc)
 				mock.GetClaimsMock.Return(claims)
 				return mock
 			},
@@ -121,10 +120,11 @@ func Test_CheckAuthHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fiberApp := fiber.New()
-			serviceProvider := sp.InitMock(tt.userRepoMock(mc), tt.authServiceMock(mc))
+			t.Parallel()
 
-			fiberApp.Get("/v1/auth/check", CheckAuthHandler(serviceProvider))
+			mc := minimock.NewController(t)
+			fiberApp := fiber.New()
+			fiberApp.Get("/v1/auth/check", CheckAuthHandler(tt.authServiceMock(mc), tt.userRepoMock(mc)))
 
 			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)

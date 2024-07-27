@@ -1,8 +1,9 @@
 package factory
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"github.com/go-playground/validator/v10"
+
+	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 )
 
 func CreateValidateErrorResponse(errors error) []dto.ValidateErrorResponse {

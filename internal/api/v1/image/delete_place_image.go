@@ -2,10 +2,11 @@ package image
 
 import (
 	"database/sql"
+	"errors"
+
+	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/interfaces"
-	"github.com/gofiber/fiber/v2"
 )
 
 // @Router 		/api/v1/images/place/{imageId} [delete]
@@ -18,7 +19,10 @@ import (
 // @security 	APIKey
 // @Accept      json
 // @Produce     json
-func DeletePlaceImageHandler(sp interfaces.ServiceProvider) fiber.Handler {
+func DeletePlaceImageHandler(
+	fileRepository FileRepository,
+	placeImageRepository PlaceImageRepository,
+) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := fctx.ParamsInt("imageId")
@@ -26,20 +30,20 @@ func DeletePlaceImageHandler(sp interfaces.ServiceProvider) fiber.Handler {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		image, err := sp.GetPlaceImageRepository().Get(ctx, id)
+		image, err := placeImageRepository.Get(ctx, id)
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetPlaceImageRepository().Delete(ctx, id, nil); err != nil {
+		if err = placeImageRepository.Delete(ctx, id, nil); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = sp.GetFileRepository().Delete(image.Image); err != nil {
+		if err = fileRepository.Delete(image.Image); err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
