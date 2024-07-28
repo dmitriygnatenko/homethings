@@ -73,7 +73,7 @@ func Init(sp ServiceProvider) (*fiber.App, error) {
 	// Configure Basic auth
 	basicAuth := basicauth.New(basicauth.Config{
 		Users: map[string]string{
-			sp.GetEnvService().GetBasicAuthUser(): sp.GetEnvService().GetBasicAuthPassword(),
+			sp.GetEnvService().BasicAuthUser(): sp.GetEnvService().BasicAuthPassword(),
 		},
 	})
 
@@ -107,7 +107,7 @@ func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
 		}
 
 		if err.Error() != "" {
-			errorsEmail := sp.GetEnvService().GetErrorsEmail()
+			errorsEmail := sp.GetEnvService().ErrorsEmail()
 
 			if errCode == fiber.StatusInternalServerError && errorsEmail != "" {
 				log.Println(err)
@@ -129,7 +129,7 @@ func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
 // nolint
 func getJWTConfig(sp ServiceProvider) fiberJwt.Config {
 	return fiberJwt.Config{
-		SigningKey: []byte(sp.GetEnvService().GetJWTSecretKey()),
+		SigningKey: []byte(sp.GetEnvService().JWTSecretKey()),
 		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
 			return fiber.NewError(fiber.StatusForbidden, err.Error())
 		},
@@ -159,8 +159,8 @@ func getMetricsConfig() monitor.Config {
 
 func getCORSConfig(sp ServiceProvider) cors.Config {
 	return cors.Config{
-		AllowOrigins: sp.GetEnvService().GetCORSAllowOrigins(),
-		AllowMethods: sp.GetEnvService().GetCORSAllowMethods(),
+		AllowOrigins: sp.GetEnvService().CORSAllowOrigins(),
+		AllowMethods: sp.GetEnvService().CORSAllowMethods(),
 	}
 }
 

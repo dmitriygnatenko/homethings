@@ -7,10 +7,10 @@ import (
 )
 
 type Env interface {
-	GetSMTPHost() string
-	GetSMTPPort() string
-	GetSMTPUser() string
-	GetSMTPPassword() string
+	SMTPHost() string
+	SMTPPort() string
+	SMTPUser() string
+	SMTPPassword() string
 }
 
 type Service struct {
@@ -27,10 +27,10 @@ type mailerAuth struct {
 }
 
 func Init(env Env) (*Service, error) {
-	host := strings.TrimSpace(env.GetSMTPHost())
-	port := strings.TrimSpace(env.GetSMTPPort())
-	user := strings.TrimSpace(env.GetSMTPUser())
-	password := strings.TrimSpace(env.GetSMTPPassword())
+	host := strings.TrimSpace(env.SMTPHost())
+	port := strings.TrimSpace(env.SMTPPort())
+	user := strings.TrimSpace(env.SMTPUser())
+	password := strings.TrimSpace(env.SMTPPassword())
 
 	if host == "" || port == "" || user == "" || password == "" {
 		return &Service{}, nil

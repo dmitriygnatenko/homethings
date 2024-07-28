@@ -102,86 +102,86 @@ func Init() (*Service, error) {
 	}, nil
 }
 
-func (e *Service) GetAppPort() string {
+func (e *Service) AppPort() string {
 	return e.appPort
 }
 
-func (e *Service) GetDBHost() string {
+func (e *Service) DBHost() string {
 	return e.dbHost
 }
 
-func (e *Service) GetDBPort() string {
+func (e *Service) DBPort() string {
 	return e.dbPort
 }
 
-func (e *Service) GetDBName() string {
+func (e *Service) DBName() string {
 	return e.dbName
 }
 
-func (e *Service) GetDBUser() string {
+func (e *Service) DBUser() string {
 	return e.dbUser
 }
 
-func (e *Service) GetDBPassword() string {
+func (e *Service) DBPassword() string {
 	return e.dbPassword
 }
 
-func (e *Service) GetCORSAllowOrigins() string {
+func (e *Service) CORSAllowOrigins() string {
 	return e.corsAllowOrigins
 }
 
-func (e *Service) GetCORSAllowMethods() string {
+func (e *Service) CORSAllowMethods() string {
 	return e.corsAllowMethods
 }
 
-func (e *Service) GetDBMaxOpenConns() int {
+func (e *Service) DBMaxOpenConns() int {
 	return e.dbMaxOpenConns
 }
 
-func (e *Service) GetDBMaxIdleConns() int {
+func (e *Service) DBMaxIdleConns() int {
 	return e.dbMaxIdleConns
 }
 
-func (e *Service) GetDBMaxConnLifetime() int {
+func (e *Service) DBMaxConnLifetime() int {
 	return e.dbMaxConnLifetime
 }
 
-func (e *Service) GetDBMaxIdleConnLifetime() int {
+func (e *Service) DBMaxIdleConnLifetime() int {
 	return e.dbMaxIdleConnLifetime
 }
 
-func (e *Service) GetSMTPHost() string {
+func (e *Service) SMTPHost() string {
 	return e.smtpHost
 }
 
-func (e *Service) GetSMTPPort() string {
+func (e *Service) SMTPPort() string {
 	return e.smtpPort
 }
 
-func (e *Service) GetSMTPUser() string {
+func (e *Service) SMTPUser() string {
 	return e.smtpUser
 }
 
-func (e *Service) GetSMTPPassword() string {
+func (e *Service) SMTPPassword() string {
 	return e.smtpPassword
 }
 
-func (e *Service) GetJWTSecretKey() string {
+func (e *Service) JWTSecretKey() string {
 	return e.jwtSecretKey
 }
 
-func (e *Service) GetJWTLifetime() int {
+func (e *Service) JWTLifetime() int {
 	return e.jwtLifeTime
 }
 
-func (e *Service) GetErrorsEmail() string {
+func (e *Service) ErrorsEmail() string {
 	return e.errorsEmail
 }
 
-func (e *Service) GetBasicAuthUser() string {
+func (e *Service) BasicAuthUser() string {
 	return e.basicAuthUser
 }
 
-func (e *Service) GetBasicAuthPassword() string {
+func (e *Service) BasicAuthPassword() string {
 	return e.basicAuthPassword
 }

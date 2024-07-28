@@ -6,24 +6,24 @@ import (
 )
 
 type Env interface {
-	GetAppPort() string
-	GetDBHost() string
-	GetDBPort() string
-	GetDBName() string
-	GetDBUser() string
-	GetDBPassword() string
-	GetDBMaxOpenConns() int
-	GetDBMaxIdleConns() int
-	GetDBMaxConnLifetime() int
-	GetDBMaxIdleConnLifetime() int
+	AppPort() string
+	DBHost() string
+	DBPort() string
+	DBName() string
+	DBUser() string
+	DBPassword() string
+	DBMaxOpenConns() int
+	DBMaxIdleConns() int
+	DBMaxConnLifetime() int
+	DBMaxIdleConnLifetime() int
 }
 
 func Init(env Env) (*sql.DB, error) {
-	dataSource := "user=" + env.GetDBUser() +
-		" password=" + env.GetDBPassword() +
-		" dbname=" + env.GetDBName() +
-		" host=" + env.GetDBHost() +
-		" port=" + env.GetDBPort() +
+	dataSource := "user=" + env.DBUser() +
+		" password=" + env.DBPassword() +
+		" dbname=" + env.DBName() +
+		" host=" + env.DBHost() +
+		" port=" + env.DBPort() +
 		" sslmode=disable"
 
 	db, err := sql.Open("postgres", dataSource)
@@ -31,20 +31,20 @@ func Init(env Env) (*sql.DB, error) {
 		return nil, err
 	}
 
-	if env.GetDBMaxOpenConns() > 0 {
-		db.SetMaxOpenConns(env.GetDBMaxOpenConns())
+	if env.DBMaxOpenConns() > 0 {
+		db.SetMaxOpenConns(env.DBMaxOpenConns())
 	}
 
-	if env.GetDBMaxIdleConns() > 0 {
-		db.SetMaxIdleConns(env.GetDBMaxIdleConns())
+	if env.DBMaxIdleConns() > 0 {
+		db.SetMaxIdleConns(env.DBMaxIdleConns())
 	}
 
-	if env.GetDBMaxConnLifetime() > 0 {
-		db.SetConnMaxLifetime(time.Second * time.Duration(env.GetDBMaxConnLifetime()))
+	if env.DBMaxConnLifetime() > 0 {
+		db.SetConnMaxLifetime(time.Second * time.Duration(env.DBMaxConnLifetime()))
 	}
 
-	if env.GetDBMaxIdleConnLifetime() > 0 {
-		db.SetConnMaxIdleTime(time.Second * time.Duration(env.GetDBMaxIdleConnLifetime()))
+	if env.DBMaxIdleConnLifetime() > 0 {
+		db.SetConnMaxIdleTime(time.Second * time.Duration(env.DBMaxIdleConnLifetime()))
 	}
 
 	if err = db.Ping(); err != nil {

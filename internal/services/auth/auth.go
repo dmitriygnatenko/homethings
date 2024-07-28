@@ -18,8 +18,8 @@ const (
 )
 
 type Env interface {
-	GetJWTSecretKey() string
-	GetJWTLifetime() int
+	JWTSecretKey() string
+	JWTLifetime() int
 }
 
 type Service struct {
@@ -51,10 +51,10 @@ func (a Service) GetClaims(fctx *fiber.Ctx) jwt.MapClaims {
 func (a Service) GenerateToken(user models.User) (string, error) {
 	claims := jwt.MapClaims{
 		ClaimsKeyName: user.Username,
-		claimsKeyExp:  time.Now().Add(time.Duration(a.env.GetJWTLifetime()) * time.Second).Unix(),
+		claimsKeyExp:  time.Now().Add(time.Duration(a.env.JWTLifetime()) * time.Second).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString([]byte(a.env.GetJWTSecretKey()))
+	return token.SignedString([]byte(a.env.JWTSecretKey()))
 }
