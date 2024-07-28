@@ -65,54 +65,54 @@ func Init() (*ServiceProvider, error) {
 	return sp, nil
 }
 
-func (sp *ServiceProvider) GetEnvService() *envService.Service {
+func (sp *ServiceProvider) EnvService() *envService.Service {
 	return sp.env
 }
 
-func (sp *ServiceProvider) GetAuthService() *authService.Service {
+func (sp *ServiceProvider) AuthService() *authService.Service {
 	return sp.auth
 }
 
-func (sp *ServiceProvider) GetMailerService() *mailerService.Service {
+func (sp *ServiceProvider) MailerService() *mailerService.Service {
 	return sp.mailer
 }
 
-func (sp *ServiceProvider) GetPlaceRepository() *repositories.PlaceRepository {
+func (sp *ServiceProvider) PlaceRepository() *repositories.PlaceRepository {
 	return sp.placeRepository
 }
 
-func (sp *ServiceProvider) GetThingRepository() *repositories.ThingRepository {
+func (sp *ServiceProvider) ThingRepository() *repositories.ThingRepository {
 	return sp.thingRepository
 }
 
-func (sp *ServiceProvider) GetTagRepository() *repositories.TagRepository {
+func (sp *ServiceProvider) TagRepository() *repositories.TagRepository {
 	return sp.tagRepository
 }
 
-func (sp *ServiceProvider) GetPlaceThingRepository() *repositories.PlaceThingRepository {
+func (sp *ServiceProvider) PlaceThingRepository() *repositories.PlaceThingRepository {
 	return sp.placeThingRepository
 }
 
-func (sp *ServiceProvider) GetPlaceImageRepository() *repositories.PlaceImageRepository {
+func (sp *ServiceProvider) PlaceImageRepository() *repositories.PlaceImageRepository {
 	return sp.placeImageRepository
 }
 
-func (sp *ServiceProvider) GetThingImageRepository() *repositories.ThingImageRepository {
+func (sp *ServiceProvider) ThingImageRepository() *repositories.ThingImageRepository {
 	return sp.thingImageRepository
 }
 
-func (sp *ServiceProvider) GetThingTagRepository() *repositories.ThingTagRepository {
+func (sp *ServiceProvider) ThingTagRepository() *repositories.ThingTagRepository {
 	return sp.thingTagRepository
 }
 
-func (sp *ServiceProvider) GetThingNotificationRepository() *repositories.ThingNotificationRepository {
+func (sp *ServiceProvider) ThingNotificationRepository() *repositories.ThingNotificationRepository {
 	return sp.thingNotificationRepository
 }
 
-func (sp *ServiceProvider) GetUserRepository() *repositories.UserRepository {
+func (sp *ServiceProvider) UserRepository() *repositories.UserRepository {
 	return sp.userRepository
 }
 
-func (sp *ServiceProvider) GetFileRepository() *repositories.FileRepository {
+func (sp *ServiceProvider) FileRepository() *repositories.FileRepository {
 	return sp.fileRepository
 }

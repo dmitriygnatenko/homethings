@@ -36,19 +36,19 @@ const (
 
 type (
 	ServiceProvider interface {
-		GetEnvService() *envService.Service
-		GetMailerService() *mailerService.Service
-		GetAuthService() *authService.Service
-		GetUserRepository() *repositories.UserRepository
-		GetPlaceRepository() *repositories.PlaceRepository
-		GetThingRepository() *repositories.ThingRepository
-		GetTagRepository() *repositories.TagRepository
-		GetPlaceThingRepository() *repositories.PlaceThingRepository
-		GetPlaceImageRepository() *repositories.PlaceImageRepository
-		GetThingImageRepository() *repositories.ThingImageRepository
-		GetThingTagRepository() *repositories.ThingTagRepository
-		GetThingNotificationRepository() *repositories.ThingNotificationRepository
-		GetFileRepository() *repositories.FileRepository
+		EnvService() *envService.Service
+		MailerService() *mailerService.Service
+		AuthService() *authService.Service
+		UserRepository() *repositories.UserRepository
+		PlaceRepository() *repositories.PlaceRepository
+		ThingRepository() *repositories.ThingRepository
+		TagRepository() *repositories.TagRepository
+		PlaceThingRepository() *repositories.PlaceThingRepository
+		PlaceImageRepository() *repositories.PlaceImageRepository
+		ThingImageRepository() *repositories.ThingImageRepository
+		ThingTagRepository() *repositories.ThingTagRepository
+		ThingNotificationRepository() *repositories.ThingNotificationRepository
+		FileRepository() *repositories.FileRepository
 	}
 )
 
@@ -73,7 +73,7 @@ func Init(sp ServiceProvider) (*fiber.App, error) {
 	// Configure Basic auth
 	basicAuth := basicauth.New(basicauth.Config{
 		Users: map[string]string{
-			sp.GetEnvService().BasicAuthUser(): sp.GetEnvService().BasicAuthPassword(),
+			sp.EnvService().BasicAuthUser(): sp.EnvService().BasicAuthPassword(),
 		},
 	})
 
@@ -107,12 +107,12 @@ func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
 		}
 
 		if err.Error() != "" {
-			errorsEmail := sp.GetEnvService().ErrorsEmail()
+			errorsEmail := sp.EnvService().ErrorsEmail()
 
 			if errCode == fiber.StatusInternalServerError && errorsEmail != "" {
 				log.Println(err)
 				// nolint
-				sp.GetMailerService().Send(
+				sp.MailerService().Send(
 					errorsEmail,
 					"AUTO - Homethings error",
 					err.Error(),
@@ -129,7 +129,7 @@ func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
 // nolint
 func getJWTConfig(sp ServiceProvider) fiberJwt.Config {
 	return fiberJwt.Config{
-		SigningKey: []byte(sp.GetEnvService().JWTSecretKey()),
+		SigningKey: []byte(sp.EnvService().JWTSecretKey()),
 		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
 			return fiber.NewError(fiber.StatusForbidden, err.Error())
 		},
@@ -159,8 +159,8 @@ func getMetricsConfig() monitor.Config {
 
 func getCORSConfig(sp ServiceProvider) cors.Config {
 	return cors.Config{
-		AllowOrigins: sp.GetEnvService().CORSAllowOrigins(),
-		AllowMethods: sp.GetEnvService().CORSAllowMethods(),
+		AllowOrigins: sp.EnvService().CORSAllowOrigins(),
+		AllowMethods: sp.EnvService().CORSAllowMethods(),
 	}
 }
 
@@ -169,8 +169,8 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 	r.Post(
 		"/v1/auth/login",
 		authAPI.LoginHandler(
-			sp.GetAuthService(),
-			sp.GetUserRepository(),
+			sp.AuthService(),
+			sp.UserRepository(),
 		),
 	)
 
@@ -178,219 +178,219 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 	r.Get(
 		"/v1/auth/check",
 		authAPI.CheckAuthHandler(
-			sp.GetAuthService(),
-			sp.GetUserRepository(),
+			sp.AuthService(),
+			sp.UserRepository(),
 		),
 	)
 
 	r.Get(
 		"/v1/places",
-		placeAPI.GetPlacesHandler(sp.GetPlaceRepository()),
+		placeAPI.GetPlacesHandler(sp.PlaceRepository()),
 	)
 	r.Get(
 		"/v1/places/tree",
-		placeAPI.GetPlaceTreeHandler(sp.GetPlaceRepository()),
+		placeAPI.GetPlaceTreeHandler(sp.PlaceRepository()),
 	)
 	r.Get(
 		"/v1/places/:placeId<int>",
-		placeAPI.GetPlaceHandler(sp.GetPlaceRepository()),
+		placeAPI.GetPlaceHandler(sp.PlaceRepository()),
 	)
 	r.Get(
 		"/v1/places/:parentPlaceId<int>/nested",
-		placeAPI.GetNestedPlacesHandler(sp.GetPlaceRepository()),
+		placeAPI.GetNestedPlacesHandler(sp.PlaceRepository()),
 	)
 	r.Post(
 		"/v1/places",
-		placeAPI.AddPlaceHandler(sp.GetPlaceRepository()),
+		placeAPI.AddPlaceHandler(sp.PlaceRepository()),
 	)
 	r.Put(
 		"/v1/places/:placeId<int>",
-		placeAPI.UpdatePlaceHandler(sp.GetPlaceRepository()),
+		placeAPI.UpdatePlaceHandler(sp.PlaceRepository()),
 	)
 	r.Delete(
 		"/v1/places/:placeId<int>",
 		placeAPI.DeletePlaceHandler(
-			sp.GetPlaceRepository(),
-			sp.GetThingRepository(),
-			sp.GetPlaceImageRepository(),
-			sp.GetThingImageRepository(),
-			sp.GetPlaceThingRepository(),
-			sp.GetThingTagRepository(),
-			sp.GetThingImageRepository(),
-			sp.GetFileRepository(),
+			sp.PlaceRepository(),
+			sp.ThingRepository(),
+			sp.PlaceImageRepository(),
+			sp.ThingImageRepository(),
+			sp.PlaceThingRepository(),
+			sp.ThingTagRepository(),
+			sp.ThingImageRepository(),
+			sp.FileRepository(),
 		),
 	)
 
 	r.Get(
 		"/v1/things/:thingId<int>",
-		thingAPI.GetThingHandler(sp.GetThingRepository()),
+		thingAPI.GetThingHandler(sp.ThingRepository()),
 	)
 	r.Get(
 		"/v1/things/search/:search",
-		thingAPI.SearchThingHandler(sp.GetThingRepository()),
+		thingAPI.SearchThingHandler(sp.ThingRepository()),
 	)
 	r.Get(
 		"/v1/things/place/:placeId<int>",
 		thingAPI.GetPlaceThingsHandler(
-			sp.GetThingRepository(),
-			sp.GetThingTagRepository(),
+			sp.ThingRepository(),
+			sp.ThingTagRepository(),
 		),
 	)
 	r.Post(
 		"/v1/things",
 		thingAPI.AddThingHandler(
-			sp.GetThingRepository(),
-			sp.GetPlaceThingRepository(),
+			sp.ThingRepository(),
+			sp.PlaceThingRepository(),
 		),
 	)
 	r.Put(
 		"/v1/things/:thingId<int>",
 		thingAPI.UpdateThingHandler(
-			sp.GetThingRepository(),
-			sp.GetPlaceThingRepository(),
+			sp.ThingRepository(),
+			sp.PlaceThingRepository(),
 		),
 	)
 	r.Delete(
 		"/v1/things/:thingId<int>",
 		thingAPI.DeleteThingHandler(
-			sp.GetThingRepository(),
-			sp.GetThingTagRepository(),
-			sp.GetPlaceThingRepository(),
-			sp.GetThingImageRepository(),
-			sp.GetThingNotificationRepository(),
-			sp.GetFileRepository(),
+			sp.ThingRepository(),
+			sp.ThingTagRepository(),
+			sp.PlaceThingRepository(),
+			sp.ThingImageRepository(),
+			sp.ThingNotificationRepository(),
+			sp.FileRepository(),
 		),
 	)
 
 	r.Get(
 		"/v1/images/place/:placeId<int>",
 		imageAPI.GetPlaceImagesHandler(
-			sp.GetThingImageRepository(),
-			sp.GetPlaceImageRepository(),
+			sp.ThingImageRepository(),
+			sp.PlaceImageRepository(),
 		),
 	)
 	r.Get(
 		"/v1/images/thing/:thingId<int>",
-		imageAPI.GetThingImagesHandler(sp.GetThingImageRepository()))
+		imageAPI.GetThingImagesHandler(sp.ThingImageRepository()))
 	r.Post(
 		"/v1/images",
 		imageAPI.AddImageHandler(
-			sp.GetFileRepository(),
-			sp.GetThingImageRepository(),
-			sp.GetPlaceImageRepository(),
+			sp.FileRepository(),
+			sp.ThingImageRepository(),
+			sp.PlaceImageRepository(),
 		),
 	)
 	r.Delete(
 		"/v1/images/place/:imageId<int>",
 		imageAPI.DeletePlaceImageHandler(
-			sp.GetFileRepository(),
-			sp.GetPlaceImageRepository(),
+			sp.FileRepository(),
+			sp.PlaceImageRepository(),
 		),
 	)
 	r.Delete(
 		"/v1/images/thing/:imageId<int>",
 		imageAPI.DeleteThingImageHandler(
-			sp.GetFileRepository(),
-			sp.GetThingImageRepository(),
+			sp.FileRepository(),
+			sp.ThingImageRepository(),
 		),
 	)
 
 	r.Get(
 		"/v1/tags",
-		tagAPI.GetTagsHandler(sp.GetTagRepository()),
+		tagAPI.GetTagsHandler(sp.TagRepository()),
 	)
 	r.Get(
 		"/v1/tags/:tagId<int>",
-		tagAPI.GetTagHandler(sp.GetTagRepository()),
+		tagAPI.GetTagHandler(sp.TagRepository()),
 	)
 	r.Get(
 		"/v1/tags/thing/:thingId<int>",
-		tagAPI.GetThingTagsHandler(sp.GetTagRepository()),
+		tagAPI.GetThingTagsHandler(sp.TagRepository()),
 	)
 	r.Post(
 		"/v1/tags",
-		tagAPI.AddTagHandler(sp.GetTagRepository()),
+		tagAPI.AddTagHandler(sp.TagRepository()),
 	)
 	r.Post(
 		"/v1/tags/:tagId<int>/thing/:thingId<int>",
 		tagAPI.AddThingTagHandler(
-			sp.GetTagRepository(),
-			sp.GetThingRepository(),
-			sp.GetThingTagRepository(),
+			sp.TagRepository(),
+			sp.ThingRepository(),
+			sp.ThingTagRepository(),
 		),
 	)
 	r.Put(
 		"/v1/tags/:tagId<int>",
-		tagAPI.UpdateTagHandler(sp.GetTagRepository()),
+		tagAPI.UpdateTagHandler(sp.TagRepository()),
 	)
 	r.Delete(
 		"/v1/tags/:tagId<int>",
 		tagAPI.DeleteTagHandler(
-			sp.GetTagRepository(),
-			sp.GetThingTagRepository(),
+			sp.TagRepository(),
+			sp.ThingTagRepository(),
 		),
 	)
 	r.Delete(
 		"/v1/tags/:tagId<int>/thing/:thingId<int>",
 		tagAPI.DeleteThingTagHandler(
-			sp.GetTagRepository(),
-			sp.GetThingRepository(),
-			sp.GetThingTagRepository(),
+			sp.TagRepository(),
+			sp.ThingRepository(),
+			sp.ThingTagRepository(),
 		),
 	)
 	r.Get(
 		"/v1/tags/:id<int>",
-		tagAPI.GetTagHandler(sp.GetTagRepository()),
+		tagAPI.GetTagHandler(sp.TagRepository()),
 	)
 	r.Post(
 		"/v1/tags",
-		tagAPI.AddTagHandler(sp.GetTagRepository()),
+		tagAPI.AddTagHandler(sp.TagRepository()),
 	)
 	r.Put(
 		"/v1/tags/:id<int>",
-		tagAPI.UpdateTagHandler(sp.GetTagRepository()),
+		tagAPI.UpdateTagHandler(sp.TagRepository()),
 	)
 	r.Delete(
 		"/v1/tags/:id<int>",
 		tagAPI.DeleteTagHandler(
-			sp.GetTagRepository(),
-			sp.GetThingTagRepository(),
+			sp.TagRepository(),
+			sp.ThingTagRepository(),
 		),
 	)
 
 	r.Get(
 		"/v1/things/notifications/:thingId<int>",
-		notificationAPI.GetThingNotificationHandler(sp.GetThingNotificationRepository()),
+		notificationAPI.GetThingNotificationHandler(sp.ThingNotificationRepository()),
 	)
 	r.Get(
 		"/v1/things/notifications/expired",
-		notificationAPI.GetExpiredThingNotificationsHandler(sp.GetThingNotificationRepository()),
+		notificationAPI.GetExpiredThingNotificationsHandler(sp.ThingNotificationRepository()),
 	)
 	r.Post(
 		"/v1/things/notifications",
-		notificationAPI.AddThingNotificationHandler(sp.GetThingNotificationRepository()),
+		notificationAPI.AddThingNotificationHandler(sp.ThingNotificationRepository()),
 	)
 	r.Put(
 		"/v1/things/notifications/:thingId<int>",
-		notificationAPI.UpdateThingNotificationHandler(sp.GetThingNotificationRepository()),
+		notificationAPI.UpdateThingNotificationHandler(sp.ThingNotificationRepository()),
 	)
 	r.Delete(
 		"/v1/things/notifications/:thingId<int>",
-		notificationAPI.DeleteThingNotificationHandler(sp.GetThingNotificationRepository()),
+		notificationAPI.DeleteThingNotificationHandler(sp.ThingNotificationRepository()),
 	)
 
 	r.Post(
 		"/v1/users",
 		userAPI.AddUserHandler(
-			sp.GetAuthService(),
-			sp.GetUserRepository(),
+			sp.AuthService(),
+			sp.UserRepository(),
 		),
 	)
 	r.Put(
 		"/v1/users",
 		userAPI.UpdateUserHandler(
-			sp.GetAuthService(),
-			sp.GetUserRepository(),
+			sp.AuthService(),
+			sp.UserRepository(),
 		),
 	)
 }
