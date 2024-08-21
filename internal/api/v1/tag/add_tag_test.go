@@ -2,8 +2,6 @@ package tag
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -12,10 +10,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -30,10 +27,10 @@ func TestAddTagHandler(t *testing.T) {
 	}
 
 	var (
-		tagID     = gofakeit.Number(1, 1000)
+		tagID     = uint64(gofakeit.Number(1, 1000))
 		title     = gofakeit.Phrase()
 		style     = gofakeit.Phrase()
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
@@ -78,12 +75,12 @@ func TestAddTagHandler(t *testing.T) {
 			tagRepoMock: func(mc *minimock.Controller) TagRepository {
 				mock := mocks.NewTagRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddTagRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, style, req.Style)
 				}).Return(tagID, nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, tagID, id)
 				}).Return(&repoRes, nil)
 
@@ -150,7 +147,7 @@ func TestAddTagHandler(t *testing.T) {
 			tagRepoMock: func(mc *minimock.Controller) TagRepository {
 				mock := mocks.NewTagRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddTagRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, style, req.Style)
 				}).Return(0, testError)
@@ -165,12 +162,12 @@ func TestAddTagHandler(t *testing.T) {
 			tagRepoMock: func(mc *minimock.Controller) TagRepository {
 				mock := mocks.NewTagRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddTagRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, style, req.Style)
 				}).Return(tagID, nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, tagID, id)
 				}).Return(nil, testError)
 
@@ -187,13 +184,13 @@ func TestAddTagHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Post("/v1/tags", AddTagHandler(tt.tagRepoMock(mc)))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, test.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

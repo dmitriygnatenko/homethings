@@ -6,7 +6,7 @@ import (
 )
 
 type Image struct {
-	ID        int
+	ID        uint64
 	ThingID   sql.NullInt64
 	PlaceID   sql.NullInt64
 	Image     string

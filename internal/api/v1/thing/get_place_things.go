@@ -1,9 +1,11 @@
 package thing
 
 import (
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
@@ -23,23 +25,26 @@ func GetPlaceThingsHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("placeId")
+		id, err := request.ConvertToUint64(fctx, "placeId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		things, err := thingRepository.GetAllByPlaceID(ctx, id)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		tags, err := thingTagRepository.GetByPlaceID(ctx, id)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		things = helpers.ApplyLocation(fctx, things)
-		tags = helpers.ApplyLocation(fctx, tags)
+		things = location.ApplyLocation(fctx, things)
+		tags = location.ApplyLocation(fctx, tags)
 
 		return fctx.JSON(mappers.ToThingsExtResponse(things, tags))
 	}

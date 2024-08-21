@@ -3,7 +3,6 @@ package image
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -13,10 +12,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -29,30 +27,30 @@ func TestGetThingImagesHandler(t *testing.T) {
 	}
 
 	var (
-		thingID   = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		thingID   = uint64(gofakeit.Number(1, 1000))
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/images/thing/" + strconv.Itoa(thingID),
+			route:  "/v1/images/thing/" + strconv.FormatUint(thingID, 10),
 		}
 
 		imageRepoRes = []models.Image{
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        gofakeit.Uint64(),
 				Image:     gofakeit.URL(),
 				CreatedAt: gofakeit.Date(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
 			},
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        gofakeit.Uint64(),
 				Image:     gofakeit.URL(),
 				CreatedAt: gofakeit.Date(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
 			},
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        gofakeit.Uint64(),
 				Image:     gofakeit.URL(),
 				CreatedAt: gofakeit.Date(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
@@ -108,7 +106,7 @@ func TestGetThingImagesHandler(t *testing.T) {
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				mock := mocks.NewThingImageRepositoryMock(mc)
 
-				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(nil, testError)
 
@@ -123,7 +121,7 @@ func TestGetThingImagesHandler(t *testing.T) {
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				mock := mocks.NewThingImageRepositoryMock(mc)
 
-				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByThingIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(imageRepoRes, nil)
 
@@ -141,11 +139,14 @@ func TestGetThingImagesHandler(t *testing.T) {
 
 			fiberApp.Get("/v1/images/thing/:thingId", GetThingImagesHandler(tt.thingImageRepoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

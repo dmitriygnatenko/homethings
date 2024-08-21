@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"errors"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
@@ -24,21 +26,24 @@ import (
 func GetThingHandler(thingRepository ThingRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("thingId")
+		id, err := request.ConvertToUint64(fctx, "thingId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		res, err := thingRepository.Get(ctx, id)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusNotFound, "")
 			}
 
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res = helpers.ApplyLocation(fctx, res)
+		res = location.ApplyLocation(fctx, res)
 
 		return fctx.JSON(mappers.ToThingResponse(*res))
 	}

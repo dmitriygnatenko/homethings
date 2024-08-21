@@ -3,7 +3,6 @@ package place
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -13,10 +12,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -29,13 +27,13 @@ func TestGetNestedPlacesHandler(t *testing.T) {
 	}
 
 	var (
-		placeID   = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		placeID   = uint64(gofakeit.Number(1, 1000))
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/places/" + strconv.Itoa(placeID) + "/nested",
+			route:  "/v1/places/" + strconv.FormatUint(placeID, 10) + "/nested",
 		}
 
 		repoRes = []models.Place{
@@ -76,7 +74,7 @@ func TestGetNestedPlacesHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.GetNestedPlacesMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetNestedPlacesMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(repoRes, nil)
 
@@ -90,7 +88,7 @@ func TestGetNestedPlacesHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.GetNestedPlacesMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetNestedPlacesMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -119,10 +117,13 @@ func TestGetNestedPlacesHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Get("/v1/places/:parentPlaceId/nested", GetNestedPlacesHandler(tt.placeRepoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

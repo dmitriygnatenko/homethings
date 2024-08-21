@@ -2,8 +2,6 @@ package notification
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -14,10 +12,9 @@ import (
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
 )
@@ -33,9 +30,9 @@ func TestAddThingNotificationHandler(t *testing.T) {
 	}
 
 	var (
-		thingID          = gofakeit.Number(1, 1000)
+		thingID          = uint64(gofakeit.Number(1, 1000))
 		notificationDate = gofakeit.Date().Truncate(time.Second)
-		testError        = errors.New(gofakeit.Phrase())
+		testError        = gofakeit.Error()
 		layout           = "2006-01-02 15:04:05"
 
 		correctReq = req{
@@ -78,12 +75,12 @@ func TestAddThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, notificationDate, req.NotificationDate)
 				}).Return(nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(&repoRes, nil)
 
@@ -139,7 +136,7 @@ func TestAddThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, notificationDate, req.NotificationDate)
 				}).Return(testError)
@@ -154,7 +151,7 @@ func TestAddThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, notificationDate, req.NotificationDate)
 				}).Return(&pq.Error{Code: repositories.DuplicateKeyErrorCode})
@@ -169,12 +166,12 @@ func TestAddThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, notificationDate, req.NotificationDate)
 				}).Return(nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(nil, testError)
 
@@ -191,13 +188,13 @@ func TestAddThingNotificationHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Post("/v1/things/notifications", AddThingNotificationHandler(tt.repoMock(mc)))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, test.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

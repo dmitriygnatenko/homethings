@@ -3,7 +3,6 @@ package notification
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -14,10 +13,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -30,13 +28,13 @@ func TestGetThingNotificationHandler(t *testing.T) {
 	}
 
 	var (
-		thingID   = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		thingID   = uint64(gofakeit.Number(1, 1000))
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/things/notifications/" + strconv.Itoa(thingID),
+			route:  "/v1/things/notifications/" + strconv.FormatUint(thingID, 10),
 		}
 
 		repoRes = models.ThingNotification{
@@ -69,7 +67,7 @@ func TestGetThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(&repoRes, nil)
 
@@ -83,7 +81,7 @@ func TestGetThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(nil, testError)
 
@@ -97,7 +95,7 @@ func TestGetThingNotificationHandler(t *testing.T) {
 			repoMock: func(mc *minimock.Controller) ThingNotificationRepository {
 				mock := mocks.NewThingNotificationRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(nil, sql.ErrNoRows)
 
@@ -125,10 +123,13 @@ func TestGetThingNotificationHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Get("/v1/things/notifications/:thingId", GetThingNotificationHandler(tt.repoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

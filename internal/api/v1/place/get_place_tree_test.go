@@ -2,7 +2,6 @@ package place
 
 import (
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -11,10 +10,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -27,12 +25,12 @@ func TestGetPlaceTreeHandler(t *testing.T) {
 	}
 
 	var (
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
-		id1 = gofakeit.Number(1, 1000)
-		id2 = gofakeit.Number(1, 1000)
-		id3 = gofakeit.Number(1, 1000)
+		id1 = uint64(gofakeit.Number(1, 1000))
+		id2 = uint64(gofakeit.Number(1, 1000))
+		id3 = uint64(gofakeit.Number(1, 1000))
 
 		correctReq = req{
 			method: fiber.MethodGet,
@@ -137,10 +135,13 @@ func TestGetPlaceTreeHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Get("/v1/places/tree", GetPlaceTreeHandler(tt.placeRepoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

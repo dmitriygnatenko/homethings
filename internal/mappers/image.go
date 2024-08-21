@@ -6,15 +6,15 @@ import (
 )
 
 func ToImageResponse(req models.Image) dto.ImageResponse {
-	var placeIDPtr, thingIDPtr *int
+	var placeIDPtr, thingIDPtr *uint64
 
 	if req.PlaceID.Valid {
-		placeID := int(req.PlaceID.Int64)
+		placeID := uint64(req.PlaceID.Int64)
 		placeIDPtr = &placeID
 	}
 
 	if req.ThingID.Valid {
-		thingID := int(req.ThingID.Int64)
+		thingID := uint64(req.ThingID.Int64)
 		thingIDPtr = &thingID
 	}
 

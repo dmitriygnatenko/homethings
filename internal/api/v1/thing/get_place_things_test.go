@@ -2,7 +2,6 @@ package thing
 
 import (
 	"context"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -12,10 +11,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -28,18 +26,18 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 	}
 
 	var (
-		placeID   = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		placeID   = uint64(gofakeit.Number(1, 1000))
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/things/place/" + strconv.Itoa(placeID),
+			route:  "/v1/things/place/" + strconv.FormatUint(placeID, 10),
 		}
 
 		thingRepoRes = []models.Thing{
 			{
-				ID:          gofakeit.Number(1, 1000),
+				ID:          uint64(gofakeit.Number(1, 1000)),
 				PlaceID:     placeID,
 				Title:       gofakeit.Phrase(),
 				Description: gofakeit.Phrase(),
@@ -47,7 +45,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 				UpdatedAt:   gofakeit.Date(),
 			},
 			{
-				ID:          gofakeit.Number(1, 1000),
+				ID:          uint64(gofakeit.Number(1, 1000)),
 				PlaceID:     placeID,
 				Title:       gofakeit.Phrase(),
 				Description: gofakeit.Phrase(),
@@ -60,7 +58,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			{
 				ThingID: thingRepoRes[0].ID,
 				Tag: models.Tag{
-					ID:        gofakeit.Number(1, 1000),
+					ID:        uint64(gofakeit.Number(1, 1000)),
 					Title:     gofakeit.Phrase(),
 					Style:     gofakeit.Phrase(),
 					CreatedAt: gofakeit.Date(),
@@ -70,7 +68,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			{
 				ThingID: thingRepoRes[1].ID,
 				Tag: models.Tag{
-					ID:        gofakeit.Number(1, 1000),
+					ID:        uint64(gofakeit.Number(1, 1000)),
 					Title:     gofakeit.Phrase(),
 					Style:     gofakeit.Phrase(),
 					CreatedAt: gofakeit.Date(),
@@ -139,7 +137,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(thingRepoRes, nil)
 
@@ -148,7 +146,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
 				mock := mocks.NewThingTagRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(thingTagRepoRes, nil)
 
@@ -162,7 +160,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -179,7 +177,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetAllByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(thingRepoRes, nil)
 
@@ -188,7 +186,7 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 			thingTagRepoMock: func(mc *minimock.Controller) ThingTagRepository {
 				mock := mocks.NewThingTagRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -218,12 +216,15 @@ func TestGetPlaceThingsHandler(t *testing.T) {
 
 			mc := minimock.NewController(t)
 			fiberApp := fiber.New()
-			fiberApp.Get("/v1/things/place/:placeId", GetPlaceThingsHandler(tt.thingRepoMock(mc), tt.thingTagRepoMock(mc)))
+			fiberApp.Get("/v1/things/place/:placeId", GetPlaceThingsHandler(
+				tt.thingRepoMock(mc),
+				tt.thingTagRepoMock(mc),
+			))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), test.TestTimeout)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

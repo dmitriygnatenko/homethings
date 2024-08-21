@@ -1,7 +1,6 @@
 package notification
 
 import (
-	"errors"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -11,10 +10,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -27,7 +25,7 @@ func TestGetExpiredThingNotificationsHandler(t *testing.T) {
 	}
 
 	var (
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
@@ -37,8 +35,8 @@ func TestGetExpiredThingNotificationsHandler(t *testing.T) {
 
 		repoRes = []models.ExtThingNotification{
 			{
-				ThingID:          gofakeit.Number(1, 1000),
-				PlaceID:          gofakeit.Number(1, 1000),
+				ThingID:          uint64(gofakeit.Number(1, 1000)),
+				PlaceID:          uint64(gofakeit.Number(1, 1000)),
 				ThingTitle:       gofakeit.Phrase(),
 				PlaceTitle:       gofakeit.Phrase(),
 				NotificationDate: gofakeit.Date().Truncate(time.Second),
@@ -100,10 +98,13 @@ func TestGetExpiredThingNotificationsHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Get("/v1/things/notifications/expired", GetExpiredThingNotificationsHandler(tt.repoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

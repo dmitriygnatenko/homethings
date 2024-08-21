@@ -27,8 +27,11 @@ test:
 	go test ./...
 
 test-cover:
-	go test ./... -coverprofile=./coverage.out
-	go tool cover -html=./coverage.out
+	go clean -testcache
+	go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=git.dmitriygnatenko.ru/dima/homethings/internal/api/...
+	grep -v 'mocks\|config' coverage.tmp.out  > coverage.out
+	rm coverage.tmp.out
+	go tool cover -html=coverage.out;
 
 lint:
 	golangci-lint run --timeout=3m

@@ -1,7 +1,6 @@
 package tag
 
 import (
-	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -10,10 +9,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -26,7 +24,7 @@ func TestGetTagsHandler(t *testing.T) {
 	}
 
 	var (
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
@@ -36,14 +34,14 @@ func TestGetTagsHandler(t *testing.T) {
 
 		tagRepoRes = []models.Tag{
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        uint64(gofakeit.Number(1, 1000)),
 				Title:     "A" + gofakeit.Phrase(),
 				Style:     gofakeit.Phrase(),
 				CreatedAt: gofakeit.Date(),
 				UpdatedAt: gofakeit.Date(),
 			},
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        uint64(gofakeit.Number(1, 1000)),
 				Title:     "B" + gofakeit.Phrase(),
 				Style:     gofakeit.Phrase(),
 				CreatedAt: gofakeit.Date(),
@@ -109,10 +107,13 @@ func TestGetTagsHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Get("/v1/tags", GetTagsHandler(tt.tagRepoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

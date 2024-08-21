@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"errors"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 )
 
 // @Router 		/api/v1/things/notifications/{thingId} [delete]
@@ -24,21 +26,25 @@ func DeleteThingNotificationHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("thingId")
+		id, err := request.ConvertToUint64(fctx, "thingId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		_, err = thingNotificationRepository.Get(ctx, id)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = thingNotificationRepository.Delete(ctx, id, nil); err != nil {
+		if err = thingNotificationRepository.Delete(ctx, id); err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

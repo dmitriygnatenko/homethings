@@ -8,6 +8,7 @@ import (
 	"context"
 	"strings"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -25,7 +26,7 @@ type (
 
 	UserRepository interface {
 		Get(ctx context.Context, username string) (*models.User, error)
-		Add(ctx context.Context, username string, password string) (int, error)
+		Add(ctx context.Context, username string, password string) (uint64, error)
 		Update(ctx context.Context, req models.UpdateUserRequest) error
 	}
 )
@@ -48,21 +49,25 @@ func AddUserHandler(
 		ctx := fctx.Context()
 		req := dto.AddUserRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
 		if err := validate.Struct(req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
 		hash, err := authService.GeneratePasswordHash(strings.TrimSpace(req.Password))
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		_, err = userRepository.Add(ctx, strings.TrimSpace(req.Username), hash)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

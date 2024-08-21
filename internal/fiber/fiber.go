@@ -2,8 +2,8 @@ package fiber
 
 import (
 	"errors"
-	"log"
 
+	"git.dmitriygnatenko.ru/dima/go-common/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -12,7 +12,7 @@ import (
 	fiberJwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
 
-	_ "git.dmitriygnatenko.ru/dima/homethings/docs" //nolint
+	_ "git.dmitriygnatenko.ru/dima/homethings/docs" // nolint
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
 	notificationAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification"
@@ -23,9 +23,8 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/middleware/timezone"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
-	authService "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
-	envService "git.dmitriygnatenko.ru/dima/homethings/internal/services/env"
-	mailerService "git.dmitriygnatenko.ru/dima/homethings/internal/services/mailer"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/services/config"
 )
 
 const (
@@ -36,9 +35,9 @@ const (
 
 type (
 	ServiceProvider interface {
-		EnvService() *envService.Service
-		MailerService() *mailerService.Service
-		AuthService() *authService.Service
+		ConfigService() *config.Service
+		AuthService() *auth.Service
+		TransactionManager() *db.TxManager
 		UserRepository() *repositories.UserRepository
 		PlaceRepository() *repositories.PlaceRepository
 		ThingRepository() *repositories.ThingRepository
@@ -53,7 +52,7 @@ type (
 )
 
 func Init(sp ServiceProvider) (*fiber.App, error) {
-	fiberApp := fiber.New(getFiberConfig(sp))
+	fiberApp := fiber.New(getFiberConfig())
 
 	// Configure web root
 	fiberApp.Static("/", staticPath)
@@ -73,7 +72,7 @@ func Init(sp ServiceProvider) (*fiber.App, error) {
 	// Configure Basic auth
 	basicAuth := basicauth.New(basicauth.Config{
 		Users: map[string]string{
-			sp.EnvService().BasicAuthUser(): sp.EnvService().BasicAuthPassword(),
+			sp.ConfigService().BasicAuthUser(): sp.ConfigService().BasicAuthPassword(),
 		},
 	})
 
@@ -90,15 +89,15 @@ func Init(sp ServiceProvider) (*fiber.App, error) {
 	return fiberApp, nil
 }
 
-func getFiberConfig(sp ServiceProvider) fiber.Config {
+func getFiberConfig() fiber.Config {
 	return fiber.Config{
 		AppName:               "Homethings",
 		DisableStartupMessage: true,
-		ErrorHandler:          getErrorHandler(sp),
+		ErrorHandler:          getErrorHandler(),
 	}
 }
 
-func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
+func getErrorHandler() fiber.ErrorHandler {
 	return func(fctx *fiber.Ctx, err error) error {
 		errCode := fiber.StatusInternalServerError
 		var e *fiber.Error
@@ -107,18 +106,6 @@ func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
 		}
 
 		if err.Error() != "" {
-			errorsEmail := sp.EnvService().ErrorsEmail()
-
-			if errCode == fiber.StatusInternalServerError && errorsEmail != "" {
-				log.Println(err)
-				// nolint
-				sp.MailerService().Send(
-					errorsEmail,
-					"AUTO - Homethings error",
-					err.Error(),
-				)
-			}
-
 			return fctx.Status(errCode).JSON(factory.CreateErrorResponse(err))
 		}
 
@@ -129,7 +116,7 @@ func getErrorHandler(sp ServiceProvider) fiber.ErrorHandler {
 // nolint
 func getJWTConfig(sp ServiceProvider) fiberJwt.Config {
 	return fiberJwt.Config{
-		SigningKey: []byte(sp.EnvService().JWTSecretKey()),
+		SigningKey: []byte(sp.ConfigService().JWTSecretKey()),
 		ErrorHandler: func(fctx *fiber.Ctx, err error) error {
 			return fiber.NewError(fiber.StatusForbidden, err.Error())
 		},
@@ -159,8 +146,8 @@ func getMetricsConfig() monitor.Config {
 
 func getCORSConfig(sp ServiceProvider) cors.Config {
 	return cors.Config{
-		AllowOrigins: sp.EnvService().CORSAllowOrigins(),
-		AllowMethods: sp.EnvService().CORSAllowMethods(),
+		AllowOrigins: sp.ConfigService().CORSAllowOrigins(),
+		AllowMethods: sp.ConfigService().CORSAllowMethods(),
 	}
 }
 
@@ -185,31 +172,50 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 
 	r.Get(
 		"/v1/places",
-		placeAPI.GetPlacesHandler(sp.PlaceRepository()),
+		placeAPI.GetPlacesHandler(
+			sp.PlaceRepository(),
+		),
 	)
+
 	r.Get(
 		"/v1/places/tree",
-		placeAPI.GetPlaceTreeHandler(sp.PlaceRepository()),
+		placeAPI.GetPlaceTreeHandler(
+			sp.PlaceRepository(),
+		),
 	)
+
 	r.Get(
 		"/v1/places/:placeId<int>",
-		placeAPI.GetPlaceHandler(sp.PlaceRepository()),
+		placeAPI.GetPlaceHandler(
+			sp.PlaceRepository(),
+		),
 	)
+
 	r.Get(
 		"/v1/places/:parentPlaceId<int>/nested",
-		placeAPI.GetNestedPlacesHandler(sp.PlaceRepository()),
+		placeAPI.GetNestedPlacesHandler(
+			sp.PlaceRepository(),
+		),
 	)
+
 	r.Post(
 		"/v1/places",
-		placeAPI.AddPlaceHandler(sp.PlaceRepository()),
+		placeAPI.AddPlaceHandler(
+			sp.PlaceRepository(),
+		),
 	)
+
 	r.Put(
 		"/v1/places/:placeId<int>",
-		placeAPI.UpdatePlaceHandler(sp.PlaceRepository()),
+		placeAPI.UpdatePlaceHandler(
+			sp.PlaceRepository(),
+		),
 	)
+
 	r.Delete(
 		"/v1/places/:placeId<int>",
 		placeAPI.DeletePlaceHandler(
+			sp.TransactionManager(),
 			sp.PlaceRepository(),
 			sp.ThingRepository(),
 			sp.PlaceImageRepository(),
@@ -225,10 +231,12 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 		"/v1/things/:thingId<int>",
 		thingAPI.GetThingHandler(sp.ThingRepository()),
 	)
+
 	r.Get(
 		"/v1/things/search/:search",
 		thingAPI.SearchThingHandler(sp.ThingRepository()),
 	)
+
 	r.Get(
 		"/v1/things/place/:placeId<int>",
 		thingAPI.GetPlaceThingsHandler(
@@ -236,23 +244,29 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 			sp.ThingTagRepository(),
 		),
 	)
+
 	r.Post(
 		"/v1/things",
 		thingAPI.AddThingHandler(
+			sp.TransactionManager(),
 			sp.ThingRepository(),
 			sp.PlaceThingRepository(),
 		),
 	)
+
 	r.Put(
 		"/v1/things/:thingId<int>",
 		thingAPI.UpdateThingHandler(
+			sp.TransactionManager(),
 			sp.ThingRepository(),
 			sp.PlaceThingRepository(),
 		),
 	)
+
 	r.Delete(
 		"/v1/things/:thingId<int>",
 		thingAPI.DeleteThingHandler(
+			sp.TransactionManager(),
 			sp.ThingRepository(),
 			sp.ThingTagRepository(),
 			sp.PlaceThingRepository(),
@@ -269,27 +283,34 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 			sp.PlaceImageRepository(),
 		),
 	)
+
 	r.Get(
 		"/v1/images/thing/:thingId<int>",
 		imageAPI.GetThingImagesHandler(sp.ThingImageRepository()))
+
 	r.Post(
 		"/v1/images",
 		imageAPI.AddImageHandler(
+			sp.TransactionManager(),
 			sp.FileRepository(),
 			sp.ThingImageRepository(),
 			sp.PlaceImageRepository(),
 		),
 	)
+
 	r.Delete(
 		"/v1/images/place/:imageId<int>",
 		imageAPI.DeletePlaceImageHandler(
+			sp.TransactionManager(),
 			sp.FileRepository(),
 			sp.PlaceImageRepository(),
 		),
 	)
+
 	r.Delete(
 		"/v1/images/thing/:imageId<int>",
 		imageAPI.DeleteThingImageHandler(
+			sp.TransactionManager(),
 			sp.FileRepository(),
 			sp.ThingImageRepository(),
 		),
@@ -297,20 +318,32 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 
 	r.Get(
 		"/v1/tags",
-		tagAPI.GetTagsHandler(sp.TagRepository()),
+		tagAPI.GetTagsHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Get(
 		"/v1/tags/:tagId<int>",
-		tagAPI.GetTagHandler(sp.TagRepository()),
+		tagAPI.GetTagHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Get(
 		"/v1/tags/thing/:thingId<int>",
-		tagAPI.GetThingTagsHandler(sp.TagRepository()),
+		tagAPI.GetThingTagsHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Post(
 		"/v1/tags",
-		tagAPI.AddTagHandler(sp.TagRepository()),
+		tagAPI.AddTagHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Post(
 		"/v1/tags/:tagId<int>/thing/:thingId<int>",
 		tagAPI.AddThingTagHandler(
@@ -319,17 +352,23 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 			sp.ThingTagRepository(),
 		),
 	)
+
 	r.Put(
 		"/v1/tags/:tagId<int>",
-		tagAPI.UpdateTagHandler(sp.TagRepository()),
+		tagAPI.UpdateTagHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Delete(
 		"/v1/tags/:tagId<int>",
 		tagAPI.DeleteTagHandler(
+			sp.TransactionManager(),
 			sp.TagRepository(),
 			sp.ThingTagRepository(),
 		),
 	)
+
 	r.Delete(
 		"/v1/tags/:tagId<int>/thing/:thingId<int>",
 		tagAPI.DeleteThingTagHandler(
@@ -338,21 +377,32 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 			sp.ThingTagRepository(),
 		),
 	)
+
 	r.Get(
 		"/v1/tags/:id<int>",
-		tagAPI.GetTagHandler(sp.TagRepository()),
+		tagAPI.UpdateTagHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Post(
 		"/v1/tags",
-		tagAPI.AddTagHandler(sp.TagRepository()),
+		tagAPI.UpdateTagHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Put(
 		"/v1/tags/:id<int>",
-		tagAPI.UpdateTagHandler(sp.TagRepository()),
+		tagAPI.UpdateTagHandler(
+			sp.TagRepository(),
+		),
 	)
+
 	r.Delete(
 		"/v1/tags/:id<int>",
 		tagAPI.DeleteTagHandler(
+			sp.TransactionManager(),
 			sp.TagRepository(),
 			sp.ThingTagRepository(),
 		),
@@ -360,23 +410,37 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 
 	r.Get(
 		"/v1/things/notifications/:thingId<int>",
-		notificationAPI.GetThingNotificationHandler(sp.ThingNotificationRepository()),
+		notificationAPI.GetThingNotificationHandler(
+			sp.ThingNotificationRepository(),
+		),
 	)
+
 	r.Get(
 		"/v1/things/notifications/expired",
-		notificationAPI.GetExpiredThingNotificationsHandler(sp.ThingNotificationRepository()),
+		notificationAPI.GetExpiredThingNotificationsHandler(
+			sp.ThingNotificationRepository(),
+		),
 	)
+
 	r.Post(
 		"/v1/things/notifications",
-		notificationAPI.AddThingNotificationHandler(sp.ThingNotificationRepository()),
+		notificationAPI.AddThingNotificationHandler(
+			sp.ThingNotificationRepository(),
+		),
 	)
+
 	r.Put(
 		"/v1/things/notifications/:thingId<int>",
-		notificationAPI.UpdateThingNotificationHandler(sp.ThingNotificationRepository()),
+		notificationAPI.UpdateThingNotificationHandler(
+			sp.ThingNotificationRepository(),
+		),
 	)
+
 	r.Delete(
 		"/v1/things/notifications/:thingId<int>",
-		notificationAPI.DeleteThingNotificationHandler(sp.ThingNotificationRepository()),
+		notificationAPI.DeleteThingNotificationHandler(
+			sp.ThingNotificationRepository(),
+		),
 	)
 
 	r.Post(
@@ -386,6 +450,7 @@ func registerHandlers(r fiber.Router, sp ServiceProvider) {
 			sp.UserRepository(),
 		),
 	)
+
 	r.Put(
 		"/v1/users",
 		userAPI.UpdateUserHandler(

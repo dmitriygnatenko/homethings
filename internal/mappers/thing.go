@@ -14,7 +14,7 @@ func ToAddThingRequest(req dto.AddThingRequest) models.AddThingRequest {
 	}
 }
 
-func ToUpdateThingRequest(id int, req dto.UpdateThingRequest) models.UpdateThingRequest {
+func ToUpdateThingRequest(id uint64, req dto.UpdateThingRequest) models.UpdateThingRequest {
 	return models.UpdateThingRequest{
 		ID:          id,
 		Title:       req.Title,
@@ -22,14 +22,14 @@ func ToUpdateThingRequest(id int, req dto.UpdateThingRequest) models.UpdateThing
 	}
 }
 
-func ToAddPlaceThingRequest(thingID int, placeID int) models.AddPlaceThingRequest {
+func ToAddPlaceThingRequest(thingID uint64, placeID uint64) models.AddPlaceThingRequest {
 	return models.AddPlaceThingRequest{
 		PlaceID: placeID,
 		ThingID: thingID,
 	}
 }
 
-func ToUpdatePlaceThingRequest(thingID int, placeID int) models.UpdatePlaceThingRequest {
+func ToUpdatePlaceThingRequest(thingID uint64, placeID uint64) models.UpdatePlaceThingRequest {
 	return models.UpdatePlaceThingRequest{
 		ThingID: thingID,
 		PlaceID: placeID,
@@ -60,7 +60,7 @@ func ToThingsResponse(things []models.Thing) dto.ThingsResponse {
 func ToThingsExtResponse(things []models.Thing, tags []models.ThingTag) dto.ThingsExtResponse {
 	res := make([]dto.ThingExtResponse, 0, len(things))
 
-	groupedTags := make(map[int][]dto.TagResponse)
+	groupedTags := make(map[uint64][]dto.TagResponse)
 	for _, tag := range tags {
 		if _, ok := groupedTags[tag.ThingID]; !ok {
 			groupedTags[tag.ThingID] = make([]dto.TagResponse, 0)

@@ -8,7 +8,7 @@ import (
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-func ToUpdateUserRequest(id int, req dto.UpdateUserRequest) models.UpdateUserRequest {
+func ToUpdateUserRequest(id uint64, req dto.UpdateUserRequest) models.UpdateUserRequest {
 	res := models.UpdateUserRequest{
 		ID: id,
 	}

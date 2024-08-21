@@ -17,7 +17,7 @@ func ToPlaceResponse(req models.Place) dto.PlaceResponse {
 	}
 
 	if req.ParentID.Valid {
-		parentID := int(req.ParentID.Int64)
+		parentID := uint64(req.ParentID.Int64)
 		res.ParentID = &parentID
 	}
 
@@ -36,7 +36,7 @@ func ToAddPlaceRequest(req dto.AddPlaceRequest) models.AddPlaceRequest {
 	return res
 }
 
-func ToUpdatePlaceRequest(id int, req dto.UpdatePlaceRequest) models.UpdatePlaceRequest {
+func ToUpdatePlaceRequest(id uint64, req dto.UpdatePlaceRequest) models.UpdatePlaceRequest {
 	res := models.UpdatePlaceRequest{
 		ID:    id,
 		Title: req.Title,
@@ -67,7 +67,7 @@ func ToPlacesResponse(req []models.Place) dto.PlacesResponse {
 
 func ToPlaceTreeResponse(req []models.Place) dto.PlaceTreeResponse {
 	var res []dto.PlaceTree
-	parentMap := make(map[int][]models.Place, len(req))
+	parentMap := make(map[uint64][]models.Place, len(req))
 
 	for _, p := range req {
 		if !p.ParentID.Valid {
@@ -77,7 +77,7 @@ func ToPlaceTreeResponse(req []models.Place) dto.PlaceTreeResponse {
 			continue
 		}
 
-		parentID := int(p.ParentID.Int64)
+		parentID := uint64(p.ParentID.Int64)
 		parentMap[parentID] = append(parentMap[parentID], p)
 	}
 
@@ -94,7 +94,7 @@ func ToPlaceTreeResponse(req []models.Place) dto.PlaceTreeResponse {
 	}
 }
 
-func recursiveFillNested(item *dto.PlaceTree, parentMap map[int][]models.Place) {
+func recursiveFillNested(item *dto.PlaceTree, parentMap map[uint64][]models.Place) {
 	id := item.Place.ID
 
 	if _, ok := parentMap[id]; ok {

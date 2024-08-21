@@ -3,7 +3,6 @@ package place
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -12,10 +11,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -30,10 +28,10 @@ func TestAddPlaceHandler(t *testing.T) {
 	}
 
 	var (
-		placeID   = gofakeit.Number(1, 1000)
-		parentID  = gofakeit.Number(1, 1000)
+		placeID   = uint64(gofakeit.Number(1, 1000))
+		parentID  = uint64(gofakeit.Number(1, 1000))
 		title     = gofakeit.Phrase()
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
@@ -78,12 +76,12 @@ func TestAddPlaceHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest) {
 					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, int64(parentID), req.ParentID.Int64)
+					assert.Equal(mc, parentID, uint64(req.ParentID.Int64))
 				}).Return(placeID, nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(&repoRes, nil)
 
@@ -127,9 +125,9 @@ func TestAddPlaceHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest) {
 					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, int64(parentID), req.ParentID.Int64)
+					assert.Equal(mc, parentID, uint64(req.ParentID.Int64))
 				}).Return(0, testError)
 
 				return mock
@@ -142,12 +140,12 @@ func TestAddPlaceHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceRequest) {
 					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, int64(parentID), req.ParentID.Int64)
+					assert.Equal(mc, parentID, uint64(req.ParentID.Int64))
 				}).Return(placeID, nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -164,13 +162,13 @@ func TestAddPlaceHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Post("/v1/places", AddPlaceHandler(tt.placeRepoMock(mc)))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, test.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

@@ -2,148 +2,89 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	tagTableName = "tag"
-)
+const tagTableName = "tag"
+
+var tagTableFields = []string{"id", "title", "style", "created_at", "updated_at"}
 
 type TagRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitTagRepository(db *sql.DB) *TagRepository {
+func InitTagRepository(db DB) *TagRepository {
 	return &TagRepository{db: db}
-}
-
-func (r TagRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
-	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
-}
-
-func (r TagRepository) CommitTx(tx *sql.Tx) error {
-	if tx == nil {
-		return errors.New("empty transaction")
-	}
-
-	return tx.Commit()
 }
 
 func (r TagRepository) GetAll(ctx context.Context) ([]models.Tag, error) {
 	var res []models.Tag
 
-	query, args, err := sq.Select("id", "title", "style", "created_at", "updated_at").
+	q, v, err := sq.Select(tagTableFields...).
 		From(tagTableName).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	err = r.db.SelectContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Tag{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.Title,
-			&resRow.Style,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
 }
 
-func (r TagRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Tag, error) {
+func (r TagRepository) GetByThingID(ctx context.Context, id uint64) ([]models.Tag, error) {
 	var res []models.Tag
 
-	query, args, err := sq.Select("t.id", "t.title", "t.style", "t.created_at", "t.updated_at").
+	q, v, err := sq.Select("t.id", "t.title", "t.style", "t.created_at", "t.updated_at").
 		From(tagTableName + " t").
 		Join(thingTagTableName + " tt ON tt.tag_id = t.id").
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"tt.thing_id": thingID}).
+		Where(sq.Eq{"tt.thing_id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	err = r.db.SelectContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Tag{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.Title,
-			&resRow.Style,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
 }
 
-func (r TagRepository) Get(ctx context.Context, tagID int) (*models.Tag, error) {
-	query, args, err := sq.Select("id", "title", "style", "created_at", "updated_at").
+func (r TagRepository) Get(ctx context.Context, id uint64) (*models.Tag, error) {
+	q, v, err := sq.Select(tagTableFields...).
 		From(tagTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": tagID}).
+		Where(sq.Eq{"id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var res models.Tag
 
-	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.ID, &res.Title, &res.Style, &res.CreatedAt, &res.UpdatedAt)
-
+	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get: %w", err)
 	}
 
 	return &res, nil
 }
 
-func (r TagRepository) Add(ctx context.Context, req models.AddTagRequest, tx *sql.Tx) (int, error) {
-	query, args, err := sq.Insert(tagTableName).
+func (r TagRepository) Add(ctx context.Context, req models.AddTagRequest) (uint64, error) {
+	q, v, err := sq.Insert(tagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("title", "style").
 		Values(req.Title, req.Style).
@@ -151,25 +92,24 @@ func (r TagRepository) Add(ctx context.Context, req models.AddTagRequest, tx *sq
 		ToSql()
 
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	var id int
-	if tx == nil {
-		err = r.db.QueryRowContext(ctx, query, args...).Scan(&id)
-	} else {
-		err = tx.QueryRowContext(ctx, query, args...).Scan(&id)
-	}
-
+	res, err := r.db.ExecContext(ctx, q, v...)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	return id, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("last insert ID: %w", err)
+	}
+
+	return uint64(id), nil
 }
 
-func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest, tx *sql.Tx) error {
-	query, args, err := sq.Update(tagTableName).
+func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest) error {
+	q, v, err := sq.Update(tagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("style", req.Style).
@@ -178,33 +118,31 @@ func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest, 
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r TagRepository) Delete(ctx context.Context, tagID int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(tagTableName).
+func (r TagRepository) Delete(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(tagTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": tagID}).
+		Where(sq.Eq{"id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }

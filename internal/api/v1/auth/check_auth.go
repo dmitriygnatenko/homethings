@@ -9,6 +9,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 
@@ -18,9 +19,9 @@ import (
 
 type (
 	AuthService interface {
-		GetClaims(fctx *fiber.Ctx) jwt.MapClaims
+		GetClaims(*fiber.Ctx) jwt.MapClaims
 		IsCorrectPassword(password string, hash string) bool
-		GenerateToken(user models.User) (string, error)
+		GenerateToken(models.User) (string, error)
 	}
 
 	UserRepository interface {
@@ -47,9 +48,11 @@ func CheckAuthHandler(
 		user, err := userRepository.Get(ctx, claims["name"].(string))
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusForbidden, "")
 			}
 
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

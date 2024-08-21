@@ -2,43 +2,39 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	thingNotificationTableName = "thing_notification"
-)
+const thingNotificationTableName = "thing_notification"
 
 type ThingNotificationRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitThingNotificationRepository(db *sql.DB) *ThingNotificationRepository {
+func InitThingNotificationRepository(db DB) *ThingNotificationRepository {
 	return &ThingNotificationRepository{db: db}
 }
 
-func (r ThingNotificationRepository) Get(ctx context.Context, thingID int) (*models.ThingNotification, error) {
-	query, args, err := sq.Select("thing_id", "notification_date", "created_at", "updated_at").
+func (r ThingNotificationRepository) Get(ctx context.Context, id uint64) (*models.ThingNotification, error) {
+	q, v, err := sq.Select("thing_id", "notification_date", "created_at", "updated_at").
 		From(thingNotificationTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"thing_id": thingID}).
+		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var res models.ThingNotification
 
-	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.ThingID, &res.NotificationDate, &res.CreatedAt, &res.UpdatedAt)
-
+	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get: %w", err)
 	}
 
 	return &res, nil
@@ -47,7 +43,7 @@ func (r ThingNotificationRepository) Get(ctx context.Context, thingID int) (*mod
 func (r ThingNotificationRepository) GetExpired(ctx context.Context) ([]models.ExtThingNotification, error) {
 	var res []models.ExtThingNotification
 
-	query, args, err := sq.Select("n.thing_id", "n.notification_date", "n.created_at", "n.updated_at", "t.title", "p.id", "p.title").
+	q, v, err := sq.Select("n.thing_id", "n.notification_date", "n.created_at", "n.updated_at", "t.title", "p.id", "p.title").
 		From(thingNotificationTableName + " n").
 		Join(thingTableName + " t ON t.id = n.thing_id").
 		LeftJoin(placeThingTableName + " pt ON pt.thing_id = n.thing_id").
@@ -58,63 +54,38 @@ func (r ThingNotificationRepository) GetExpired(ctx context.Context) ([]models.E
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	err = r.db.SelectContext(ctx, &res, q, v)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.ExtThingNotification{}
-
-		err = rows.Scan(
-			&resRow.ThingID,
-			&resRow.NotificationDate,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-			&resRow.ThingTitle,
-			&resRow.PlaceID,
-			&resRow.PlaceTitle,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
 }
 
-func (r ThingNotificationRepository) Add(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) error {
-	query, args, err := sq.Insert(thingNotificationTableName).
+func (r ThingNotificationRepository) Add(ctx context.Context, req models.AddThingNotificationRequest) error {
+	q, v, err := sq.Insert(thingNotificationTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("thing_id", "notification_date").
 		Values(req.ThingID, req.NotificationDate).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingNotificationRepository) Update(ctx context.Context, req models.UpdateThingNotificationRequest, tx *sql.Tx) error {
-	query, args, err := sq.Update(thingNotificationTableName).
+func (r ThingNotificationRepository) Update(ctx context.Context, req models.UpdateThingNotificationRequest) error {
+	q, v, err := sq.Update(thingNotificationTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("notification_date", req.NotificationDate).
 		Set("updated_at", "NOW()").
@@ -122,33 +93,31 @@ func (r ThingNotificationRepository) Update(ctx context.Context, req models.Upda
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingNotificationRepository) Delete(ctx context.Context, thingID int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(thingNotificationTableName).
+func (r ThingNotificationRepository) Delete(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(thingNotificationTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"thing_id": thingID}).
+		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }

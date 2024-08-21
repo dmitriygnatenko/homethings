@@ -2,15 +2,15 @@ package models
 
 type ThingTag struct {
 	Tag
-	ThingID int
+	ThingID uint64
 }
 
 type AddThingTagRequest struct {
-	ThingID int
-	TagID   int
+	ThingID uint64
+	TagID   uint64
 }
 
 type DeleteThingTagRequest struct {
-	ThingID int
-	TagID   int
+	ThingID uint64
+	TagID   uint64
 }

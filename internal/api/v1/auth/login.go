@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
@@ -30,20 +31,24 @@ func LoginHandler(
 		ctx := fctx.Context()
 		req := dto.LoginRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
 		if err := validate.Struct(req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
 		user, err := userRepository.Get(ctx, req.Username)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusForbidden, "")
 			}
 
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
@@ -53,6 +58,7 @@ func LoginHandler(
 
 		token, err := authService.GenerateToken(*user)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

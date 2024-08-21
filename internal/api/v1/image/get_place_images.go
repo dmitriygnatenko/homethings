@@ -3,9 +3,11 @@ package image
 import (
 	"sort"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
@@ -27,19 +29,23 @@ func GetPlaceImagesHandler(
 	return func(fctx *fiber.Ctx) error {
 		var res []models.Image
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("placeId")
+
+		id, err := request.ConvertToUint64(fctx, "placeId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		placesRes, err := placeImageRepository.GetByPlaceID(ctx, id)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 		res = append(res, placesRes...)
 
 		thingsRes, err := thingImageRepository.GetByPlaceID(ctx, id)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 		res = append(res, thingsRes...)
@@ -48,8 +54,6 @@ func GetPlaceImagesHandler(
 			return res[i].CreatedAt.After(res[j].CreatedAt)
 		})
 
-		res = helpers.ApplyLocation(fctx, res)
-
-		return fctx.JSON(mappers.ToImagesResponse(res))
+		return fctx.JSON(mappers.ToImagesResponse(location.ApplyLocation(fctx, res)))
 	}
 }

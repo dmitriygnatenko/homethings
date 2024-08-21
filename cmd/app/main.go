@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err = fiberApp.Listen(":" + serviceProvider.EnvService().AppPort()); err != nil {
+	if err = fiberApp.Listen(":" + serviceProvider.ConfigService().AppPort()); err != nil {
 		log.Fatal(err)
 	}
 }

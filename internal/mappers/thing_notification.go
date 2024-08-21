@@ -19,7 +19,7 @@ func ToAddThingNotificationRequest(req dto.AddThingNotificationRequest) (*models
 	}, nil
 }
 
-func ToUpdateThingNotificationRequest(thingID int, req dto.UpdateThingNotificationRequest) (*models.UpdateThingNotificationRequest, error) {
+func ToUpdateThingNotificationRequest(thingID uint64, req dto.UpdateThingNotificationRequest) (*models.UpdateThingNotificationRequest, error) {
 	date, err := time.Parse(time.RFC3339, req.NotificationDate)
 	if err != nil {
 		return nil, err

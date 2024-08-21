@@ -3,8 +3,8 @@ package models
 import "time"
 
 type Thing struct {
-	ID          int
-	PlaceID     int
+	ID          uint64
+	PlaceID     uint64
 	Title       string
 	Description string
 	CreatedAt   time.Time
@@ -17,17 +17,17 @@ type AddThingRequest struct {
 }
 
 type UpdateThingRequest struct {
-	ID          int
+	ID          uint64
 	Title       string
 	Description string
 }
 
 type AddPlaceThingRequest struct {
-	PlaceID int
-	ThingID int
+	PlaceID uint64
+	ThingID uint64
 }
 
 type UpdatePlaceThingRequest struct {
-	ThingID int
-	PlaceID int
+	ThingID uint64
+	PlaceID uint64
 }

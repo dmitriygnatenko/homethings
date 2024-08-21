@@ -1,6 +1,6 @@
 package models
 
 type AddThingImageRequest struct {
-	ThingID int
+	ThingID uint64
 	Image   string
 }

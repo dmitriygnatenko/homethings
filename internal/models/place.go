@@ -6,7 +6,7 @@ import (
 )
 
 type Place struct {
-	ID        int
+	ID        uint64
 	Title     string
 	ParentID  sql.NullInt64
 	CreatedAt time.Time
@@ -19,7 +19,7 @@ type AddPlaceRequest struct {
 }
 
 type UpdatePlaceRequest struct {
-	ID       int
+	ID       uint64
 	Title    string
 	ParentID sql.NullInt64
 }

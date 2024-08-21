@@ -6,14 +6,14 @@ package notification
 
 import (
 	"context"
-	"database/sql"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
@@ -21,10 +21,10 @@ import (
 
 type (
 	ThingNotificationRepository interface {
-		Add(ctx context.Context, req models.AddThingNotificationRequest, tx *sql.Tx) error
-		Update(ctx context.Context, req models.UpdateThingNotificationRequest, tx *sql.Tx) error
-		Delete(ctx context.Context, thingID int, tx *sql.Tx) error
-		Get(ctx context.Context, thingID int) (*models.ThingNotification, error)
+		Add(ctx context.Context, req models.AddThingNotificationRequest) error
+		Update(ctx context.Context, req models.UpdateThingNotificationRequest) error
+		Delete(ctx context.Context, id uint64) error
+		Get(ctx context.Context, id uint64) (*models.ThingNotification, error)
 		GetExpired(ctx context.Context) ([]models.ExtThingNotification, error)
 	}
 )
@@ -47,33 +47,39 @@ func AddThingNotificationHandler(
 
 		req := dto.AddThingNotificationRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
 		if err := validate.Struct(req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
 		dbReq, err := mappers.ToAddThingNotificationRequest(req)
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		if err = thingNotificationRepository.Add(ctx, *dbReq, nil); err != nil {
+		if err = thingNotificationRepository.Add(ctx, *dbReq); err != nil {
 			if repositories.IsFKViolationError(err) || repositories.IsDuplicateKeyError(err) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res, err := thingNotificationRepository.Get(ctx, req.ThingID)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res = helpers.ApplyLocation(fctx, res)
+		res = location.ApplyLocation(fctx, res)
 
 		return fctx.JSON(mappers.ToThingNotificationResponse(*res))
 	}
