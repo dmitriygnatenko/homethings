@@ -11,7 +11,7 @@ type UpdateTagRequest struct {
 }
 
 type TagResponse struct {
-	ID        int    `json:"id"`
+	ID        uint64 `json:"id"`
 	Title     string `json:"title"`
 	Style     string `json:"style"`
 	CreatedAt string `json:"created_at"`

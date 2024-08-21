@@ -3,7 +3,6 @@ package image
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -14,10 +13,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -30,28 +28,28 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 	}
 
 	var (
-		placeID   = gofakeit.Number(1, 1000)
-		thingID   = gofakeit.Number(1, 1000)
+		placeID   = uint64(gofakeit.Number(1, 1000))
+		thingID   = uint64(gofakeit.Number(1, 1000))
 		date1     = gofakeit.Date()
 		date2     = date1.Add(time.Hour)
 		date3     = date2.Add(time.Hour)
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/images/place/" + strconv.Itoa(placeID),
+			route:  "/v1/images/place/" + strconv.FormatUint(placeID, 10),
 		}
 
 		placeImageRepoRes = []models.Image{
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        gofakeit.Uint64(),
 				Image:     gofakeit.URL(),
 				PlaceID:   sql.NullInt64{Valid: true, Int64: int64(placeID)},
 				CreatedAt: date1,
 			},
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        gofakeit.Uint64(),
 				Image:     gofakeit.URL(),
 				PlaceID:   sql.NullInt64{Valid: true, Int64: int64(placeID)},
 				CreatedAt: date2,
@@ -60,7 +58,7 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 
 		thingImageRepoRes = []models.Image{
 			{
-				ID:        gofakeit.Number(1, 1000),
+				ID:        gofakeit.Uint64(),
 				Image:     gofakeit.URL(),
 				ThingID:   sql.NullInt64{Valid: true, Int64: int64(thingID)},
 				CreatedAt: date3,
@@ -120,7 +118,7 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -137,7 +135,7 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, nil)
 
@@ -146,7 +144,7 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				mock := mocks.NewThingImageRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -161,7 +159,7 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(placeImageRepoRes, nil)
 
@@ -170,7 +168,7 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				mock := mocks.NewThingImageRepositoryMock(mc)
 
-				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetByPlaceIDMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(thingImageRepoRes, nil)
 
@@ -191,11 +189,14 @@ func TestGetPlaceImagesHandler(t *testing.T) {
 				tt.placeImageRepoMock(mc),
 			))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

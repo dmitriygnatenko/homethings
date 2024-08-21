@@ -3,7 +3,6 @@ package tag
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -13,10 +12,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -29,13 +27,13 @@ func TestGetTagHandler(t *testing.T) {
 	}
 
 	var (
-		tagID     = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		tagID     = uint64(gofakeit.Number(1, 1000))
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodGet,
-			route:  "/v1/tags/" + strconv.Itoa(tagID),
+			route:  "/v1/tags/" + strconv.FormatUint(tagID, 10),
 		}
 
 		tagRepoRes = models.Tag{
@@ -70,7 +68,7 @@ func TestGetTagHandler(t *testing.T) {
 			tagRepoMock: func(mc *minimock.Controller) TagRepository {
 				mock := mocks.NewTagRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, tagID, id)
 				}).Return(&tagRepoRes, nil)
 
@@ -84,7 +82,7 @@ func TestGetTagHandler(t *testing.T) {
 			tagRepoMock: func(mc *minimock.Controller) TagRepository {
 				mock := mocks.NewTagRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, tagID, id)
 				}).Return(nil, sql.ErrNoRows)
 
@@ -98,7 +96,7 @@ func TestGetTagHandler(t *testing.T) {
 			tagRepoMock: func(mc *minimock.Controller) TagRepository {
 				mock := mocks.NewTagRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, tagID, id)
 				}).Return(nil, testError)
 
@@ -127,10 +125,13 @@ func TestGetTagHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Get("/v1/tags/:tagId", GetTagHandler(tt.tagRepoMock(mc)))
 
-			fiberRes, _ := fiberApp.Test(httptest.NewRequest(tt.req.method, tt.req.route, nil), API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(
+				httptest.NewRequest(tt.req.method, tt.req.route, nil),
+				test.TestTimeout,
+			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

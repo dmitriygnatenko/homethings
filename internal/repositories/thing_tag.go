@@ -2,120 +2,101 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	thingTagTableName = "thing_tag"
-)
+const thingTagTableName = "thing_tag"
 
 type ThingTagRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitThingTagRepository(db *sql.DB) *ThingTagRepository {
+func InitThingTagRepository(db DB) *ThingTagRepository {
 	return &ThingTagRepository{db: db}
 }
 
-func (r ThingTagRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
-	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
-}
-
-func (r ThingTagRepository) CommitTx(tx *sql.Tx) error {
-	if tx == nil {
-		return errors.New("empty transaction")
-	}
-
-	return tx.Commit()
-}
-
-func (r ThingTagRepository) Add(ctx context.Context, req models.AddThingTagRequest, tx *sql.Tx) error {
-	query, args, err := sq.Insert(thingTagTableName).
+func (r ThingTagRepository) Add(ctx context.Context, req models.AddThingTagRequest) error {
+	q, v, err := sq.Insert(thingTagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("thing_id", "tag_id").
 		Values(req.ThingID, req.TagID).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingTagRepository) Delete(ctx context.Context, req models.DeleteThingTagRequest, tx *sql.Tx) error {
-	query, args, err := sq.Delete(thingTagTableName).
+func (r ThingTagRepository) Delete(ctx context.Context, req models.DeleteThingTagRequest) error {
+	q, v, err := sq.Delete(thingTagTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"thing_id": req.ThingID}).
 		Where(sq.Eq{"tag_id": req.TagID}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingTagRepository) DeleteByTagID(ctx context.Context, tagID int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(thingTagTableName).
+func (r ThingTagRepository) DeleteByTagID(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(thingTagTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"tag_id": tagID}).
+		Where(sq.Eq{"tag_id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingTagRepository) DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(thingTagTableName).
+func (r ThingTagRepository) DeleteByThingID(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(thingTagTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"thing_id": thingID}).
+		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingTagRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.ThingTag, error) {
+func (r ThingTagRepository) GetByPlaceID(ctx context.Context, id uint64) ([]models.ThingTag, error) {
 	var res []models.ThingTag
 
-	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
+	q := "WITH RECURSIVE cte (id, parent_id) AS (" +
 		"SELECT id, parent_id " +
 		"FROM " + placeTableName + " " +
 		"WHERE id = $1 " +
@@ -129,32 +110,9 @@ func (r ThingTagRepository) GetByPlaceID(ctx context.Context, placeID int) ([]mo
 		"WHERE pt.place_id = cte.id AND tt.thing_id = pt.thing_id AND tt.tag_id = t.id " +
 		"ORDER BY t.updated_at DESC"
 
-	rows, err := r.db.QueryContext(ctx, query, placeID)
+	err := r.db.SelectContext(ctx, &res, q, id)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.ThingTag{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.Title,
-			&resRow.Style,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-			&resRow.ThingID,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil

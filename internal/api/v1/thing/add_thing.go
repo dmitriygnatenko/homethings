@@ -2,16 +2,16 @@ package thing
 
 //go:generate mkdir -p mocks
 //go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i ThingRepository,PlaceThingRepository,ThingTagRepository,ThingImageRepository,ThingNotificationRepository,FileRepository -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i ThingRepository,PlaceThingRepository,ThingTagRepository,ThingImageRepository,ThingNotificationRepository,FileRepository,TransactionManager -o ./mocks/ -s "_minimock.go"
 
 import (
 	"context"
-	"database/sql"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 
@@ -20,37 +20,39 @@ import (
 )
 
 type (
+	TransactionManager interface {
+		ReadCommitted(context.Context, func(ctx context.Context) error) error
+	}
+
 	ThingRepository interface {
-		Get(ctx context.Context, thingID int) (*models.Thing, error)
+		Get(ctx context.Context, id uint64) (*models.Thing, error)
 		Search(ctx context.Context, search string) ([]models.Thing, error)
-		GetByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error)
-		GetAllByPlaceID(ctx context.Context, placeID int) ([]models.Thing, error)
-		Add(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) (int, error)
-		Update(ctx context.Context, req models.UpdateThingRequest, tx *sql.Tx) error
-		Delete(ctx context.Context, thingID int, tx *sql.Tx) error
-		BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error)
-		CommitTx(tx *sql.Tx) error
+		GetByPlaceID(ctx context.Context, id uint64) ([]models.Thing, error)
+		GetAllByPlaceID(ctx context.Context, id uint64) ([]models.Thing, error)
+		Add(ctx context.Context, req models.AddThingRequest) (uint64, error)
+		Update(ctx context.Context, req models.UpdateThingRequest) error
+		Delete(ctx context.Context, id uint64) error
 	}
 
 	PlaceThingRepository interface {
-		Add(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) error
-		GetByThingID(ctx context.Context, thingID int) (*models.PlaceThing, error)
-		UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) error
-		DeleteThing(ctx context.Context, thingID int, tx *sql.Tx) error
+		Add(ctx context.Context, req models.AddPlaceThingRequest) error
+		GetByThingID(ctx context.Context, id uint64) (*models.PlaceThing, error)
+		UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest) error
+		DeleteThing(ctx context.Context, id uint64) error
 	}
 
 	ThingTagRepository interface {
-		GetByPlaceID(ctx context.Context, placeID int) ([]models.ThingTag, error)
-		DeleteByThingID(ctx context.Context, thingID int, tx *sql.Tx) error
+		GetByPlaceID(ctx context.Context, id uint64) ([]models.ThingTag, error)
+		DeleteByThingID(ctx context.Context, id uint64) error
 	}
 
 	ThingImageRepository interface {
-		GetByThingID(ctx context.Context, thingID int) ([]models.Image, error)
-		Delete(ctx context.Context, imageID int, tx *sql.Tx) error
+		GetByThingID(ctx context.Context, id uint64) ([]models.Image, error)
+		Delete(ctx context.Context, id uint64) error
 	}
 
 	ThingNotificationRepository interface {
-		Delete(ctx context.Context, thingID int, tx *sql.Tx) error
+		Delete(ctx context.Context, id uint64) error
 	}
 
 	FileRepository interface {
@@ -69,6 +71,7 @@ type (
 // @Accept      json
 // @Produce     json
 func AddThingHandler(
+	tm TransactionManager,
 	thingRepository ThingRepository,
 	placeThingRepository PlaceThingRepository,
 ) fiber.Handler {
@@ -76,39 +79,45 @@ func AddThingHandler(
 		ctx := fctx.Context()
 		req := dto.AddThingRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		var validate = validator.New()
 		if err := validate.Struct(req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fctx.Status(fiber.StatusBadRequest).JSON(factory.CreateValidateErrorResponse(err))
 		}
 
-		tx, err := thingRepository.BeginTx(ctx, API.DefaultTxLevel)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
+		var id uint64
 
-		id, err := thingRepository.Add(ctx, mappers.ToAddThingRequest(req), tx)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
+		err := tm.ReadCommitted(ctx, func(ctx context.Context) error {
+			var txErr error
+			id, txErr = thingRepository.Add(ctx, mappers.ToAddThingRequest(req))
+			if txErr != nil {
+				return txErr
+			}
 
-		err = placeThingRepository.Add(ctx, mappers.ToAddPlaceThingRequest(id, req.PlaceID), tx)
-		if err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
+			txErr = placeThingRepository.Add(ctx, mappers.ToAddPlaceThingRequest(id, req.PlaceID))
+			if txErr != nil {
+				return txErr
+			}
 
-		if err = thingRepository.CommitTx(tx); err != nil {
+			return nil
+		})
+
+		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		res, err := thingRepository.Get(ctx, id)
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		res = helpers.ApplyLocation(fctx, res)
+		res = location.ApplyLocation(fctx, res)
 
 		return fctx.JSON(mappers.ToThingResponse(*res))
 	}

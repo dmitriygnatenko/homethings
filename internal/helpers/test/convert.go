@@ -1,4 +1,4 @@
-package helpers
+package test
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 
 func ConvertBodyToString(body io.ReadCloser) string {
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(body) //nolint
+	buf.ReadFrom(body) // nolint
 	return buf.String()
 }
 
@@ -20,9 +20,4 @@ func ConvertDataToIOReader(data interface{}) io.Reader {
 	}
 
 	return res
-}
-
-func MarshalResponse(data interface{}) string {
-	res, _ := json.Marshal(data)
-	return string(res)
 }

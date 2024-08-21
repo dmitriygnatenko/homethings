@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID        int
+	ID        uint64
 	Username  string
 	Password  string
 	CreatedAt time.Time
@@ -14,7 +14,7 @@ type User struct {
 }
 
 type UpdateUserRequest struct {
-	ID       int
+	ID       uint64
 	Username sql.NullString
 	Password sql.NullString
 }

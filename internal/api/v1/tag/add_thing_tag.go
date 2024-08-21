@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"errors"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
 )
 
@@ -28,36 +30,46 @@ func AddThingTagHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		tagID, err := fctx.ParamsInt("tagId")
+
+		tagID, err := request.ConvertToUint64(fctx, "tagId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		thingID, err := fctx.ParamsInt("thingId")
+		thingID, err := request.ConvertToUint64(fctx, "thingId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
 		tag, err := tagRepository.Get(ctx, tagID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
+
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		if _, err = thingRepository.Get(ctx, thingID); err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
+				logger.Info(ctx, err.Error())
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
+
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		if err = thingTagRepository.Add(ctx, mappers.ToAddThingTagRequest(tagID, thingID), nil); err != nil {
+		if err = thingTagRepository.Add(ctx, mappers.ToAddThingTagRequest(tagID, thingID)); err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		tag = helpers.ApplyLocation(fctx, tag)
+		tag = location.ApplyLocation(fctx, tag)
 
 		return fctx.JSON(mappers.ToTagResponse(*tag))
 	}

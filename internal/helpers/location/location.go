@@ -1,4 +1,4 @@
-package helpers
+package location
 
 import (
 	"time"

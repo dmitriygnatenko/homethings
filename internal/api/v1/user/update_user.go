@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
@@ -34,6 +35,7 @@ func UpdateUserHandler(
 		ctx := fctx.Context()
 		req := dto.UpdateUserRequest{}
 		if err = fctx.BodyParser(&req); err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
@@ -44,6 +46,7 @@ func UpdateUserHandler(
 		if req.Password != nil {
 			password, err = authService.GeneratePasswordHash(strings.TrimSpace(*req.Password))
 			if err != nil {
+				logger.Error(ctx, err.Error())
 				return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 			}
 		}
@@ -56,6 +59,8 @@ func UpdateUserHandler(
 
 		user, err := userRepository.Get(ctx, claims[auth.ClaimsKeyName].(string))
 		if err != nil {
+			logger.Error(ctx, err.Error())
+
 			if errors.Is(err, sql.ErrNoRows) {
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
@@ -68,6 +73,7 @@ func UpdateUserHandler(
 
 		err = userRepository.Update(ctx, mappers.ToUpdateUserRequest(user.ID, req))
 		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

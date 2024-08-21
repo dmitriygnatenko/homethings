@@ -14,7 +14,7 @@ func ToAddTagRequest(req dto.AddTagRequest) models.AddTagRequest {
 	}
 }
 
-func ToUpdateTagRequest(id int, req dto.UpdateTagRequest) models.UpdateTagRequest {
+func ToUpdateTagRequest(id uint64, req dto.UpdateTagRequest) models.UpdateTagRequest {
 	return models.UpdateTagRequest{
 		ID:    id,
 		Title: req.Title,
@@ -22,14 +22,14 @@ func ToUpdateTagRequest(id int, req dto.UpdateTagRequest) models.UpdateTagReques
 	}
 }
 
-func ToAddThingTagRequest(tagID int, thingID int) models.AddThingTagRequest {
+func ToAddThingTagRequest(tagID uint64, thingID uint64) models.AddThingTagRequest {
 	return models.AddThingTagRequest{
 		ThingID: thingID,
 		TagID:   tagID,
 	}
 }
 
-func ToDeleteThingTagRequest(tagID int, thingID int) models.DeleteThingTagRequest {
+func ToDeleteThingTagRequest(tagID uint64, thingID uint64) models.DeleteThingTagRequest {
 	return models.DeleteThingTagRequest{
 		ThingID: thingID,
 		TagID:   tagID,

@@ -3,8 +3,6 @@ package image
 import (
 	"bytes"
 	"context"
-	"database/sql"
-	"errors"
 	"mime/multipart"
 	"net/http/httptest"
 	"strconv"
@@ -15,10 +13,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -34,15 +31,19 @@ func TestAddImageHandler(t *testing.T) {
 	}
 
 	var (
-		placeID   = gofakeit.Number(1, 1000)
-		thingID   = gofakeit.Number(1, 1000)
-		testError = errors.New(gofakeit.Phrase())
+		placeID   = gofakeit.Uint64()
+		thingID   = gofakeit.Uint64()
+		testError = gofakeit.Error()
+
+		txMockFunc = func(ctx context.Context, f func(ctx context.Context) error) error {
+			return f(ctx)
+		}
 	)
 
 	// Correct request for adding place image
 	addPlaceCorrectBody := &bytes.Buffer{}
 	addPlaceCorrectWriter := multipart.NewWriter(addPlaceCorrectBody)
-	addPlaceCorrectWriter.WriteField("place_id", strconv.Itoa(placeID))
+	addPlaceCorrectWriter.WriteField("place_id", strconv.FormatUint(placeID, 10))
 	addPlaceCorrectWriter.CreateFormFile("files", gofakeit.Word())
 	addPlaceCorrectContentType := addPlaceCorrectWriter.FormDataContentType()
 	addPlaceCorrectWriter.Close()
@@ -50,7 +51,7 @@ func TestAddImageHandler(t *testing.T) {
 	// Correct request for adding thing image
 	addThingCorrectBody := &bytes.Buffer{}
 	addThingCorrectWriter := multipart.NewWriter(addThingCorrectBody)
-	addThingCorrectWriter.WriteField("thing_id", strconv.Itoa(thingID))
+	addThingCorrectWriter.WriteField("thing_id", strconv.FormatUint(thingID, 10))
 	addThingCorrectWriter.CreateFormFile("files", gofakeit.Word())
 	addThingCorrectContentType := addThingCorrectWriter.FormDataContentType()
 	addThingCorrectWriter.Close()
@@ -80,6 +81,7 @@ func TestAddImageHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
+		tmMock             func(mc *minimock.Controller) TransactionManager
 		fileRepoMock       func(mc *minimock.Controller) FileRepository
 		placeImageRepoMock func(mc *minimock.Controller) PlaceImageRepository
 		thingImageRepoMock func(mc *minimock.Controller) ThingImageRepository
@@ -91,6 +93,9 @@ func TestAddImageHandler(t *testing.T) {
 				route:  "/v1/images",
 			},
 			resCode: fiber.StatusBadRequest,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
@@ -110,6 +115,9 @@ func TestAddImageHandler(t *testing.T) {
 				contentType: addPlaceIncorrectContentType,
 			},
 			resCode: fiber.StatusBadRequest,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
@@ -129,6 +137,9 @@ func TestAddImageHandler(t *testing.T) {
 				contentType: addThingIncorrectContentType,
 			},
 			resCode: fiber.StatusBadRequest,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
@@ -148,6 +159,9 @@ func TestAddImageHandler(t *testing.T) {
 				contentType: emptyContentType,
 			},
 			resCode: fiber.StatusBadRequest,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
@@ -159,60 +173,6 @@ func TestAddImageHandler(t *testing.T) {
 			},
 		},
 		{
-			name: "negative case - repository error (begin tx)",
-			req: req{
-				method:      fiber.MethodPost,
-				route:       "/v1/images",
-				body:        addPlaceCorrectBody.Bytes(),
-				contentType: addPlaceCorrectContentType,
-			},
-			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
-				mock := mocks.NewPlaceImageRepositoryMock(mc)
-				mock.BeginTxMock.Return(nil, testError)
-				return mock
-			},
-			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
-				return mocks.NewThingImageRepositoryMock(mc)
-			},
-			fileRepoMock: func(mc *minimock.Controller) FileRepository {
-				mock := mocks.NewFileRepositoryMock(mc)
-				mock.SaveMock.Return(nil)
-				return mock
-			},
-		},
-		{
-			name: "negative case - repository error (commit tx)",
-			req: req{
-				method:      fiber.MethodPost,
-				route:       "/v1/images",
-				body:        addPlaceCorrectBody.Bytes(),
-				contentType: addPlaceCorrectContentType,
-			},
-			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
-				mock := mocks.NewPlaceImageRepositoryMock(mc)
-
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) {
-					assert.Equal(mc, placeID, req.PlaceID)
-				}).Return(nil)
-
-				mock.CommitTxMock.Return(testError)
-
-				return mock
-			},
-			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
-				return mocks.NewThingImageRepositoryMock(mc)
-			},
-			fileRepoMock: func(mc *minimock.Controller) FileRepository {
-				mock := mocks.NewFileRepositoryMock(mc)
-				mock.SaveMock.Return(nil)
-				return mock
-			},
-		},
-		{
 			name: "negative case - repository error (add image)",
 			req: req{
 				method:      fiber.MethodPost,
@@ -221,12 +181,15 @@ func TestAddImageHandler(t *testing.T) {
 				contentType: addPlaceCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceImageRequest) {
 					assert.Equal(mc, placeID, req.PlaceID)
 				}).Return(testError)
 
@@ -251,75 +214,22 @@ func TestAddImageHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				mock := mocks.NewPlaceImageRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceImageRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceImageRequest) {
 					assert.Equal(mc, placeID, req.PlaceID)
 				}).Return(nil)
-
-				mock.CommitTxMock.Return(nil)
 
 				return mock
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				return mocks.NewThingImageRepositoryMock(mc)
-			},
-			fileRepoMock: func(mc *minimock.Controller) FileRepository {
-				mock := mocks.NewFileRepositoryMock(mc)
-				mock.SaveMock.Return(nil)
-				return mock
-			},
-		},
-		{
-			name: "negative case - repository error (begin tx)",
-			req: req{
-				method:      fiber.MethodPost,
-				route:       "/v1/images",
-				body:        addThingCorrectBody.Bytes(),
-				contentType: addThingCorrectContentType,
-			},
-			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
-				return mocks.NewPlaceImageRepositoryMock(mc)
-			},
-			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
-				mock := mocks.NewThingImageRepositoryMock(mc)
-				mock.BeginTxMock.Return(nil, testError)
-				return mock
-			},
-			fileRepoMock: func(mc *minimock.Controller) FileRepository {
-				mock := mocks.NewFileRepositoryMock(mc)
-				mock.SaveMock.Return(nil)
-				return mock
-			},
-		},
-		{
-			name: "negative case - repository error (commit tx)",
-			req: req{
-				method:      fiber.MethodPost,
-				route:       "/v1/images",
-				body:        addThingCorrectBody.Bytes(),
-				contentType: addThingCorrectContentType,
-			},
-			resCode: fiber.StatusInternalServerError,
-			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
-				return mocks.NewPlaceImageRepositoryMock(mc)
-			},
-			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
-				mock := mocks.NewThingImageRepositoryMock(mc)
-
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingImageRequest, tx *sql.Tx) {
-					assert.Equal(mc, thingID, req.ThingID)
-				}).Return(nil)
-
-				mock.CommitTxMock.Return(testError)
-
-				return mock
 			},
 			fileRepoMock: func(mc *minimock.Controller) FileRepository {
 				mock := mocks.NewFileRepositoryMock(mc)
@@ -336,15 +246,18 @@ func TestAddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				mock := mocks.NewThingImageRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingImageRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingImageRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 				}).Return(testError)
 
@@ -366,19 +279,20 @@ func TestAddImageHandler(t *testing.T) {
 			},
 			resCode: fiber.StatusOK,
 			resBody: dto.EmptyResponse{},
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
 			thingImageRepoMock: func(mc *minimock.Controller) ThingImageRepository {
 				mock := mocks.NewThingImageRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingImageRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingImageRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 				}).Return(nil)
-
-				mock.CommitTxMock.Return(nil)
 
 				return mock
 			},
@@ -397,6 +311,9 @@ func TestAddImageHandler(t *testing.T) {
 				contentType: addThingCorrectContentType,
 			},
 			resCode: fiber.StatusInternalServerError,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			placeImageRepoMock: func(mc *minimock.Controller) PlaceImageRepository {
 				return mocks.NewPlaceImageRepositoryMock(mc)
 			},
@@ -419,6 +336,7 @@ func TestAddImageHandler(t *testing.T) {
 			fiberApp := fiber.New()
 
 			fiberApp.Post("/v1/images", AddImageHandler(
+				tt.tmMock(mc),
 				tt.fileRepoMock(mc),
 				tt.thingImageRepoMock(mc),
 				tt.placeImageRepoMock(mc),
@@ -426,11 +344,11 @@ func TestAddImageHandler(t *testing.T) {
 
 			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, bytes.NewReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

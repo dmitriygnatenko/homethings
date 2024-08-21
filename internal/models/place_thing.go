@@ -3,7 +3,7 @@ package models
 import "time"
 
 type PlaceThing struct {
-	PlaceID   int
-	ThingID   int
+	PlaceID   uint64
+	ThingID   uint64
 	CreatedAt time.Time
 }

@@ -2,70 +2,65 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	placeThingTableName = "place_thing"
-)
+const placeThingTableName = "place_thing"
 
 type PlaceThingRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitPlaceThingRepository(db *sql.DB) *PlaceThingRepository {
+func InitPlaceThingRepository(db DB) *PlaceThingRepository {
 	return &PlaceThingRepository{db: db}
 }
 
-func (r PlaceThingRepository) GetByThingID(ctx context.Context, thingID int) (*models.PlaceThing, error) {
-	query, args, err := sq.Select("place_id", "thing_id", "created_at").
+func (r PlaceThingRepository) GetByThingID(ctx context.Context, id uint64) (*models.PlaceThing, error) {
+	q, v, err := sq.Select("place_id", "thing_id", "created_at").
 		From(placeThingTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"thing_id": thingID}).
+		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var res models.PlaceThing
 
-	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.PlaceID, &res.ThingID, &res.CreatedAt)
-
+	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get: %w", err)
 	}
 
 	return &res, nil
 }
 
-func (r PlaceThingRepository) Add(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) error {
-	query, args, err := sq.Insert(placeThingTableName).
+func (r PlaceThingRepository) Add(ctx context.Context, req models.AddPlaceThingRequest) error {
+	q, v, err := sq.Insert(placeThingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("place_id", "thing_id").
 		Values(req.PlaceID, req.ThingID).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r PlaceThingRepository) UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest, tx *sql.Tx) error {
-	query, args, err := sq.Update(placeThingTableName).
+func (r PlaceThingRepository) UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest) error {
+	q, v, err := sq.Update(placeThingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("place_id", req.PlaceID).
 		Set("updated_at", "NOW()").
@@ -73,33 +68,31 @@ func (r PlaceThingRepository) UpdatePlace(ctx context.Context, req models.Update
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r PlaceThingRepository) DeleteThing(ctx context.Context, id int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(placeThingTableName).
+func (r PlaceThingRepository) DeleteThing(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(placeThingTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }

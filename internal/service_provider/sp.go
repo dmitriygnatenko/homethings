@@ -1,17 +1,19 @@
 package sp
 
 import (
+	"git.dmitriygnatenko.ru/dima/go-common/db"
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"git.dmitriygnatenko.ru/dima/go-common/smtp"
+
 	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
-	authService "git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
-	dbService "git.dmitriygnatenko.ru/dima/homethings/internal/services/db"
-	envService "git.dmitriygnatenko.ru/dima/homethings/internal/services/env"
-	mailerService "git.dmitriygnatenko.ru/dima/homethings/internal/services/mailer"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/services/config"
 )
 
 type ServiceProvider struct {
-	env                         *envService.Service
-	auth                        *authService.Service
-	mailer                      *mailerService.Service
+	config                      *config.Service
+	auth                        *auth.Service
+	tm                          *db.TxManager
 	placeRepository             *repositories.PlaceRepository
 	thingRepository             *repositories.ThingRepository
 	tagRepository               *repositories.TagRepository
@@ -27,54 +29,100 @@ type ServiceProvider struct {
 func Init() (*ServiceProvider, error) {
 	sp := &ServiceProvider{}
 
-	env, err := envService.Init()
+	// Init config
+	configService, err := config.Init()
 	if err != nil {
 		return nil, err
 	}
-	sp.env = env
+	sp.config = configService
 
-	auth, err := authService.Init(env)
+	// Init auth
+	authService, err := auth.Init(configService)
 	if err != nil {
 		return nil, err
 	}
-	sp.auth = auth
+	sp.auth = authService
 
-	mailer, err := mailerService.Init(env)
+	// Init SMTP
+	smtpService, err := smtp.NewSMTP(
+		smtp.NewConfig(
+			smtp.WithPassword(configService.SMTPPassword()),
+			smtp.WithUsername(configService.SMTPUser()),
+			smtp.WithHost(configService.SMTPHost()),
+			smtp.WithPort(configService.SMTPPort()),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
-	sp.mailer = mailer
 
-	db, err := dbService.Init(env)
+	// Init DB
+	dbService, err := db.NewDB(
+		db.NewConfig(
+			db.WithDriver(configService.DBDriver()),
+			db.WithHost(configService.DBHost()),
+			db.WithPort(configService.DBPort()),
+			db.WithUsername(configService.DBUser()),
+			db.WithPassword(configService.DBPassword()),
+			db.WithDatabase(configService.DBName()),
+			db.WithMaxIdleConns(configService.DBMaxIdleConns()),
+			db.WithMaxOpenConns(configService.DBMaxOpenConns()),
+			db.WithMaxIdleConnLifetime(configService.DBMaxIdleConnLifetime()),
+			db.WithMaxOpenConnLifetime(configService.DBMaxOpenConnLifetime()),
+			db.WithSSLMode(configService.DBSSLMode()),
+		),
+	)
 	if err != nil {
 		return nil, err
 	}
+
+	// Init transaction manager
+	sp.tm = db.NewTransactionManager(dbService)
 
 	// Init repositories
-	sp.placeRepository = repositories.InitPlaceRepository(db)
-	sp.thingRepository = repositories.InitThingRepository(db)
-	sp.placeThingRepository = repositories.InitPlaceThingRepository(db)
-	sp.placeImageRepository = repositories.InitPlaceImageRepository(db)
-	sp.thingImageRepository = repositories.InitThingImageRepository(db)
-	sp.tagRepository = repositories.InitTagRepository(db)
-	sp.thingTagRepository = repositories.InitThingTagRepository(db)
-	sp.userRepository = repositories.InitUserRepository(db)
-	sp.thingNotificationRepository = repositories.InitThingNotificationRepository(db)
+	sp.placeRepository = repositories.InitPlaceRepository(dbService)
+	sp.thingRepository = repositories.InitThingRepository(dbService)
+	sp.placeThingRepository = repositories.InitPlaceThingRepository(dbService)
+	sp.placeImageRepository = repositories.InitPlaceImageRepository(dbService)
+	sp.thingImageRepository = repositories.InitThingImageRepository(dbService)
+	sp.tagRepository = repositories.InitTagRepository(dbService)
+	sp.thingTagRepository = repositories.InitThingTagRepository(dbService)
+	sp.userRepository = repositories.InitUserRepository(dbService)
+	sp.thingNotificationRepository = repositories.InitThingNotificationRepository(dbService)
 	sp.fileRepository = repositories.InitFileRepository()
+
+	// Init logger
+	err = logger.Init(
+		logger.NewConfig(
+			logger.WithSMTPClient(smtpService),
+			logger.WithEmailLogEnabled(configService.LoggerEmailEnabled()),
+			logger.WithEmailLogLevel(configService.LoggerEmailLevel()),
+			logger.WithEmailSubject(configService.LoggerEmailSubject()),
+			logger.WithEmailRecipient(configService.LoggerEmailRecipient()),
+			logger.WithEmailLogAddSource(configService.LoggerEmailAddSource()),
+			logger.WithStdoutLogEnabled(configService.LoggerStdoutEnabled()),
+			logger.WithStdoutLogLevel(configService.LoggerStdoutLevel()),
+			logger.WithStdoutLogAddSource(configService.LoggerStdoutAddSource()),
+		),
+	)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return sp, nil
 }
 
-func (sp *ServiceProvider) EnvService() *envService.Service {
-	return sp.env
+func (sp *ServiceProvider) ConfigService() *config.Service {
+	return sp.config
 }
 
-func (sp *ServiceProvider) AuthService() *authService.Service {
+func (sp *ServiceProvider) AuthService() *auth.Service {
 	return sp.auth
 }
 
-func (sp *ServiceProvider) MailerService() *mailerService.Service {
-	return sp.mailer
+func (sp *ServiceProvider) TransactionManager() *db.TxManager {
+	return sp.tm
 }
 
 func (sp *ServiceProvider) PlaceRepository() *repositories.PlaceRepository {

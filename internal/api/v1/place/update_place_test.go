@@ -3,7 +3,6 @@ package place
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -13,10 +12,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -31,15 +29,15 @@ func TestUpdatePlaceHandler(t *testing.T) {
 	}
 
 	var (
-		placeID   = gofakeit.Number(1, 1000)
-		parentID  = gofakeit.Number(1, 1000)
+		placeID   = uint64(gofakeit.Number(1, 1000))
+		parentID  = uint64(gofakeit.Number(1, 1000))
 		title     = gofakeit.Phrase()
-		testError = errors.New(gofakeit.Phrase())
+		testError = gofakeit.Error()
 		layout    = "2006-01-02 15:04:05"
 
 		correctReq = req{
 			method: fiber.MethodPut,
-			route:  "/v1/places/" + strconv.Itoa(placeID),
+			route:  "/v1/places/" + strconv.FormatUint(placeID, 10),
 			body: &dto.UpdatePlaceRequest{
 				Title:    title,
 				ParentID: &parentID,
@@ -79,12 +77,12 @@ func TestUpdatePlaceHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest) {
 					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, parentID, int(req.ParentID.Int64))
+					assert.Equal(mc, parentID, uint64(req.ParentID.Int64))
 				}).Return(nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(&repoRes, nil)
 
@@ -106,7 +104,7 @@ func TestUpdatePlaceHandler(t *testing.T) {
 			name: "negative case - body parse error",
 			req: req{
 				method: fiber.MethodPut,
-				route:  "/v1/places/" + strconv.Itoa(placeID),
+				route:  "/v1/places/" + strconv.FormatUint(placeID, 10),
 			},
 			resCode: fiber.StatusBadRequest,
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
@@ -117,7 +115,7 @@ func TestUpdatePlaceHandler(t *testing.T) {
 			name: "negative case - request without title",
 			req: req{
 				method:      fiber.MethodPut,
-				route:       "/v1/places/" + strconv.Itoa(placeID),
+				route:       "/v1/places/" + strconv.FormatUint(placeID, 10),
 				contentType: fiber.MIMEApplicationJSON,
 				body:        &dto.UpdatePlaceRequest{},
 			},
@@ -139,9 +137,9 @@ func TestUpdatePlaceHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest) {
 					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, parentID, int(req.ParentID.Int64))
+					assert.Equal(mc, parentID, uint64(req.ParentID.Int64))
 				}).Return(testError)
 
 				return mock
@@ -154,12 +152,12 @@ func TestUpdatePlaceHandler(t *testing.T) {
 			placeRepoMock: func(mc *minimock.Controller) PlaceRepository {
 				mock := mocks.NewPlaceRepositoryMock(mc)
 
-				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) {
+				mock.UpdateMock.Inspect(func(ctx context.Context, req models.UpdatePlaceRequest) {
 					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, parentID, int(req.ParentID.Int64))
+					assert.Equal(mc, parentID, uint64(req.ParentID.Int64))
 				}).Return(nil)
 
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, placeID, id)
 				}).Return(nil, testError)
 
@@ -176,13 +174,13 @@ func TestUpdatePlaceHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Put("/v1/places/:placeId", UpdatePlaceHandler(tt.placeRepoMock(mc)))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, test.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

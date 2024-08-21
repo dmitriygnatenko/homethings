@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Tag struct {
-	ID        int
+	ID        uint64
 	Title     string
 	Style     string
 	CreatedAt time.Time
@@ -16,7 +16,7 @@ type AddTagRequest struct {
 }
 
 type UpdateTagRequest struct {
-	ID    int
+	ID    uint64
 	Title string
 	Style string
 }

@@ -1,12 +1,13 @@
 package image
 
 import (
-	"database/sql"
-	"errors"
+	"context"
 
+	"git.dmitriygnatenko.ru/dima/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 )
 
 // @Router 		/api/v1/images/thing/{imageId} [delete]
@@ -20,30 +21,38 @@ import (
 // @Accept      json
 // @Produce     json
 func DeleteThingImageHandler(
+	tm TransactionManager,
 	fileRepository FileRepository,
 	thingImageRepository ThingImageRepository,
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("imageId")
+
+		id, err := request.ConvertToUint64(fctx, "imageId")
 		if err != nil {
+			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		image, err := thingImageRepository.Get(ctx, id)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return fiber.NewError(fiber.StatusBadRequest, "")
+		err = tm.ReadCommitted(ctx, func(ctx context.Context) error {
+			image, txErr := thingImageRepository.Get(ctx, id)
+			if txErr != nil {
+				return txErr
 			}
 
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
+			if txErr = thingImageRepository.Delete(ctx, id); txErr != nil {
+				return txErr
+			}
 
-		if err = thingImageRepository.Delete(ctx, id, nil); err != nil {
-			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-		}
+			if txErr = fileRepository.Delete(image.Image); txErr != nil {
+				return txErr
+			}
 
-		if err = fileRepository.Delete(image.Image); err != nil {
+			return nil
+		})
+
+		if err != nil {
+			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

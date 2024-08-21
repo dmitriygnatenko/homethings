@@ -1,14 +1,27 @@
 package repositories
 
-import "github.com/lib/pq"
+import (
+	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/lib/pq"
+)
 
 const (
 	FKViolationErrorCode  = "23503"
 	DuplicateKeyErrorCode = "23505"
 )
 
+type DB interface {
+	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+}
+
 func IsFKViolationError(err error) bool {
-	if pgErr, ok := err.(*pq.Error); ok {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) {
 		return pgErr.Code == FKViolationErrorCode
 	}
 
@@ -16,7 +29,8 @@ func IsFKViolationError(err error) bool {
 }
 
 func IsDuplicateKeyError(err error) bool {
-	if pgErr, ok := err.(*pq.Error); ok {
+	var pgErr *pq.Error
+	if errors.As(err, &pgErr) {
 		return pgErr.Code == DuplicateKeyErrorCode
 	}
 

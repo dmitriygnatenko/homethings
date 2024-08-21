@@ -2,49 +2,48 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	userTableName = "\"user\""
-)
+const userTableName = "\"user\""
+
+var userTableFields = []string{"id", "username", "password", "created_at", "updated_at"}
 
 type UserRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitUserRepository(db *sql.DB) *UserRepository {
+func InitUserRepository(db DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
 func (r UserRepository) Get(ctx context.Context, username string) (*models.User, error) {
-	query, args, err := sq.Select("id", "username", "password", "created_at", "updated_at").
+	q, v, err := sq.Select(userTableFields...).
 		From(userTableName).
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{"username": username}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var res models.User
-	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.ID, &res.Username, &res.Password, &res.CreatedAt, &res.UpdatedAt)
 
+	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get: %w", err)
 	}
 
 	return &res, nil
 }
 
-func (r UserRepository) Add(ctx context.Context, username string, password string) (int, error) {
-	query, args, err := sq.Insert(userTableName).
+func (r UserRepository) Add(ctx context.Context, username string, password string) (uint64, error) {
+	q, v, err := sq.Insert(userTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("username", "password").
 		Values(username, password).
@@ -52,15 +51,20 @@ func (r UserRepository) Add(ctx context.Context, username string, password strin
 		ToSql()
 
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	var id int
-	if err = r.db.QueryRowContext(ctx, query, args...).Scan(&id); err != nil {
-		return 0, err
+	res, err := r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	return id, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("last insert ID: %w", err)
+	}
+
+	return uint64(id), nil
 }
 
 func (r UserRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
@@ -77,12 +81,15 @@ func (r UserRepository) Update(ctx context.Context, req models.UpdateUserRequest
 		qb = qb.Set("password", req.Password.String)
 	}
 
-	query, args, err := qb.ToSql()
+	q, v, err := qb.ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	_, err = r.db.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
+	}
 
-	return err
+	return nil
 }

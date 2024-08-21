@@ -17,17 +17,17 @@ const (
 	defaultCost   = bcrypt.DefaultCost
 )
 
-type Env interface {
+type Config interface {
 	JWTSecretKey() string
-	JWTLifetime() int
+	JWTLifetime() time.Duration
 }
 
 type Service struct {
-	env Env
+	config Config
 }
 
-func Init(env Env) (*Service, error) {
-	return &Service{env: env}, nil
+func Init(config Config) (*Service, error) {
+	return &Service{config: config}, nil
 }
 
 func (a Service) GeneratePasswordHash(password string) (string, error) {
@@ -51,10 +51,10 @@ func (a Service) GetClaims(fctx *fiber.Ctx) jwt.MapClaims {
 func (a Service) GenerateToken(user models.User) (string, error) {
 	claims := jwt.MapClaims{
 		ClaimsKeyName: user.Username,
-		claimsKeyExp:  time.Now().Add(time.Duration(a.env.JWTLifetime()) * time.Second).Unix(),
+		claimsKeyExp:  time.Now().Add(a.config.JWTLifetime()).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString([]byte(a.env.JWTSecretKey()))
+	return token.SignedString([]byte(a.config.JWTSecretKey()))
 }

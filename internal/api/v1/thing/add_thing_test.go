@@ -3,7 +3,6 @@ package thing
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -12,10 +11,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -30,12 +28,16 @@ func TestAddThingHandler(t *testing.T) {
 	}
 
 	var (
-		placeID     = gofakeit.Number(1, 1000)
-		thingID     = gofakeit.Number(1, 1000)
+		placeID     = uint64(gofakeit.Number(1, 1000))
+		thingID     = uint64(gofakeit.Number(1, 1000))
 		title       = gofakeit.Phrase()
 		description = gofakeit.Phrase()
-		testError   = errors.New(gofakeit.Phrase())
+		testError   = gofakeit.Error()
 		layout      = "2006-01-02 15:04:05"
+
+		txMockFunc = func(ctx context.Context, f func(ctx context.Context) error) error {
+			return f(ctx)
+		}
 
 		correctReq = req{
 			method: fiber.MethodPost,
@@ -72,6 +74,7 @@ func TestAddThingHandler(t *testing.T) {
 		req                req
 		resCode            int
 		resBody            interface{}
+		tmMock             func(mc *minimock.Controller) TransactionManager
 		thingRepoMock      func(mc *minimock.Controller) ThingRepository
 		placeThingRepoMock func(mc *minimock.Controller) PlaceThingRepository
 	}{
@@ -80,19 +83,20 @@ func TestAddThingHandler(t *testing.T) {
 			req:     correctReq,
 			resCode: fiber.StatusOK,
 			resBody: expectedRes,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, description, req.Description)
 				}).Return(thingID, nil)
 
-				mock.CommitTxMock.Return(nil)
-
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(&repoRes, nil)
 
@@ -101,7 +105,7 @@ func TestAddThingHandler(t *testing.T) {
 			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
 				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, placeID, req.PlaceID)
 				}).Return(nil)
@@ -116,6 +120,9 @@ func TestAddThingHandler(t *testing.T) {
 				route:  "/v1/things",
 			},
 			resCode: fiber.StatusBadRequest,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				return mocks.NewThingRepositoryMock(mc)
 			},
@@ -140,6 +147,9 @@ func TestAddThingHandler(t *testing.T) {
 					Field: "AddThingRequest.PlaceID",
 					Tag:   "required",
 				},
+			},
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
 			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				return mocks.NewThingRepositoryMock(mc)
@@ -166,21 +176,11 @@ func TestAddThingHandler(t *testing.T) {
 					Tag:   "required",
 				},
 			},
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				return mocks.NewTransactionManagerMock(mc)
+			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				return mocks.NewThingRepositoryMock(mc)
-			},
-			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
-				return mocks.NewPlaceThingRepositoryMock(mc)
-			},
-		},
-		{
-			name:    "negative case - repository error (begin tx)",
-			req:     correctReq,
-			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
-				mock := mocks.NewThingRepositoryMock(mc)
-				mock.BeginTxMock.Return(nil, testError)
-				return mock
 			},
 			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
 				return mocks.NewPlaceThingRepositoryMock(mc)
@@ -190,12 +190,15 @@ func TestAddThingHandler(t *testing.T) {
 			name:    "negative case - repository error (add thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, description, req.Description)
 				}).Return(0, testError)
@@ -210,12 +213,15 @@ func TestAddThingHandler(t *testing.T) {
 			name:    "negative case - repository error (add place thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, description, req.Description)
 				}).Return(thingID, nil)
@@ -225,7 +231,7 @@ func TestAddThingHandler(t *testing.T) {
 			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
 				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, placeID, req.PlaceID)
 				}).Return(testError)
@@ -234,51 +240,23 @@ func TestAddThingHandler(t *testing.T) {
 			},
 		},
 		{
-			name:    "negative case - repository error (commit tx)",
-			req:     correctReq,
-			resCode: fiber.StatusInternalServerError,
-			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
-				mock := mocks.NewThingRepositoryMock(mc)
-
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
-					assert.Equal(mc, title, req.Title)
-					assert.Equal(mc, description, req.Description)
-				}).Return(thingID, nil)
-
-				mock.CommitTxMock.Return(testError)
-
-				return mock
-			},
-			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
-				mock := mocks.NewPlaceThingRepositoryMock(mc)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
-					assert.Equal(mc, thingID, req.ThingID)
-					assert.Equal(mc, placeID, req.PlaceID)
-				}).Return(nil)
-
-				return mock
-			},
-		},
-		{
 			name:    "negative case - repository error (get thing)",
 			req:     correctReq,
 			resCode: fiber.StatusInternalServerError,
+			tmMock: func(mc *minimock.Controller) TransactionManager {
+				mock := mocks.NewTransactionManagerMock(mc)
+				mock.ReadCommittedMock.Set(txMockFunc)
+				return mock
+			},
 			thingRepoMock: func(mc *minimock.Controller) ThingRepository {
 				mock := mocks.NewThingRepositoryMock(mc)
 
-				mock.BeginTxMock.Return(nil, nil)
-
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingRequest) {
 					assert.Equal(mc, title, req.Title)
 					assert.Equal(mc, description, req.Description)
 				}).Return(thingID, nil)
 
-				mock.CommitTxMock.Return(nil)
-
-				mock.GetMock.Inspect(func(ctx context.Context, id int) {
+				mock.GetMock.Inspect(func(ctx context.Context, id uint64) {
 					assert.Equal(mc, thingID, id)
 				}).Return(nil, sql.ErrNoRows)
 
@@ -287,7 +265,7 @@ func TestAddThingHandler(t *testing.T) {
 			placeThingRepoMock: func(mc *minimock.Controller) PlaceThingRepository {
 				mock := mocks.NewPlaceThingRepositoryMock(mc)
 
-				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest, tx *sql.Tx) {
+				mock.AddMock.Inspect(func(ctx context.Context, req models.AddPlaceThingRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, placeID, req.PlaceID)
 				}).Return(nil)
@@ -303,15 +281,19 @@ func TestAddThingHandler(t *testing.T) {
 
 			mc := minimock.NewController(t)
 			fiberApp := fiber.New()
-			fiberApp.Post("/v1/things", AddThingHandler(tt.thingRepoMock(mc), tt.placeThingRepoMock(mc)))
+			fiberApp.Post("/v1/things", AddThingHandler(
+				tt.tmMock(mc),
+				tt.thingRepoMock(mc),
+				tt.placeThingRepoMock(mc),
+			))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, test.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}

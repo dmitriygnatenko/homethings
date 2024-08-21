@@ -2,129 +2,89 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	thingImageTableName = "thing_image"
-)
+const thingImageTableName = "thing_image"
 
 type ThingImageRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitThingImageRepository(db *sql.DB) *ThingImageRepository {
+func InitThingImageRepository(db DB) *ThingImageRepository {
 	return &ThingImageRepository{db: db}
 }
 
-func (r ThingImageRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
-	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
-}
-
-func (r ThingImageRepository) CommitTx(tx *sql.Tx) error {
-	if tx == nil {
-		return errors.New("empty transaction")
-	}
-
-	return tx.Commit()
-}
-
-func (r ThingImageRepository) Add(ctx context.Context, req models.AddThingImageRequest, tx *sql.Tx) error {
-	query, args, err := sq.Insert(thingImageTableName).
+func (r ThingImageRepository) Add(ctx context.Context, req models.AddThingImageRequest) error {
+	q, v, err := sq.Insert(thingImageTableName).
 		PlaceholderFormat(sq.Dollar).
 		Columns("thing_id", "image").
 		Values(req.ThingID, req.Image).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r ThingImageRepository) Get(ctx context.Context, imageID int) (*models.Image, error) {
-	query, args, err := sq.Select("id", "image", "thing_id", "created_at").
+func (r ThingImageRepository) Get(ctx context.Context, id uint64) (*models.Image, error) {
+	q, v, err := sq.Select("id", "image", "thing_id", "created_at").
 		From(thingImageTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": imageID}).
+		Where(sq.Eq{"id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var res models.Image
 
-	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.ID, &res.Image, &res.ThingID, &res.CreatedAt)
-
+	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get: %w", err)
 	}
 
 	return &res, nil
 }
 
-func (r ThingImageRepository) GetByThingID(ctx context.Context, thingID int) ([]models.Image, error) {
+func (r ThingImageRepository) GetByThingID(ctx context.Context, id uint64) ([]models.Image, error) {
 	var res []models.Image
 
-	query, args, err := sq.Select("id", "image", "thing_id", "created_at").
+	q, v, err := sq.Select("id", "image", "thing_id", "created_at").
 		From(thingImageTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"thing_id": thingID}).
+		Where(sq.Eq{"thing_id": id}).
 		OrderBy("created_at DESC").
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	err = r.db.SelectContext(ctx, &res, q, v)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Image{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.Image,
-			&resRow.ThingID,
-			&resRow.CreatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
-
 }
 
-func (r ThingImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]models.Image, error) {
+func (r ThingImageRepository) GetByPlaceID(ctx context.Context, id uint64) ([]models.Image, error) {
 	var res []models.Image
 
-	query := "WITH RECURSIVE cte (id, parent_id) AS (" +
+	q := "WITH RECURSIVE cte (id, parent_id) AS (" +
 		"SELECT id, parent_id " +
 		"FROM " + placeTableName + " " +
 		"WHERE id = $1 " +
@@ -138,50 +98,28 @@ func (r ThingImageRepository) GetByPlaceID(ctx context.Context, placeID int) ([]
 		"WHERE pt.place_id = cte.id AND pt.thing_id = ti.thing_id " +
 		"ORDER BY ti.created_at DESC"
 
-	rows, err := r.db.QueryContext(ctx, query, placeID)
+	err := r.db.SelectContext(ctx, &res, q, id)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Image{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.Image,
-			&resRow.ThingID,
-			&resRow.CreatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
 }
 
-func (r ThingImageRepository) Delete(ctx context.Context, imageID int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(thingImageTableName).
+func (r ThingImageRepository) Delete(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(thingImageTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": imageID}).
+		Where(sq.Eq{"id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }

@@ -2,173 +2,112 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const (
-	placeTableName = "place"
-)
+const placeTableName = "place"
+
+var placeTableFields = []string{"id", "parent_id", "title", "created_at", "updated_at"}
 
 type PlaceRepository struct {
-	db *sql.DB
+	db DB
 }
 
-func InitPlaceRepository(db *sql.DB) *PlaceRepository {
+func InitPlaceRepository(db DB) *PlaceRepository {
 	return &PlaceRepository{db: db}
-}
-
-func (r PlaceRepository) BeginTx(ctx context.Context, level sql.IsolationLevel) (*sql.Tx, error) {
-	return r.db.BeginTx(ctx, &sql.TxOptions{Isolation: level})
-}
-
-func (r PlaceRepository) CommitTx(tx *sql.Tx) error {
-	if tx == nil {
-		return errors.New("empty transaction")
-	}
-
-	return tx.Commit()
 }
 
 func (r PlaceRepository) GetAll(ctx context.Context) ([]models.Place, error) {
 	var res []models.Place
 
-	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
+	q, v, err := sq.Select(placeTableFields...).
 		From(placeTableName).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	err = r.db.SelectContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Place{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.ParentID,
-			&resRow.Title,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
 }
 
-func (r PlaceRepository) GetNestedPlaces(ctx context.Context, placeID int) ([]models.Place, error) {
+func (r PlaceRepository) GetNestedPlaces(ctx context.Context, id uint64) ([]models.Place, error) {
 	var res []models.Place
 
-	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
+	q, v, err := sq.Select(placeTableFields...).
 		From(placeTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"parent_id": placeID}).
+		Where(sq.Eq{"parent_id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, args...)
+	err = r.db.SelectContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		resRow := models.Place{}
-
-		err = rows.Scan(
-			&resRow.ID,
-			&resRow.ParentID,
-			&resRow.Title,
-			&resRow.CreatedAt,
-			&resRow.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, resRow)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("select: %w", err)
 	}
 
 	return res, nil
 }
 
-func (r PlaceRepository) Get(ctx context.Context, placeID int) (*models.Place, error) {
-	query, args, err := sq.Select("id", "parent_id", "title", "created_at", "updated_at").
+func (r PlaceRepository) Get(ctx context.Context, id uint64) (*models.Place, error) {
+	q, v, err := sq.Select(placeTableFields...).
 		From(placeTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": placeID}).
+		Where(sq.Eq{"id": id}).
 		ToSql()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("build query: %w", err)
 	}
 
 	var res models.Place
 
-	err = r.db.QueryRowContext(ctx, query, args...).
-		Scan(&res.ID, &res.ParentID, &res.Title, &res.CreatedAt, &res.UpdatedAt)
-
+	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get: %w", err)
 	}
 
 	return &res, nil
 }
 
-func (r PlaceRepository) Add(ctx context.Context, req models.AddPlaceRequest, tx *sql.Tx) (int, error) {
-	query, args, err := sq.Insert(placeTableName).
-		PlaceholderFormat(sq.Dollar).
+func (r PlaceRepository) Add(ctx context.Context, req models.AddPlaceRequest) (uint64, error) {
+	builder := sq.Insert(placeTableName).
 		Columns("title", "parent_id").
 		Values(req.Title, req.ParentID).
-		Suffix("RETURNING id").
-		ToSql()
+		Suffix("RETURNING id")
 
+	q, v, err := builder.ToSql()
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	var id int
-	if tx == nil {
-		err = r.db.QueryRowContext(ctx, query, args...).Scan(&id)
-	} else {
-		err = tx.QueryRowContext(ctx, query, args...).Scan(&id)
-	}
-
+	res, err := r.db.ExecContext(ctx, q, v...)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	return id, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("last insert ID: %w", err)
+	}
+
+	return uint64(id), nil
 }
 
-func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceRequest, tx *sql.Tx) error {
-	query, args, err := sq.Update(placeTableName).
+func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceRequest) error {
+	q, v, err := sq.Update(placeTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set("title", req.Title).
 		Set("parent_id", req.ParentID).
@@ -177,33 +116,31 @@ func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceReque
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }
 
-func (r PlaceRepository) Delete(ctx context.Context, placeID int, tx *sql.Tx) error {
-	query, args, err := sq.Delete(placeTableName).
+func (r PlaceRepository) Delete(ctx context.Context, id uint64) error {
+	q, v, err := sq.Delete(placeTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{"id": placeID}).
+		Where(sq.Eq{"id": id}).
 		ToSql()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
 
-	if tx == nil {
-		_, err = r.db.ExecContext(ctx, query, args...)
-	} else {
-		_, err = tx.ExecContext(ctx, query, args...)
+	_, err = r.db.ExecContext(ctx, q, v...)
+	if err != nil {
+		return fmt.Errorf("exec: %w", err)
 	}
 
-	return err
+	return nil
 }

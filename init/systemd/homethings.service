@@ -1,0 +1,16 @@
+[Unit]
+Description=Homethings service
+After=network.target
+After=nginx.service
+After=postgresql.service
+
+[Service]
+Type=simple
+User=dima
+Group=dima
+ExecStart=/var/www/homethings.ru/build/app/app -config="/var/www/homethings.ru/.env"
+WorkingDirectory=/var/www/homethings.ru/build/app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

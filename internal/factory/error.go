@@ -7,7 +7,7 @@ import (
 )
 
 func CreateValidateErrorResponse(errors error) []dto.ValidateErrorResponse {
-	var res []dto.ValidateErrorResponse //nolint
+	var res []dto.ValidateErrorResponse
 
 	for _, err := range errors.(validator.ValidationErrors) {
 		res = append(res, dto.ValidateErrorResponse{

@@ -1,6 +1,6 @@
 package models
 
 type AddPlaceImageRequest struct {
-	PlaceID int
+	PlaceID uint64
 	Image   string
 }

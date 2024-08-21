@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http/httptest"
 	"testing"
 
@@ -12,10 +11,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	API "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth/mocks"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -30,12 +28,12 @@ func TestLoginHandler(t *testing.T) {
 	}
 
 	var (
-		id           = gofakeit.Number(1, 1000)
+		id           = gofakeit.Uint64()
 		username     = gofakeit.Username()
 		password     = gofakeit.Word()
 		passwordHash = gofakeit.Word()
 		token        = gofakeit.Word()
-		testError    = errors.New(gofakeit.Phrase())
+		testError    = gofakeit.Error()
 
 		correctReq = req{
 			method: fiber.MethodPost,
@@ -203,13 +201,13 @@ func TestLoginHandler(t *testing.T) {
 			fiberApp := fiber.New()
 			fiberApp.Post("/v1/auth/login", LoginHandler(tt.authServiceMock(mc), tt.userRepoMock(mc)))
 
-			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, helpers.ConvertDataToIOReader(tt.req.body))
+			fiberReq := httptest.NewRequest(tt.req.method, tt.req.route, test.ConvertDataToIOReader(tt.req.body))
 			fiberReq.Header.Add(fiber.HeaderContentType, tt.req.contentType)
-			fiberRes, _ := fiberApp.Test(fiberReq, API.DefaultTestTimeOut)
+			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
 			if tt.resBody != nil {
-				assert.Equal(t, helpers.MarshalResponse(tt.resBody), helpers.ConvertBodyToString(fiberRes.Body))
+				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}
 		})
 	}
