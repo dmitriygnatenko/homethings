@@ -6,9 +6,9 @@ import (
 )
 
 type Image struct {
-	ID        uint64
-	ThingID   sql.NullInt64
-	PlaceID   sql.NullInt64
-	Image     string
-	CreatedAt time.Time
+	ID        uint64        `db:"id"`
+	ThingID   sql.NullInt64 `db:"thing_id"`
+	PlaceID   sql.NullInt64 `db:"place_id"`
+	Image     string        `db:"image"`
+	CreatedAt time.Time     `db:"created_at"`
 }

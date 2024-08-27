@@ -2,7 +2,7 @@ package models
 
 type ThingTag struct {
 	Tag
-	ThingID uint64
+	ThingID uint64 `db:"thing_id"`
 }
 
 type AddThingTagRequest struct {

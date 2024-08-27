@@ -95,17 +95,13 @@ func (r TagRepository) Add(ctx context.Context, req models.AddTagRequest) (uint6
 		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	res, err := r.db.ExecContext(ctx, q, v...)
+	var id uint64
+	err = r.db.QueryRowContext(ctx, q, v...).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("last insert ID: %w", err)
-	}
-
-	return uint64(id), nil
+	return id, nil
 }
 
 func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest) error {

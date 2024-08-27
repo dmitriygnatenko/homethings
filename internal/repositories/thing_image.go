@@ -73,7 +73,7 @@ func (r ThingImageRepository) GetByThingID(ctx context.Context, id uint64) ([]mo
 		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	err = r.db.SelectContext(ctx, &res, q, v)
+	err = r.db.SelectContext(ctx, &res, q, v...)
 	if err != nil {
 		return nil, fmt.Errorf("select: %w", err)
 	}

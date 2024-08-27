@@ -84,6 +84,7 @@ func (r PlaceRepository) Get(ctx context.Context, id uint64) (*models.Place, err
 
 func (r PlaceRepository) Add(ctx context.Context, req models.AddPlaceRequest) (uint64, error) {
 	builder := sq.Insert(placeTableName).
+		PlaceholderFormat(sq.Dollar).
 		Columns("title", "parent_id").
 		Values(req.Title, req.ParentID).
 		Suffix("RETURNING id")
@@ -93,17 +94,13 @@ func (r PlaceRepository) Add(ctx context.Context, req models.AddPlaceRequest) (u
 		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	res, err := r.db.ExecContext(ctx, q, v...)
+	var id uint64
+	err = r.db.QueryRowContext(ctx, q, v...).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	id, err := res.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("last insert ID: %w", err)
-	}
-
-	return uint64(id), nil
+	return id, nil
 }
 
 func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceRequest) error {

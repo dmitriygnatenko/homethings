@@ -17,6 +17,7 @@ type DB interface {
 	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
 }
 
 func IsFKViolationError(err error) bool {

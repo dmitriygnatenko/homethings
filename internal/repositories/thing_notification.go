@@ -43,7 +43,15 @@ func (r ThingNotificationRepository) Get(ctx context.Context, id uint64) (*model
 func (r ThingNotificationRepository) GetExpired(ctx context.Context) ([]models.ExtThingNotification, error) {
 	var res []models.ExtThingNotification
 
-	q, v, err := sq.Select("n.thing_id", "n.notification_date", "n.created_at", "n.updated_at", "t.title", "p.id", "p.title").
+	q, v, err := sq.Select(
+		"n.thing_id AS thing_id",
+		"n.notification_date",
+		"n.created_at",
+		"n.updated_at",
+		"t.title AS thing_title",
+		"p.id AS place_id",
+		"p.title AS place_title",
+	).
 		From(thingNotificationTableName + " n").
 		Join(thingTableName + " t ON t.id = n.thing_id").
 		LeftJoin(placeThingTableName + " pt ON pt.thing_id = n.thing_id").
@@ -57,7 +65,7 @@ func (r ThingNotificationRepository) GetExpired(ctx context.Context) ([]models.E
 		return nil, fmt.Errorf("build query: %w", err)
 	}
 
-	err = r.db.SelectContext(ctx, &res, q, v)
+	err = r.db.SelectContext(ctx, &res, q, v...)
 	if err != nil {
 		return nil, fmt.Errorf("select: %w", err)
 	}
