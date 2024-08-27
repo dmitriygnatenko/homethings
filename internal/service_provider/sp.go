@@ -43,19 +43,6 @@ func Init() (*ServiceProvider, error) {
 	}
 	sp.auth = authService
 
-	// Init SMTP
-	smtpService, err := smtp.NewSMTP(
-		smtp.NewConfig(
-			smtp.WithPassword(configService.SMTPPassword()),
-			smtp.WithUsername(configService.SMTPUser()),
-			smtp.WithHost(configService.SMTPHost()),
-			smtp.WithPort(configService.SMTPPort()),
-		),
-	)
-	if err != nil {
-		return nil, err
-	}
-
 	// Init DB
 	dbService, err := db.NewDB(
 		db.NewConfig(
@@ -92,20 +79,38 @@ func Init() (*ServiceProvider, error) {
 	sp.fileRepository = repositories.InitFileRepository()
 
 	// Init logger
-	err = logger.Init(
-		logger.NewConfig(
-			logger.WithSMTPClient(smtpService),
-			logger.WithEmailLogEnabled(configService.LoggerEmailEnabled()),
-			logger.WithEmailLogLevel(configService.LoggerEmailLevel()),
-			logger.WithEmailSubject(configService.LoggerEmailSubject()),
-			logger.WithEmailRecipient(configService.LoggerEmailRecipient()),
-			logger.WithEmailLogAddSource(configService.LoggerEmailAddSource()),
-			logger.WithStdoutLogEnabled(configService.LoggerStdoutEnabled()),
-			logger.WithStdoutLogLevel(configService.LoggerStdoutLevel()),
-			logger.WithStdoutLogAddSource(configService.LoggerStdoutAddSource()),
-		),
-	)
+	loggerConfigOptions := logger.ConfigOptions{
+		logger.WithEmailLogEnabled(configService.LoggerEmailEnabled()),
+		logger.WithEmailLogLevel(configService.LoggerEmailLevel()),
+		logger.WithEmailSubject(configService.LoggerEmailSubject()),
+		logger.WithEmailRecipient(configService.LoggerEmailRecipient()),
+		logger.WithEmailLogAddSource(configService.LoggerEmailAddSource()),
+		logger.WithStdoutLogEnabled(configService.LoggerStdoutEnabled()),
+		logger.WithStdoutLogLevel(configService.LoggerStdoutLevel()),
+		logger.WithStdoutLogAddSource(configService.LoggerStdoutAddSource()),
+	}
 
+	if len(configService.SMTPPassword()) > 0 &&
+		len(configService.SMTPUser()) > 0 &&
+		len(configService.SMTPHost()) > 0 &&
+		configService.SMTPPort() > 0 {
+
+		smtpService, smtpErr := smtp.NewSMTP(
+			smtp.NewConfig(
+				smtp.WithPassword(configService.SMTPPassword()),
+				smtp.WithUsername(configService.SMTPUser()),
+				smtp.WithHost(configService.SMTPHost()),
+				smtp.WithPort(configService.SMTPPort()),
+			),
+		)
+		if smtpErr != nil {
+			return nil, smtpErr
+		}
+
+		loggerConfigOptions.Add(logger.WithSMTPClient(smtpService))
+	}
+
+	err = logger.Init(logger.NewConfig(loggerConfigOptions...))
 	if err != nil {
 		return nil, err
 	}
