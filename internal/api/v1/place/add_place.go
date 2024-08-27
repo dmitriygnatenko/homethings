@@ -2,7 +2,7 @@ package place
 
 //go:generate mkdir -p mocks
 //go:generate rm -rf ./mocks/*_minimock.go
-//go:generate minimock -i PlaceRepository,ThingRepository,PlaceImageRepository,ThingImageRepository,PlaceThingRepository,ThingTagRepository,ThingNotificationRepository,FileRepository -o ./mocks/ -s "_minimock.go"
+//go:generate minimock -i TransactionManager,PlaceRepository,ThingRepository,PlaceImageRepository,ThingImageRepository,PlaceThingRepository,ThingTagRepository,ThingNotificationRepository,FileRepository -o ./mocks/ -s "_minimock.go"
 
 import (
 	"context"

@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
+	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
@@ -35,13 +36,13 @@ func DeletePlaceHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
-		id, err := fctx.ParamsInt("placeId")
+		id, err := request.ConvertToUint64(fctx, "placeId")
 		if err != nil {
 			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 
-		_, err = placeRepository.Get(ctx, uint64(id))
+		_, err = placeRepository.Get(ctx, id)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				logger.Info(ctx, err.Error())
@@ -52,7 +53,7 @@ func DeletePlaceHandler(
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
-		nestedRes, err := placeRepository.GetNestedPlaces(ctx, uint64(id))
+		nestedRes, err := placeRepository.GetNestedPlaces(ctx, id)
 		if err != nil {
 			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
@@ -63,12 +64,12 @@ func DeletePlaceHandler(
 		}
 
 		err = tm.ReadCommitted(ctx, func(ctx context.Context) error {
-			placeImages, txErr := placeImageRepository.GetByPlaceID(ctx, uint64(id))
+			placeImages, txErr := placeImageRepository.GetByPlaceID(ctx, id)
 			if txErr != nil {
 				return txErr
 			}
 
-			things, txErr := thingRepository.GetByPlaceID(ctx, uint64(id))
+			things, txErr := thingRepository.GetByPlaceID(ctx, id)
 			if txErr != nil {
 				return txErr
 			}
@@ -119,7 +120,7 @@ func DeletePlaceHandler(
 				}
 			}
 
-			if txErr = placeRepository.Delete(ctx, uint64(id)); txErr != nil {
+			if txErr = placeRepository.Delete(ctx, id); txErr != nil {
 				return txErr
 			}
 
