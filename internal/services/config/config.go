@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-const defaultConfigPath = "../../.env"
+const defaultConfigPath = "./.env"
 
 type Service struct {
-	appPort               string
+	appPort               uint16
 	dbDriver              string
 	dbHost                string
 	dbPort                uint16
@@ -60,7 +60,7 @@ func Init() (*Service, error) {
 	}
 
 	s := struct {
-		AppPort               string        `mapstructure:"APP_PORT"`
+		AppPort               uint16        `mapstructure:"APP_PORT"`
 		DBDriver              string        `mapstructure:"DB_DRIVER"`
 		DBHost                string        `mapstructure:"DB_HOST"`
 		DBPort                uint16        `mapstructure:"DB_PORT"`
@@ -130,7 +130,7 @@ func Init() (*Service, error) {
 	}, nil
 }
 
-func (e *Service) AppPort() string {
+func (e *Service) AppPort() uint16 {
 	return e.appPort
 }
 

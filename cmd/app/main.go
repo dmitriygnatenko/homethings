@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -26,7 +27,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err = fiberApp.Listen(":" + serviceProvider.ConfigService().AppPort()); err != nil {
+	port := strconv.FormatUint(uint64(serviceProvider.ConfigService().AppPort()), 10)
+	if err = fiberApp.Listen(":" + port); err != nil {
 		log.Fatal(err)
 	}
 }
