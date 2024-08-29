@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -27,8 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	port := strconv.FormatUint(uint64(serviceProvider.ConfigService().AppPort()), 10)
-	if err = fiberApp.Listen(":" + port); err != nil {
+	if err = fiberApp.Listen(fmt.Sprintf(":%d", serviceProvider.ConfigService().AppPort())); err != nil {
 		log.Fatal(err)
 	}
 }
