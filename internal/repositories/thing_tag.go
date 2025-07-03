@@ -21,7 +21,7 @@ func InitThingTagRepository(db DB) *ThingTagRepository {
 
 func (r ThingTagRepository) Add(ctx context.Context, req models.AddThingTagRequest) error {
 	q, v, err := sq.Insert(thingTagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("thing_id", "tag_id").
 		Values(req.ThingID, req.TagID).
 		ToSql()
@@ -40,7 +40,7 @@ func (r ThingTagRepository) Add(ctx context.Context, req models.AddThingTagReque
 
 func (r ThingTagRepository) Delete(ctx context.Context, req models.DeleteThingTagRequest) error {
 	q, v, err := sq.Delete(thingTagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": req.ThingID}).
 		Where(sq.Eq{"tag_id": req.TagID}).
 		ToSql()
@@ -59,7 +59,7 @@ func (r ThingTagRepository) Delete(ctx context.Context, req models.DeleteThingTa
 
 func (r ThingTagRepository) DeleteByTagID(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(thingTagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"tag_id": id}).
 		ToSql()
 
@@ -77,7 +77,7 @@ func (r ThingTagRepository) DeleteByTagID(ctx context.Context, id uint64) error 
 
 func (r ThingTagRepository) DeleteByThingID(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(thingTagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
@@ -99,7 +99,7 @@ func (r ThingTagRepository) GetByPlaceID(ctx context.Context, id uint64) ([]mode
 	q := "WITH RECURSIVE cte (id, parent_id) AS (" +
 		"SELECT id, parent_id " +
 		"FROM " + placeTableName + " " +
-		"WHERE id = $1 " +
+		"WHERE id = ? " +
 		"UNION ALL " +
 		"SELECT p.id, p.parent_id " +
 		"FROM " + placeTableName + " p " +

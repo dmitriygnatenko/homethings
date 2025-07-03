@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -46,7 +47,7 @@ func (r TagRepository) GetByThingID(ctx context.Context, id uint64) ([]models.Ta
 	q, v, err := sq.Select("t.id", "t.title", "t.style", "t.created_at", "t.updated_at").
 		From(tagTableName + " t").
 		Join(thingTagTableName + " tt ON tt.tag_id = t.id").
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"tt.thing_id": id}).
 		ToSql()
 
@@ -65,7 +66,7 @@ func (r TagRepository) GetByThingID(ctx context.Context, id uint64) ([]models.Ta
 func (r TagRepository) Get(ctx context.Context, id uint64) (*models.Tag, error) {
 	q, v, err := sq.Select(tagTableFields...).
 		From(tagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 
@@ -85,31 +86,34 @@ func (r TagRepository) Get(ctx context.Context, id uint64) (*models.Tag, error) 
 
 func (r TagRepository) Add(ctx context.Context, req models.AddTagRequest) (uint64, error) {
 	q, v, err := sq.Insert(tagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("title", "style").
 		Values(req.Title, req.Style).
-		Suffix("RETURNING id").
 		ToSql()
 
 	if err != nil {
 		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	var id uint64
-	err = r.db.QueryRowContext(ctx, q, v...).Scan(&id)
+	res, err := r.db.ExecContext(ctx, q, v...)
 	if err != nil {
 		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	return id, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("last insert id: %w", err)
+	}
+
+	return uint64(id), nil
 }
 
 func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest) error {
 	q, v, err := sq.Update(tagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Set("title", req.Title).
 		Set("style", req.Style).
-		Set("updated_at", "NOW()").
+		Set("updated_at", time.Now()).
 		Where(sq.Eq{"id": req.ID}).
 		ToSql()
 
@@ -127,7 +131,7 @@ func (r TagRepository) Update(ctx context.Context, req models.UpdateTagRequest) 
 
 func (r TagRepository) Delete(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(tagTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 

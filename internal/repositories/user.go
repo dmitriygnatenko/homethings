@@ -3,13 +3,14 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
 
-const userTableName = "\"user\""
+const userTableName = "user"
 
 var userTableFields = []string{"id", "username", "password", "created_at", "updated_at"}
 
@@ -24,7 +25,7 @@ func InitUserRepository(db DB) *UserRepository {
 func (r UserRepository) Get(ctx context.Context, username string) (*models.User, error) {
 	q, v, err := sq.Select(userTableFields...).
 		From(userTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"username": username}).
 		ToSql()
 
@@ -44,29 +45,32 @@ func (r UserRepository) Get(ctx context.Context, username string) (*models.User,
 
 func (r UserRepository) Add(ctx context.Context, username string, password string) (uint64, error) {
 	q, v, err := sq.Insert(userTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("username", "password").
 		Values(username, password).
-		Suffix("RETURNING id").
 		ToSql()
 
 	if err != nil {
 		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	var id uint64
-	err = r.db.QueryRowContext(ctx, q, v...).Scan(&id)
+	res, err := r.db.ExecContext(ctx, q, v...)
 	if err != nil {
 		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	return id, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("last insert id: %w", err)
+	}
+
+	return uint64(id), nil
 }
 
 func (r UserRepository) Update(ctx context.Context, req models.UpdateUserRequest) error {
 	qb := sq.Update(userTableName).
-		PlaceholderFormat(sq.Dollar).
-		Set("updated_at", "NOW()").
+		PlaceholderFormat(placeholder).
+		Set("updated_at", time.Now()).
 		Where(sq.Eq{"id": req.ID})
 
 	if req.Username.Valid {

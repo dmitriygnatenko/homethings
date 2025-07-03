@@ -21,7 +21,7 @@ func InitThingImageRepository(db DB) *ThingImageRepository {
 
 func (r ThingImageRepository) Add(ctx context.Context, req models.AddThingImageRequest) error {
 	q, v, err := sq.Insert(thingImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("thing_id", "image").
 		Values(req.ThingID, req.Image).
 		ToSql()
@@ -41,7 +41,7 @@ func (r ThingImageRepository) Add(ctx context.Context, req models.AddThingImageR
 func (r ThingImageRepository) Get(ctx context.Context, id uint64) (*models.Image, error) {
 	q, v, err := sq.Select("id", "image", "thing_id", "created_at").
 		From(thingImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 
@@ -64,7 +64,7 @@ func (r ThingImageRepository) GetByThingID(ctx context.Context, id uint64) ([]mo
 
 	q, v, err := sq.Select("id", "image", "thing_id", "created_at").
 		From(thingImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": id}).
 		OrderBy("created_at DESC").
 		ToSql()
@@ -87,7 +87,7 @@ func (r ThingImageRepository) GetByPlaceID(ctx context.Context, id uint64) ([]mo
 	q := "WITH RECURSIVE cte (id, parent_id) AS (" +
 		"SELECT id, parent_id " +
 		"FROM " + placeTableName + " " +
-		"WHERE id = $1 " +
+		"WHERE id = ? " +
 		"UNION ALL " +
 		"SELECT p.id, p.parent_id " +
 		"FROM " + placeTableName + " p " +
@@ -108,7 +108,7 @@ func (r ThingImageRepository) GetByPlaceID(ctx context.Context, id uint64) ([]mo
 
 func (r ThingImageRepository) Delete(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(thingImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 

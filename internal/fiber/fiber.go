@@ -12,7 +12,7 @@ import (
 	fiberJwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
 
-	_ "git.dmitriygnatenko.ru/dima/homethings/docs" // nolint
+	_ "git.dmitriygnatenko.ru/dima/homethings/doc"
 	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
 	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
 	notificationAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification"

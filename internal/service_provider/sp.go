@@ -56,7 +56,6 @@ func Init() (*ServiceProvider, error) {
 			db.WithMaxOpenConns(configService.DBMaxOpenConns()),
 			db.WithMaxIdleConnLifetime(configService.DBMaxIdleConnLifetime()),
 			db.WithMaxOpenConnLifetime(configService.DBMaxOpenConnLifetime()),
-			db.WithSSLMode(configService.DBSSLMode()),
 		),
 	)
 	if err != nil {
@@ -84,10 +83,8 @@ func Init() (*ServiceProvider, error) {
 		logger.WithEmailLogLevel(configService.LoggerEmailLevel()),
 		logger.WithEmailSubject(configService.LoggerEmailSubject()),
 		logger.WithEmailRecipient(configService.LoggerEmailRecipient()),
-		logger.WithEmailLogAddSource(configService.LoggerEmailAddSource()),
 		logger.WithStdoutLogEnabled(configService.LoggerStdoutEnabled()),
 		logger.WithStdoutLogLevel(configService.LoggerStdoutLevel()),
-		logger.WithStdoutLogAddSource(configService.LoggerStdoutAddSource()),
 	}
 
 	if len(configService.SMTPPassword()) > 0 &&

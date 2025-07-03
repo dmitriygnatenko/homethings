@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -22,7 +23,7 @@ func InitPlaceThingRepository(db DB) *PlaceThingRepository {
 func (r PlaceThingRepository) GetByThingID(ctx context.Context, id uint64) (*models.PlaceThing, error) {
 	q, v, err := sq.Select("place_id", "thing_id", "created_at").
 		From(placeThingTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
@@ -42,7 +43,7 @@ func (r PlaceThingRepository) GetByThingID(ctx context.Context, id uint64) (*mod
 
 func (r PlaceThingRepository) Add(ctx context.Context, req models.AddPlaceThingRequest) error {
 	q, v, err := sq.Insert(placeThingTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("place_id", "thing_id").
 		Values(req.PlaceID, req.ThingID).
 		ToSql()
@@ -61,9 +62,9 @@ func (r PlaceThingRepository) Add(ctx context.Context, req models.AddPlaceThingR
 
 func (r PlaceThingRepository) UpdatePlace(ctx context.Context, req models.UpdatePlaceThingRequest) error {
 	q, v, err := sq.Update(placeThingTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Set("place_id", req.PlaceID).
-		Set("updated_at", "NOW()").
+		Set("updated_at", time.Now()).
 		Where(sq.Eq{"thing_id": req.ThingID}).
 		ToSql()
 
@@ -81,7 +82,7 @@ func (r PlaceThingRepository) UpdatePlace(ctx context.Context, req models.Update
 
 func (r PlaceThingRepository) DeleteThing(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(placeThingTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 

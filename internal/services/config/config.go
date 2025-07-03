@@ -1,13 +1,11 @@
 package config
 
 import (
-	"flag"
 	"time"
 
-	"github.com/spf13/viper"
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
-
-const defaultConfigPath = "./.env"
 
 type Service struct {
 	appPort               uint16
@@ -21,7 +19,6 @@ type Service struct {
 	dbMaxIdleConns        uint16
 	dbMaxOpenConnLifetime time.Duration
 	dbMaxIdleConnLifetime time.Duration
-	dbSSLMode             string
 	corsAllowOrigins      string
 	corsAllowMethods      string
 	jwtSecretKey          string
@@ -34,72 +31,52 @@ type Service struct {
 	smtpPassword          string
 	loggerStdoutEnabled   bool
 	loggerStdoutLevel     string
-	loggerStdoutAddSource bool
 	loggerEmailEnabled    bool
 	loggerEmailLevel      string
-	loggerEmailAddSource  bool
 	loggerEmailRecipient  string
 	loggerEmailSubject    string
 }
 
 func Init() (*Service, error) {
-	var configPath string
-	flag.StringVar(&configPath, "config", "", "Path to .env config file")
-	flag.Parse()
-
-	if configPath == "" {
-		configPath = defaultConfigPath
-	}
-
-	viper.SetConfigFile(configPath)
-	viper.SetConfigType("env")
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
-	}
-
 	s := struct {
-		AppPort               uint16        `mapstructure:"APP_PORT"`
-		DBDriver              string        `mapstructure:"DB_DRIVER"`
-		DBHost                string        `mapstructure:"DB_HOST"`
-		DBPort                uint16        `mapstructure:"DB_PORT"`
-		DBName                string        `mapstructure:"DB_NAME"`
-		DBUser                string        `mapstructure:"DB_USER"`
-		DBPassword            string        `mapstructure:"DB_PASSWORD"`
-		DBSSLMode             string        `mapstructure:"DB_SSL_MODE"`
-		DBMaxOpenConns        uint16        `mapstructure:"DB_MAX_OPEN_CONNS"`
-		DBMaxIdleConns        uint16        `mapstructure:"DB_MAX_IDLE_CONNS"`
-		DBMaxOpenConnLifetime time.Duration `mapstructure:"DB_MAX_OPEN_CONN_LIFETIME"`
-		DBMaxIdleConnLifetime time.Duration `mapstructure:"DB_MAX_IDLE_CONN_LIFETIME"`
-		CORSAllowOrigins      string        `mapstructure:"CORS_ALLOW_ORIGING"`
-		CORSAllowMethods      string        `mapstructure:"CORS_ALLOW_METHODS"`
-		JWTSecretKey          string        `mapstructure:"JWT_SECRET_KEY"`
-		JWTLifeTime           time.Duration `mapstructure:"JWT_LIFETIME"`
-		BasicAuthUser         string        `mapstructure:"BASIC_AUTH_USER"`
-		BasicAuthPassword     string        `mapstructure:"BASIC_AUTH_PASSWORD"`
-		SMTPHost              string        `mapstructure:"SMTP_HOST"`
-		SMTPPort              uint16        `mapstructure:"SMTP_PORT"`
-		SMTPUser              string        `mapstructure:"SMTP_USER"`
-		SMTPPassword          string        `mapstructure:"SMTP_PASSWORD"`
-		LoggerStdoutEnabled   bool          `mapstructure:"LOGGER_STDOUT_ENABLED"`
-		LoggerStdoutLevel     string        `mapstructure:"LOGGER_STDOUT_LEVEL"`
-		LoggerStdoutAddSource bool          `mapstructure:"LOGGER_STDOUT_ADD_SOURCE"`
-		LoggerEmailEnabled    bool          `mapstructure:"LOGGER_EMAIL_ENABLED"`
-		LoggerEmailLevel      string        `mapstructure:"LOGGER_EMAIL_LEVEL"`
-		LoggerEmailAddSource  bool          `mapstructure:"LOGGER_EMAIL_ADD_SOURCE"`
-		LoggerEmailRecipient  string        `mapstructure:"LOGGER_EMAIL_RECIPIENT"`
-		LoggerEmailSubject    string        `mapstructure:"LOGGER_EMAIL_SUBJECT"`
+		AppPort               uint16        `envconfig:"APP_PORT"`
+		DBDriver              string        `envconfig:"DB_DRIVER"`
+		DBHost                string        `envconfig:"DB_HOST"`
+		DBPort                uint16        `envconfig:"DB_PORT"`
+		DBName                string        `envconfig:"DB_NAME"`
+		DBUser                string        `envconfig:"DB_USER"`
+		DBPassword            string        `envconfig:"DB_PASSWORD"`
+		DBMaxOpenConns        uint16        `envconfig:"DB_MAX_OPEN_CONNS"`
+		DBMaxIdleConns        uint16        `envconfig:"DB_MAX_IDLE_CONNS"`
+		DBMaxOpenConnLifetime time.Duration `envconfig:"DB_MAX_OPEN_CONN_LIFETIME"`
+		DBMaxIdleConnLifetime time.Duration `envconfig:"DB_MAX_IDLE_CONN_LIFETIME"`
+		CORSAllowOrigins      string        `envconfig:"CORS_ALLOW_ORIGING"`
+		CORSAllowMethods      string        `envconfig:"CORS_ALLOW_METHODS"`
+		JWTSecretKey          string        `envconfig:"JWT_SECRET_KEY"`
+		JWTLifeTime           time.Duration `envconfig:"JWT_LIFETIME"`
+		BasicAuthUser         string        `envconfig:"BASIC_AUTH_USER"`
+		BasicAuthPassword     string        `envconfig:"BASIC_AUTH_PASSWORD"`
+		SMTPHost              string        `envconfig:"SMTP_HOST"`
+		SMTPPort              uint16        `envconfig:"SMTP_PORT"`
+		SMTPUser              string        `envconfig:"SMTP_USER"`
+		SMTPPassword          string        `envconfig:"SMTP_PASSWORD"`
+		LoggerStdoutEnabled   bool          `envconfig:"LOGGER_STDOUT_ENABLED"`
+		LoggerStdoutLevel     string        `envconfig:"LOGGER_STDOUT_LEVEL"`
+		LoggerEmailEnabled    bool          `envconfig:"LOGGER_EMAIL_ENABLED"`
+		LoggerEmailLevel      string        `envconfig:"LOGGER_EMAIL_LEVEL"`
+		LoggerEmailRecipient  string        `envconfig:"LOGGER_EMAIL_RECIPIENT"`
+		LoggerEmailSubject    string        `envconfig:"LOGGER_EMAIL_SUBJECT"`
 	}{}
 
-	if err := viper.Unmarshal(&s); err != nil {
+	_ = godotenv.Overload()
+
+	if err := envconfig.Process("", &s); err != nil {
 		return nil, err
 	}
 
 	return &Service{
 		appPort:               s.AppPort,
 		dbDriver:              s.DBDriver,
-		dbSSLMode:             s.DBSSLMode,
 		dbHost:                s.DBHost,
 		dbPort:                s.DBPort,
 		dbName:                s.DBName,
@@ -121,10 +98,8 @@ func Init() (*Service, error) {
 		smtpPassword:          s.SMTPPassword,
 		loggerStdoutEnabled:   s.LoggerStdoutEnabled,
 		loggerStdoutLevel:     s.LoggerStdoutLevel,
-		loggerStdoutAddSource: s.LoggerStdoutAddSource,
 		loggerEmailEnabled:    s.LoggerEmailEnabled,
 		loggerEmailLevel:      s.LoggerEmailLevel,
-		loggerEmailAddSource:  s.LoggerEmailAddSource,
 		loggerEmailRecipient:  s.LoggerEmailRecipient,
 		loggerEmailSubject:    s.LoggerEmailSubject,
 	}, nil
@@ -136,10 +111,6 @@ func (e *Service) AppPort() uint16 {
 
 func (e *Service) DBDriver() string {
 	return e.dbDriver
-}
-
-func (e *Service) DBSSLMode() string {
-	return e.dbSSLMode
 }
 
 func (e *Service) DBHost() string {
@@ -226,20 +197,12 @@ func (e *Service) LoggerStdoutLevel() string {
 	return e.loggerStdoutLevel
 }
 
-func (e *Service) LoggerStdoutAddSource() bool {
-	return e.loggerStdoutAddSource
-}
-
 func (e *Service) LoggerEmailEnabled() bool {
 	return e.loggerEmailEnabled
 }
 
 func (e *Service) LoggerEmailLevel() string {
 	return e.loggerEmailLevel
-}
-
-func (e *Service) LoggerEmailAddSource() bool {
-	return e.loggerEmailAddSource
 }
 
 func (e *Service) LoggerEmailRecipient() string {

@@ -1,6 +1,6 @@
 include .env
 
-GOOSE_DB_STRING = "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} port=${DB_PORT} host=${DB_HOST} sslmode=disable"
+GOOSE_DB_STRING = ${DB_USER}:${DB_PASSWORD}@tcp\(${DB_HOST}:${DB_PORT}\)/${DB_NAME}
 
 usage:
 	@echo "make run"
@@ -37,16 +37,16 @@ lint:
 	golangci-lint run --timeout=3m
 
 swag:
-	swag init -o "docs" -d "cmd/app,internal/api/v1,internal/dto"
+	swag init -o "doc" -d "cmd/app,internal/api/v1,internal/dto"
 
 migration-status:
-	goose -dir migrations postgres ${GOOSE_DB_STRING} status
+	goose -dir migration ${DB_DRIVER} ${GOOSE_DB_STRING} status
 
 migration-up:
-	goose -dir migrations postgres ${GOOSE_DB_STRING} up
+	goose -dir migration ${DB_DRIVER} ${GOOSE_DB_STRING} up
 
 migration-down:
-	goose -dir migrations postgres ${GOOSE_DB_STRING} down
+	goose -dir migration ${DB_DRIVER} ${GOOSE_DB_STRING} down
 
 docker-build:
 	docker compose up --build --detach

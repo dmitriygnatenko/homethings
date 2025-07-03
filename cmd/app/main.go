@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/fiber"
 	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"

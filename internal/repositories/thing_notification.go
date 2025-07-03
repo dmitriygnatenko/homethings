@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -22,7 +23,7 @@ func InitThingNotificationRepository(db DB) *ThingNotificationRepository {
 func (r ThingNotificationRepository) Get(ctx context.Context, id uint64) (*models.ThingNotification, error) {
 	q, v, err := sq.Select("thing_id", "notification_date", "created_at", "updated_at").
 		From(thingNotificationTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 
@@ -56,8 +57,8 @@ func (r ThingNotificationRepository) GetExpired(ctx context.Context) ([]models.E
 		Join(thingTableName + " t ON t.id = n.thing_id").
 		LeftJoin(placeThingTableName + " pt ON pt.thing_id = n.thing_id").
 		LeftJoin(placeTableName + " p ON p.id = pt.place_id").
-		PlaceholderFormat(sq.Dollar).
-		Where(sq.Lt{"n.notification_date": "NOW()"}).
+		PlaceholderFormat(placeholder).
+		Where(sq.Lt{"n.notification_date": time.Now()}).
 		OrderBy("n.notification_date DESC").
 		ToSql()
 
@@ -75,7 +76,7 @@ func (r ThingNotificationRepository) GetExpired(ctx context.Context) ([]models.E
 
 func (r ThingNotificationRepository) Add(ctx context.Context, req models.AddThingNotificationRequest) error {
 	q, v, err := sq.Insert(thingNotificationTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("thing_id", "notification_date").
 		Values(req.ThingID, req.NotificationDate).
 		ToSql()
@@ -94,9 +95,9 @@ func (r ThingNotificationRepository) Add(ctx context.Context, req models.AddThin
 
 func (r ThingNotificationRepository) Update(ctx context.Context, req models.UpdateThingNotificationRequest) error {
 	q, v, err := sq.Update(thingNotificationTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Set("notification_date", req.NotificationDate).
-		Set("updated_at", "NOW()").
+		Set("updated_at", time.Now()).
 		Where(sq.Eq{"thing_id": req.ThingID}).
 		ToSql()
 
@@ -114,7 +115,7 @@ func (r ThingNotificationRepository) Update(ctx context.Context, req models.Upda
 
 func (r ThingNotificationRepository) Delete(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(thingNotificationTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"thing_id": id}).
 		ToSql()
 

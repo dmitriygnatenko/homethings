@@ -3,8 +3,8 @@ package repositories
 import (
 	"context"
 	"fmt"
-
 	sq "github.com/Masterminds/squirrel"
+	"time"
 
 	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
 )
@@ -45,7 +45,7 @@ func (r PlaceRepository) GetNestedPlaces(ctx context.Context, id uint64) ([]mode
 
 	q, v, err := sq.Select(placeTableFields...).
 		From(placeTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"parent_id": id}).
 		ToSql()
 
@@ -64,7 +64,7 @@ func (r PlaceRepository) GetNestedPlaces(ctx context.Context, id uint64) ([]mode
 func (r PlaceRepository) Get(ctx context.Context, id uint64) (*models.Place, error) {
 	q, v, err := sq.Select(placeTableFields...).
 		From(placeTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 
@@ -84,31 +84,34 @@ func (r PlaceRepository) Get(ctx context.Context, id uint64) (*models.Place, err
 
 func (r PlaceRepository) Add(ctx context.Context, req models.AddPlaceRequest) (uint64, error) {
 	builder := sq.Insert(placeTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("title", "parent_id").
-		Values(req.Title, req.ParentID).
-		Suffix("RETURNING id")
+		Values(req.Title, req.ParentID)
 
 	q, v, err := builder.ToSql()
 	if err != nil {
 		return 0, fmt.Errorf("build query: %w", err)
 	}
 
-	var id uint64
-	err = r.db.QueryRowContext(ctx, q, v...).Scan(&id)
+	res, err := r.db.ExecContext(ctx, q, v...)
 	if err != nil {
 		return 0, fmt.Errorf("exec: %w", err)
 	}
 
-	return id, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("last insert id: %w", err)
+	}
+
+	return uint64(id), nil
 }
 
 func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceRequest) error {
 	q, v, err := sq.Update(placeTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Set("title", req.Title).
 		Set("parent_id", req.ParentID).
-		Set("updated_at", "NOW()").
+		Set("updated_at", time.Now()).
 		Where(sq.Eq{"id": req.ID}).
 		ToSql()
 
@@ -126,7 +129,7 @@ func (r PlaceRepository) Update(ctx context.Context, req models.UpdatePlaceReque
 
 func (r PlaceRepository) Delete(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(placeTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 

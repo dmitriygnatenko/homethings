@@ -21,7 +21,7 @@ func InitPlaceImageRepository(db DB) *PlaceImageRepository {
 
 func (r PlaceImageRepository) Add(ctx context.Context, req models.AddPlaceImageRequest) error {
 	q, v, err := sq.Insert(placeImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Columns("place_id", "image").
 		Values(req.PlaceID, req.Image).
 		ToSql()
@@ -41,7 +41,7 @@ func (r PlaceImageRepository) Add(ctx context.Context, req models.AddPlaceImageR
 func (r PlaceImageRepository) Get(ctx context.Context, id uint64) (*models.Image, error) {
 	q, v, err := sq.Select("id", "image", "place_id", "created_at").
 		From(placeImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 
@@ -64,7 +64,7 @@ func (r PlaceImageRepository) GetByPlaceID(ctx context.Context, id uint64) ([]mo
 	q := "WITH RECURSIVE cte (id, parent_id) AS (" +
 		"SELECT id, parent_id " +
 		"FROM " + placeTableName + " " +
-		"WHERE id = $1 " +
+		"WHERE id = ? " +
 		"UNION ALL " +
 		"SELECT p.id, p.parent_id " +
 		"FROM " + placeTableName + " p " +
@@ -85,7 +85,7 @@ func (r PlaceImageRepository) GetByPlaceID(ctx context.Context, id uint64) ([]mo
 
 func (r PlaceImageRepository) Delete(ctx context.Context, id uint64) error {
 	q, v, err := sq.Delete(placeImageTableName).
-		PlaceholderFormat(sq.Dollar).
+		PlaceholderFormat(placeholder).
 		Where(sq.Eq{"id": id}).
 		ToSql()
 
