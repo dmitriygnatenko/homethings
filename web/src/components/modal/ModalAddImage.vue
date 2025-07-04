@@ -121,7 +121,7 @@ export default {
                         <div class="col-9">
                             <input
                                 class="form-control form-control-sm"
-                                accept="image/*"
+                                accept="image/png, image/jpeg, image/gif"
                                 type="file"
                                 :data-index="index"
                                 @change="onFileChange">
