@@ -1,18 +1,18 @@
-module git.dmitriygnatenko.ru/dima/homethings
+module github.com/dmitriygnatenko/homethings-v1
 
-go 1.23.3
+go 1.24.0
 
 require (
-	git.dmitriygnatenko.ru/dima/go-common v1.7.0
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/disintegration/imaging v1.6.2
+	github.com/dmitriygnatenko/go-common v1.8.0
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/gofiber/jwt/v3 v3.3.6
 	github.com/gofiber/swagger v1.1.0
-	github.com/gojuno/minimock/v3 v3.3.13
+	github.com/gojuno/minimock/v3 v3.4.5
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -55,7 +55,7 @@ require (
 	golang.org/x/image v0.11.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

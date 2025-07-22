@@ -3,9 +3,10 @@ package factory
 import (
 	"github.com/go-playground/validator/v10"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
 )
 
+// nolint:errorlint,prealloc
 func CreateValidateErrorResponse(errors error) []dto.ValidateErrorResponse {
 	var res []dto.ValidateErrorResponse
 

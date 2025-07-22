@@ -3,13 +3,13 @@ package image
 import (
 	"sort"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/request"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 // @Router 		/api/v1/images/place/{placeId} [get]
@@ -28,6 +28,7 @@ func GetPlaceImagesHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var res []models.Image
+
 		ctx := fctx.Context()
 
 		id, err := request.ConvertToUint64(fctx, "placeId")
@@ -41,6 +42,7 @@ func GetPlaceImagesHandler(
 			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
+
 		res = append(res, placesRes...)
 
 		thingsRes, err := thingImageRepository.GetByPlaceID(ctx, id)
@@ -48,6 +50,7 @@ func GetPlaceImagesHandler(
 			logger.Error(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
+
 		res = append(res, thingsRes...)
 
 		sort.Slice(res, func(i, j int) bool {

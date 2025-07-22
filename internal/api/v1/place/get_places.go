@@ -1,11 +1,11 @@
 package place
 
 import (
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
 )
 
 // @Router 		/api/v1/places [get]
@@ -19,6 +19,7 @@ import (
 func GetPlacesHandler(placeRepository PlaceRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
+
 		res, err := placeRepository.GetAll(ctx)
 		if err != nil {
 			logger.Error(ctx, err.Error())

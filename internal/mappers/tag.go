@@ -3,8 +3,8 @@ package mappers
 import (
 	"sort"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func ToAddTagRequest(req dto.AddTagRequest) models.AddTagRequest {

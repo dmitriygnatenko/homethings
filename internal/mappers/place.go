@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"sort"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func ToPlaceResponse(req models.Place) dto.PlaceResponse {
@@ -67,6 +67,7 @@ func ToPlacesResponse(req []models.Place) dto.PlacesResponse {
 
 func ToPlaceTreeResponse(req []models.Place) dto.PlaceTreeResponse {
 	var res []dto.PlaceTree
+
 	parentMap := make(map[uint64][]models.Place, len(req))
 
 	for _, p := range req {
@@ -74,6 +75,7 @@ func ToPlaceTreeResponse(req []models.Place) dto.PlaceTreeResponse {
 			res = append(res, dto.PlaceTree{
 				Place: ToPlaceResponse(p),
 			})
+
 			continue
 		}
 

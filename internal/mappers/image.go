@@ -1,8 +1,8 @@
 package mappers
 
 import (
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func ToImageResponse(req models.Image) dto.ImageResponse {

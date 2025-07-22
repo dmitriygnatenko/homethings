@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
 )
 
 // @Router 		/api/v1/auth/login [post]
@@ -29,6 +29,7 @@ func LoginHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
+
 		req := dto.LoginRequest{}
 		if err := fctx.BodyParser(&req); err != nil {
 			logger.Info(ctx, err.Error())
@@ -49,6 +50,7 @@ func LoginHandler(
 			}
 
 			logger.Error(ctx, err.Error())
+
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

@@ -7,7 +7,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 const thingTableName = "thing"
@@ -90,7 +90,7 @@ func (r ThingRepository) GetByPlaceID(ctx context.Context, id uint64) ([]models.
 	return res, nil
 }
 
-// GetAllByPlaceID return things by place ID and all child places
+// GetAllByPlaceID return things by place ID and all child places.
 func (r ThingRepository) GetAllByPlaceID(ctx context.Context, id uint64) ([]models.Thing, error) {
 	var res []models.Thing
 

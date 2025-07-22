@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"strings"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func ToUpdateUserRequest(id uint64, req dto.UpdateUserRequest) models.UpdateUserRequest {
@@ -17,6 +17,7 @@ func ToUpdateUserRequest(id uint64, req dto.UpdateUserRequest) models.UpdateUser
 	if req.Username != nil {
 		username = strings.TrimSpace(*req.Username)
 	}
+
 	if req.Password != nil {
 		password = strings.TrimSpace(*req.Password)
 	}

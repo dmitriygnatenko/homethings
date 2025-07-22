@@ -3,8 +3,8 @@ package mappers
 import (
 	"time"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func ToAddThingNotificationRequest(req dto.AddThingNotificationRequest) (*models.AddThingNotificationRequest, error) {
@@ -19,7 +19,10 @@ func ToAddThingNotificationRequest(req dto.AddThingNotificationRequest) (*models
 	}, nil
 }
 
-func ToUpdateThingNotificationRequest(thingID uint64, req dto.UpdateThingNotificationRequest) (*models.UpdateThingNotificationRequest, error) {
+func ToUpdateThingNotificationRequest(
+	thingID uint64,
+	req dto.UpdateThingNotificationRequest,
+) (*models.UpdateThingNotificationRequest, error) {
 	date, err := time.Parse(time.RFC3339, req.NotificationDate)
 	if err != nil {
 		return nil, err

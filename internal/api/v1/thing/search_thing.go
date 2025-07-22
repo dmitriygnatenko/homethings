@@ -5,11 +5,11 @@ import (
 	"regexp"
 	"strings"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
 )
 
 // @Router 		/api/v1/things/search/{search} [get]
@@ -26,6 +26,7 @@ func SearchThingHandler(thingRepository ThingRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		search, _ := url.QueryUnescape(fctx.Params("search", ""))
+
 		if match, _ := regexp.MatchString("^[A-Za-zА-Яа-я0-9 ]+$", search); !match {
 			return fiber.NewError(fiber.StatusBadRequest, "")
 		}

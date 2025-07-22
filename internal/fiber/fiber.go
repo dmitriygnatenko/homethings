@@ -3,7 +3,7 @@ package fiber
 import (
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/go-common/db"
+	"github.com/dmitriygnatenko/go-common/db"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -12,19 +12,19 @@ import (
 	fiberJwt "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/swagger"
 
-	_ "git.dmitriygnatenko.ru/dima/homethings/doc"
-	authAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth"
-	imageAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/image"
-	notificationAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification"
-	placeAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/place"
-	tagAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/tag"
-	thingAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/thing"
-	userAPI "git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/user"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/middleware/timezone"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/services/config"
+	_ "github.com/dmitriygnatenko/homethings-v1/doc"
+	authAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/auth"
+	imageAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/image"
+	notificationAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/notification"
+	placeAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/place"
+	tagAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/tag"
+	thingAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/thing"
+	userAPI "github.com/dmitriygnatenko/homethings-v1/internal/api/v1/user"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/middleware/timezone"
+	"github.com/dmitriygnatenko/homethings-v1/internal/repositories"
+	"github.com/dmitriygnatenko/homethings-v1/internal/services/auth"
+	"github.com/dmitriygnatenko/homethings-v1/internal/services/config"
 )
 
 const (
@@ -100,6 +100,7 @@ func getFiberConfig() fiber.Config {
 func getErrorHandler() fiber.ErrorHandler {
 	return func(fctx *fiber.Ctx, err error) error {
 		errCode := fiber.StatusInternalServerError
+
 		var e *fiber.Error
 		if errors.As(err, &e) {
 			errCode = e.Code

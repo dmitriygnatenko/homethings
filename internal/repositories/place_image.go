@@ -6,7 +6,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 const placeImageTableName = "place_image"
@@ -50,6 +50,7 @@ func (r PlaceImageRepository) Get(ctx context.Context, id uint64) (*models.Image
 	}
 
 	var res models.Image
+
 	err = r.db.GetContext(ctx, &res, q, v...)
 	if err != nil {
 		return nil, fmt.Errorf("get: %w", err)

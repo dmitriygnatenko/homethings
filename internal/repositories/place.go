@@ -3,10 +3,11 @@ package repositories
 import (
 	"context"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
 	"time"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	sq "github.com/Masterminds/squirrel"
+
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 const placeTableName = "place"

@@ -35,6 +35,7 @@ func (r FileRepository) Save(fctx *fiber.Ctx, header *multipart.FileHeader, path
 
 	origHeight := src.Bounds().Size().Y
 	origWidth := src.Bounds().Size().X
+
 	var newHeight, newWidth int
 
 	if origWidth > origHeight {

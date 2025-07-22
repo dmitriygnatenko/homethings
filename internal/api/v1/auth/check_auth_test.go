@@ -12,10 +12,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/auth/mocks"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/auth/mocks"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func TestCheckAuthHandler(t *testing.T) {
@@ -64,7 +64,7 @@ func TestCheckAuthHandler(t *testing.T) {
 			userRepoMock: func(mc *minimock.Controller) UserRepository {
 				mock := mocks.NewUserRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
+				mock.GetMock.Inspect(func(_ context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
 				}).Return(&user, nil)
 
@@ -83,7 +83,7 @@ func TestCheckAuthHandler(t *testing.T) {
 			userRepoMock: func(mc *minimock.Controller) UserRepository {
 				mock := mocks.NewUserRepositoryMock(mc)
 
-				mock.GetMock.Inspect(func(ctx context.Context, reqUsername string) {
+				mock.GetMock.Inspect(func(_ context.Context, reqUsername string) {
 					assert.Equal(mc, username, reqUsername)
 				}).Return(nil, sql.ErrNoRows)
 
@@ -129,6 +129,7 @@ func TestCheckAuthHandler(t *testing.T) {
 				test.TestTimeout,
 			)
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
+
 			if tt.resBody != nil {
 				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}

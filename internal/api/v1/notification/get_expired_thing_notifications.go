@@ -1,11 +1,11 @@
 package notification
 
 import (
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
 )
 
 // @Router 		/api/v1/things/notifications/expired [get]
@@ -23,6 +23,7 @@ func GetExpiredThingNotificationsHandler(
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		res, err := thingNotificationRepository.GetExpired(ctx)
+
 		if err != nil {
 			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())

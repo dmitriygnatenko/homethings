@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/request"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
 )
 
 // @Router 		/api/v1/things/notifications/{thingId} [put]
@@ -32,6 +32,7 @@ func UpdateThingNotificationHandler(
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := request.ConvertToUint64(fctx, "thingId")
+
 		if err != nil {
 			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -53,16 +54,19 @@ func UpdateThingNotificationHandler(
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				logger.Info(ctx, err.Error())
+
 				return fiber.NewError(fiber.StatusBadRequest, "")
 			}
 
 			logger.Error(ctx, err.Error())
+
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 
 		dbReq, err := mappers.ToUpdateThingNotificationRequest(id, req)
 		if err != nil {
 			logger.Info(ctx, err.Error())
+
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 

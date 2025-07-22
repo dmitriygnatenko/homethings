@@ -3,8 +3,8 @@ package mappers
 import (
 	"sort"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func ToAddThingRequest(req dto.AddThingRequest) models.AddThingRequest {
@@ -71,10 +71,12 @@ func ToThingsExtResponse(things []models.Thing, tags []models.ThingTag) dto.Thin
 
 	for _, thing := range things {
 		var thingTags []dto.TagResponse
+
 		if t, ok := groupedTags[thing.ID]; ok {
 			sort.Slice(t, func(i, j int) bool {
 				return t[i].Title < t[j].Title
 			})
+
 			thingTags = t
 		}
 

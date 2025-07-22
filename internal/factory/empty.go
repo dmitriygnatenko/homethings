@@ -1,6 +1,6 @@
 package factory
 
-import "git.dmitriygnatenko.ru/dima/homethings/internal/dto"
+import "github.com/dmitriygnatenko/homethings-v1/internal/dto"
 
 func CreateEmptyResponse() dto.EmptyResponse {
 	return dto.EmptyResponse{}

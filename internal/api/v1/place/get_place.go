@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/request"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
 )
 
 // @Router 		/api/v1/places/{placeId} [get]
@@ -27,6 +27,7 @@ func GetPlaceHandler(placeRepository PlaceRepository) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
 		id, err := request.ConvertToUint64(fctx, "placeId")
+
 		if err != nil {
 			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -36,10 +37,12 @@ func GetPlaceHandler(placeRepository PlaceRepository) fiber.Handler {
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				logger.Info(ctx, err.Error())
+
 				return fiber.NewError(fiber.StatusNotFound, "")
 			}
 
 			logger.Error(ctx, err.Error())
+
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

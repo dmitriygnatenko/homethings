@@ -11,13 +11,13 @@ import (
 	"strconv"
 	"time"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/random"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/random"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 const fileDateLayout = "2006-01-02-15-04-05"
@@ -68,8 +68,11 @@ func AddImageHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var form *multipart.Form
+
 		var placeID, thingID uint64
+
 		var files []string
+
 		var err error
 
 		ctx := fctx.Context()

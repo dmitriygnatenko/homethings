@@ -5,13 +5,13 @@ import (
 	"errors"
 	"strings"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/services/auth"
 )
 
 // @Router 		/api/v1/users [put]
@@ -30,10 +30,12 @@ func UpdateUserHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		var err error
+
 		var username, password string
 
 		ctx := fctx.Context()
 		req := dto.UpdateUserRequest{}
+
 		if err = fctx.BodyParser(&req); err != nil {
 			logger.Info(ctx, err.Error())
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())

@@ -7,16 +7,16 @@ package notification
 import (
 	"context"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/location"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/mappers"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/repositories"
 )
 
 type (
@@ -70,6 +70,7 @@ func AddThingNotificationHandler(
 			}
 
 			logger.Error(ctx, err.Error())
+
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

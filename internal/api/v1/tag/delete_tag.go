@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"errors"
 
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/factory"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/request"
+	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/request"
 )
 
 // @Router 		/api/v1/tags/{tagId} [delete]
@@ -29,6 +29,7 @@ func DeleteTagHandler(
 ) fiber.Handler {
 	return func(fctx *fiber.Ctx) error {
 		ctx := fctx.Context()
+
 		id, err := request.ConvertToUint64(fctx, "tagId")
 		if err != nil {
 			logger.Info(ctx, err.Error())
@@ -42,6 +43,7 @@ func DeleteTagHandler(
 			}
 
 			logger.Error(ctx, err.Error())
+
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
 

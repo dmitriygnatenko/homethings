@@ -1,6 +1,6 @@
 package mappers
 
-import "git.dmitriygnatenko.ru/dima/homethings/internal/models"
+import "github.com/dmitriygnatenko/homethings-v1/internal/models"
 
 func ToAddThingImageRequest(thingID uint64, image string) models.AddThingImageRequest {
 	return models.AddThingImageRequest{

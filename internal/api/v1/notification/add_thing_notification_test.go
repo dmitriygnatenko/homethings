@@ -7,16 +7,16 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
-	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification/mocks"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
+	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/notification/mocks"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/repositories"
 )
 
 func TestAddThingNotificationHandler(t *testing.T) {
@@ -154,7 +154,7 @@ func TestAddThingNotificationHandler(t *testing.T) {
 				mock.AddMock.Inspect(func(ctx context.Context, req models.AddThingNotificationRequest) {
 					assert.Equal(mc, thingID, req.ThingID)
 					assert.Equal(mc, notificationDate, req.NotificationDate)
-				}).Return(&pq.Error{Code: repositories.DuplicateKeyErrorCode})
+				}).Return(&mysql.MySQLError{Number: repositories.DuplErrCode})
 
 				return mock
 			},
@@ -193,6 +193,7 @@ func TestAddThingNotificationHandler(t *testing.T) {
 			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
+
 			if tt.resBody != nil {
 				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}

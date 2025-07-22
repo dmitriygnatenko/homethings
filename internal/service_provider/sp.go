@@ -1,13 +1,13 @@
 package sp
 
 import (
-	"git.dmitriygnatenko.ru/dima/go-common/db"
-	"git.dmitriygnatenko.ru/dima/go-common/logger"
-	"git.dmitriygnatenko.ru/dima/go-common/smtp"
+	"github.com/dmitriygnatenko/go-common/db"
+	"github.com/dmitriygnatenko/go-common/logger"
+	"github.com/dmitriygnatenko/go-common/smtp"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/repositories"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/services/auth"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/services/config"
+	"github.com/dmitriygnatenko/homethings-v1/internal/repositories"
+	"github.com/dmitriygnatenko/homethings-v1/internal/services/auth"
+	"github.com/dmitriygnatenko/homethings-v1/internal/services/config"
 )
 
 type ServiceProvider struct {
@@ -34,6 +34,7 @@ func Init() (*ServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	sp.config = configService
 
 	// Init auth
@@ -41,6 +42,7 @@ func Init() (*ServiceProvider, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	sp.auth = authService
 
 	// Init DB
@@ -91,7 +93,6 @@ func Init() (*ServiceProvider, error) {
 		len(configService.SMTPUser()) > 0 &&
 		len(configService.SMTPHost()) > 0 &&
 		configService.SMTPPort() > 0 {
-
 		smtpService, smtpErr := smtp.NewSMTP(
 			smtp.NewConfig(
 				smtp.WithPassword(configService.SMTPPassword()),

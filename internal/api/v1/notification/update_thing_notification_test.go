@@ -13,10 +13,10 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/api/v1/notification/mocks"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/dto"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/helpers/test"
-	"git.dmitriygnatenko.ru/dima/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/notification/mocks"
+	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
+	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings-v1/internal/models"
 )
 
 func TestUpdateThingNotificationHandler(t *testing.T) {
@@ -230,6 +230,7 @@ func TestUpdateThingNotificationHandler(t *testing.T) {
 			fiberRes, _ := fiberApp.Test(fiberReq, test.TestTimeout)
 
 			assert.Equal(t, tt.resCode, fiberRes.StatusCode)
+
 			if tt.resBody != nil {
 				assert.Equal(t, test.MarshalResponse(tt.resBody), test.ConvertBodyToString(fiberRes.Body))
 			}

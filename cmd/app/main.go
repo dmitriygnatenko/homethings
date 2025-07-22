@@ -7,8 +7,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"git.dmitriygnatenko.ru/dima/homethings/internal/fiber"
-	sp "git.dmitriygnatenko.ru/dima/homethings/internal/service_provider"
+	"github.com/dmitriygnatenko/homethings-v1/internal/fiber"
+	sp "github.com/dmitriygnatenko/homethings-v1/internal/service_provider"
 )
 
 // @title 						Homethings API

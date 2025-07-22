@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/go-sql-driver/mysql"
 )
@@ -11,8 +12,8 @@ import (
 var placeholder = sq.Question
 
 const (
-	duplErrCode   = 1062
-	fkViolErrCode = 1452
+	DuplErrCode   = 1062
+	FKViolErrCode = 1452
 )
 
 type DB interface {
@@ -24,20 +25,22 @@ type DB interface {
 
 func IsFKViolationError(err error) bool {
 	var me *mysql.MySQLError
+
 	ok := errors.As(err, &me)
 	if !ok {
 		return false
 	}
 
-	return me.Number == fkViolErrCode
+	return me.Number == FKViolErrCode
 }
 
 func IsDuplicateKeyError(err error) bool {
 	var me *mysql.MySQLError
+
 	ok := errors.As(err, &me)
 	if !ok {
 		return false
 	}
 
-	return me.Number == duplErrCode
+	return me.Number == DuplErrCode
 }
