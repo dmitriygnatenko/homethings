@@ -2,7 +2,7 @@
 
 package mocks
 
-//go:generate minimock -i github.com/dmitriygnatenko/homethings-v1/internal/api/v1/user.AuthService -o auth_service_minimock.go -n AuthServiceMock -p mocks
+//go:generate minimock -i github.com/dmitriygnatenko/homethings/internal/api/v1/user.AuthService -o auth_service_minimock.go -n AuthServiceMock -p mocks
 
 import (
 	"sync"

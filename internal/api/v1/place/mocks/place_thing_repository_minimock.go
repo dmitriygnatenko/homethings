@@ -2,7 +2,7 @@
 
 package mocks
 
-//go:generate minimock -i github.com/dmitriygnatenko/homethings-v1/internal/api/v1/place.PlaceThingRepository -o place_thing_repository_minimock.go -n PlaceThingRepositoryMock -p mocks
+//go:generate minimock -i github.com/dmitriygnatenko/homethings/internal/api/v1/place.PlaceThingRepository -o place_thing_repository_minimock.go -n PlaceThingRepositoryMock -p mocks
 
 import (
 	"context"

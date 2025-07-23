@@ -5,9 +5,9 @@ import (
 	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/dmitriygnatenko/go-common/smtp"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/repositories"
-	"github.com/dmitriygnatenko/homethings-v1/internal/services/auth"
-	"github.com/dmitriygnatenko/homethings-v1/internal/services/config"
+	"github.com/dmitriygnatenko/homethings/internal/repositories"
+	"github.com/dmitriygnatenko/homethings/internal/services/auth"
+	"github.com/dmitriygnatenko/homethings/internal/services/config"
 )
 
 type ServiceProvider struct {

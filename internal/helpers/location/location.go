@@ -5,8 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/middleware/timezone"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/middleware/timezone"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 func ApplyLocation[T interface{}](fctx *fiber.Ctx, req T) T {

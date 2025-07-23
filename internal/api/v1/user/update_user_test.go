@@ -12,11 +12,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/user/mocks"
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
-	"github.com/dmitriygnatenko/homethings-v1/internal/services/auth"
+	"github.com/dmitriygnatenko/homethings/internal/api/v1/user/mocks"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/services/auth"
 )
 
 func TestUpdateUserHandler(t *testing.T) {

@@ -28,7 +28,7 @@ test:
 
 test-cover:
 	go clean -testcache
-	go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/dmitriygnatenko/homethings-v1/internal/api/...
+	go test ./... -coverprofile=coverage.tmp.out -covermode count -coverpkg=github.com/dmitriygnatenko/homethings/internal/api/...
 	grep -v 'mocks\|config' coverage.tmp.out  > coverage.out
 	rm coverage.tmp.out
 	go tool cover -html=coverage.out;

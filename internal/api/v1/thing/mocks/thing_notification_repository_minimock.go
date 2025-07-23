@@ -2,7 +2,7 @@
 
 package mocks
 
-//go:generate minimock -i github.com/dmitriygnatenko/homethings-v1/internal/api/v1/thing.ThingNotificationRepository -o thing_notification_repository_minimock.go -n ThingNotificationRepositoryMock -p mocks
+//go:generate minimock -i github.com/dmitriygnatenko/homethings/internal/api/v1/thing.ThingNotificationRepository -o thing_notification_repository_minimock.go -n ThingNotificationRepositoryMock -p mocks
 
 import (
 	"context"

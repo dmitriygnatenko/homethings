@@ -8,10 +8,10 @@ import (
 	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
-	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
-	"github.com/dmitriygnatenko/homethings-v1/internal/services/auth"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/factory"
+	"github.com/dmitriygnatenko/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings/internal/services/auth"
 )
 
 // @Router 		/api/v1/users [put]

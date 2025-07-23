@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 const (

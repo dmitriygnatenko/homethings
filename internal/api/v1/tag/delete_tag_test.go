@@ -12,9 +12,9 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/tag/mocks"
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings/internal/api/v1/tag/mocks"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/test"
 )
 
 func TestDeleteTagHandler(t *testing.T) {

@@ -12,10 +12,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/auth/mocks"
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/api/v1/auth/mocks"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 func TestCheckAuthHandler(t *testing.T) {

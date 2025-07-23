@@ -2,7 +2,7 @@
 
 package mocks
 
-//go:generate minimock -i github.com/dmitriygnatenko/homethings-v1/internal/api/v1/thing.ThingRepository -o thing_repository_minimock.go -n ThingRepositoryMock -p mocks
+//go:generate minimock -i github.com/dmitriygnatenko/homethings/internal/api/v1/thing.ThingRepository -o thing_repository_minimock.go -n ThingRepositoryMock -p mocks
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 	"github.com/gojuno/minimock/v3"
 )
 

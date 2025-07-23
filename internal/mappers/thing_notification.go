@@ -3,8 +3,8 @@ package mappers
 import (
 	"time"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 func ToAddThingNotificationRequest(req dto.AddThingNotificationRequest) (*models.AddThingNotificationRequest, error) {

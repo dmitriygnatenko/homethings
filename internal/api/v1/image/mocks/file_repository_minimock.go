@@ -2,7 +2,7 @@
 
 package mocks
 
-//go:generate minimock -i github.com/dmitriygnatenko/homethings-v1/internal/api/v1/image.FileRepository -o file_repository_minimock.go -n FileRepositoryMock -p mocks
+//go:generate minimock -i github.com/dmitriygnatenko/homethings/internal/api/v1/image.FileRepository -o file_repository_minimock.go -n FileRepositoryMock -p mocks
 
 import (
 	"mime/multipart"

@@ -8,9 +8,9 @@ import (
 	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/request"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/factory"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/request"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 // @Router 		/api/v1/places/{placeId} [delete]

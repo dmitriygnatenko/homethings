@@ -11,10 +11,10 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/api/v1/thing/mocks"
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/test"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/api/v1/thing/mocks"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/test"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 func TestSearchThingHandler(t *testing.T) {

@@ -13,8 +13,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 type (

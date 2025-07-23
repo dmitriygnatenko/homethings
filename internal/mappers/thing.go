@@ -3,8 +3,8 @@ package mappers
 import (
 	"sort"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 func ToAddThingRequest(req dto.AddThingRequest) models.AddThingRequest {

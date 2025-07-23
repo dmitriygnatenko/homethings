@@ -9,11 +9,11 @@ import (
 
 	"github.com/dmitriygnatenko/go-common/logger"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/dto"
-	"github.com/dmitriygnatenko/homethings-v1/internal/factory"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
-	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/dto"
+	"github.com/dmitriygnatenko/homethings/internal/factory"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

@@ -2,14 +2,14 @@
 
 package mocks
 
-//go:generate minimock -i github.com/dmitriygnatenko/homethings-v1/internal/api/v1/auth.AuthService -o auth_service_minimock.go -n AuthServiceMock -p mocks
+//go:generate minimock -i github.com/dmitriygnatenko/homethings/internal/api/v1/auth.AuthService -o auth_service_minimock.go -n AuthServiceMock -p mocks
 
 import (
 	"sync"
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojuno/minimock/v3"
 	"github.com/golang-jwt/jwt/v4"

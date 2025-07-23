@@ -6,10 +6,10 @@ import (
 	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/request"
-	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
-	"github.com/dmitriygnatenko/homethings-v1/internal/models"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/request"
+	"github.com/dmitriygnatenko/homethings/internal/mappers"
+	"github.com/dmitriygnatenko/homethings/internal/models"
 )
 
 // @Router 		/api/v1/images/place/{placeId} [get]

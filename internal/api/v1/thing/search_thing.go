@@ -8,8 +8,8 @@ import (
 	"github.com/dmitriygnatenko/go-common/logger"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/dmitriygnatenko/homethings-v1/internal/helpers/location"
-	"github.com/dmitriygnatenko/homethings-v1/internal/mappers"
+	"github.com/dmitriygnatenko/homethings/internal/helpers/location"
+	"github.com/dmitriygnatenko/homethings/internal/mappers"
 )
 
 // @Router 		/api/v1/things/search/{search} [get]
