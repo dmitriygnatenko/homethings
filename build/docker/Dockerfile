@@ -1,19 +1,13 @@
-FROM golang:alpine AS builder
+FROM alpine:3.20
 
-WORKDIR ./../../
+RUN apk add --no-cache ca-certificates
 
-COPY go.mod go.sum ./
-RUN go mod download
+WORKDIR /app
 
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /app cmd/app/main.go
+COPY build/app/app /app/app
 
-FROM alpine:3.24
-
-WORKDIR /
-
-COPY --from=builder /app /app
+RUN chmod +x /app/app
 
 EXPOSE 8080
 
-CMD ["/app"]
+ENTRYPOINT ["/app/app"]
